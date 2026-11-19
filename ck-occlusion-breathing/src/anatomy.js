@@ -292,7 +292,7 @@ export class Anatomy {
   }
 
   // up ∈ [-1, 1]: +1 = rest posture near the palate, −1 = low posture.
-  updateTongue(up, jawAngle) {
+  updateTongue(up, jawAngle, protr = 0) {
     const p = this.tongueMesh.geometry.attributes.position, b = this.tongueBase, bb = this.tongueBB;
     const h = this.hinge, ca = Math.cos(jawAngle), sa = Math.sin(jawAngle);
     const len = bb.max.z - bb.min.z, hgt = bb.max.y - bb.min.y;
@@ -317,6 +317,7 @@ export class Anatomy {
       const a = jawAngle * follow, c = Math.cos(a), s = Math.sin(a);
       const ry = y - h.y, rz = z - h.z;
       y = h.y + ry * c - rz * s; z = h.z + ry * s + rz * c;
+      z += protr * (0.55 + 0.35 * (1 - hn));   // tongue follows a protruded mandible
       p.setXYZ(i, x, y, z);
     }
     p.needsUpdate = true;
@@ -343,16 +344,17 @@ export class Anatomy {
     }
     this.skinW = w;
   }
-  updateSkin(jawAngle) {
-    if (this._skinAngle === jawAngle) return;
-    this._skinAngle = jawAngle;
+  updateSkin(jawAngle, protr = 0) {
+    const key = jawAngle + '|' + protr;
+    if (this._skinKey === key) return;
+    this._skinKey = key;
     const p = this.skinMesh.geometry.attributes.position, b = this.skinBase, w = this.skinW, h = this.hinge;
     for (let i = 0; i < p.count; i++) {
       const a = jawAngle * w[i];
-      if (a === 0) { p.setXYZ(i, b[i * 3], b[i * 3 + 1], b[i * 3 + 2]); continue; }
+      if (w[i] === 0 || (a === 0 && protr === 0)) { p.setXYZ(i, b[i * 3], b[i * 3 + 1], b[i * 3 + 2]); continue; }
       const c = Math.cos(a), s = Math.sin(a);
       const ry = b[i * 3 + 1] - h.y, rz = b[i * 3 + 2] - h.z;
-      p.setXYZ(i, b[i * 3], h.y + ry * c - rz * s, h.z + ry * s + rz * c);
+      p.setXYZ(i, b[i * 3], h.y + ry * c - rz * s, h.z + ry * s + rz * c + protr * w[i]);
     }
     p.needsUpdate = true;
     this.skinMesh.geometry.computeVertexNormals();
@@ -383,9 +385,11 @@ export class Anatomy {
     this.gingiva.visible = false;
   }
 
-  setJaw(angle) {
+  // angle: opening rotation about the condylar axis; protr: anterior translation (m)
+  setJaw(angle, protr = 0) {
     this.jawAngle = angle;
     this.mandibleGroup.rotation.x = angle;
+    this.mandibleGroup.position.set(this.hinge.x, this.hinge.y, this.hinge.z + protr);
   }
 
   // horizontal arch narrowing of an upper tooth (scene 5)

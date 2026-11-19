@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { Anatomy } from './anatomy.js';
-import { Adenoid, Airflow, Lumen, buildPaths } from './airway.js';
+import { Adenoid, Airflow, Lumen, Tonsil, buildPaths } from './airway.js';
 import { Overlay } from './overlay.js';
 import { backgroundCanvas } from './brand.js';
-import { sectionPlane, archUniforms, archShiftX, setOpacity } from './materials.js';
+import { sectionPlane, coronalPlane, archUniforms, archShiftX, setOpacity } from './materials.js';
 import { evaluate, PRIMARY, PERMANENT, WIDTH, HEIGHT } from './timeline.js';
 import { smooth, smoother, easeInOut, easeOut, lerp, clamp } from './util.js';
 
@@ -69,6 +69,9 @@ export class Film {
     // airway
     this.paths = buildPaths();
     this.adenoid = new Adenoid(); A.skull.add(this.adenoid.mesh);
+    // generated palatine tonsils (v2 scene)
+    this.tonsils = [new Tonsil(1), new Tonsil(-1)];
+    for (const tn of this.tonsils) A.skull.add(tn.mesh);
     this.flow = new Airflow(this.paths); this.scene.add(this.flow.points);
     this.lumenL = new Lumen(this.paths.nasalL); this.lumenR = new Lumen(this.paths.nasalR);
     this.scene.add(this.lumenL.mesh, this.lumenR.mesh);
@@ -183,12 +186,14 @@ export class Film {
     c.lookAt(...s.cam.target);
 
     // section plane
-    if (s.sectionMode === 'coronal') { sectionPlane.normal.set(0, 0, -1); sectionPlane.constant = s.section; }
-    else { sectionPlane.normal.set(1, 0, 0); sectionPlane.constant = s.section; }
-    const wantClip = s.tongueClip ? 1 : 0;
-    if (this._tongueClip !== wantClip) {
-      this._tongueClip = wantClip;
-      for (const m of [this.tongueMat, A.mats.softPalate, A.mats.tonsil]) { m.clippingPlanes = wantClip ? [sectionPlane] : []; m.needsUpdate = true; }
+    // section planes: sagittal (x >= −sag) and coronal (z <= cor); 1 = no cut
+    const sag = s.sag ?? (s.sectionMode === 'coronal' ? 1 : s.section);
+    const cor = s.cor ?? (s.sectionMode === 'coronal' ? s.section : 1);
+    sectionPlane.normal.set(1, 0, 0); sectionPlane.constant = sag;
+    coronalPlane.normal.set(0, 0, -1); coronalPlane.constant = cor;
+    if (!this._softClip) {   // midline soft tissues are only ever cut coronally
+      this._softClip = true;
+      for (const m of [this.tongueMat, A.mats.softPalate, A.mats.tonsil]) { m.clippingPlanes = [coronalPlane]; m.needsUpdate = true; }
     }
 
     // bones
@@ -223,10 +228,18 @@ export class Film {
     this.adenoid.setSize(s.adenoid);
 
     // jaw + tongue + skin
-    A.setJaw(s.jaw);
-    const tkey = s.tongueUp.toFixed(4) + '|' + s.jaw.toFixed(5);
-    if (tkey !== this._tkey && tv > 0) { this._tkey = tkey; A.updateTongue(s.tongueUp, s.jaw); }
-    if (s.skin > 0.003) A.updateSkin(s.jaw);
+    const protr = s.protr || 0;
+    A.setJaw(s.jaw, protr);
+    const tkey = s.tongueUp.toFixed(4) + '|' + s.jaw.toFixed(5) + '|' + protr.toFixed(5);
+    if (tkey !== this._tkey && tv > 0) { this._tkey = tkey; A.updateTongue(s.tongueUp, s.jaw, protr); }
+    if (s.skin > 0.003) A.updateSkin(s.jaw, protr);
+
+    // palatine tonsils
+    for (const tn of this.tonsils) {
+      tn.setSize(s.tonsil || 0);
+      setOpacity(tn.mat, s.tonsilVis || 0);
+      tn.mesh.visible = (s.tonsilVis || 0) > 0.004;
+    }
 
     // teeth
     this._updateTeeth(s);
@@ -234,7 +247,7 @@ export class Film {
     // airflow
     const narrow = s.adenoid;
     this.flow.points.visible = s.flowOpacity > 0.003;
-    if (this.flow.points.visible) this.flow.update(s.t, { nasal: s.nasalFlow, oral: s.oralFlow, narrow, opacity: s.flowOpacity });
+    if (this.flow.points.visible) this.flow.update(s.clock ?? s.t, { nasal: s.nasalFlow, oral: s.oralFlow, narrow, tonsil: s.tonsil || 0, opacity: s.flowOpacity });
     this.flow.mat.uniforms.uScale.value = 1.6 * HEIGHT / (2 * Math.tan(THREE.MathUtils.degToRad(c.fov / 2))) * 0.0012;
     const lum = s.lumen;
     for (const L of [this.lumenL, this.lumenR]) {
@@ -244,10 +257,10 @@ export class Film {
     if (lum > 0.003) {
       const rf = (u) => {
         const base = u < 0.4 ? 0.0028 : 0.0045;
-        const sq = 1 - 0.62 * narrow * Math.exp(-((u - 0.53) ** 2) / 0.006);
+        const sq = (1 - 0.62 * narrow * Math.exp(-((u - 0.53) ** 2) / 0.006)) * (1 - 0.5 * (s.tonsil || 0) * Math.exp(-((u - 0.8) ** 2) / 0.004));
         return lerp(0.0028, base, smooth(0.3, 0.45, u)) * sq * (1 - smooth(0.92, 1.0, u) * 0.6);
       };
-      const key = narrow.toFixed(4);
+      const key = narrow.toFixed(4) + '|' + (s.tonsil || 0).toFixed(4);
       if (key !== this._lkey) { this._lkey = key; this.lumenL.update(rf); this.lumenR.update(rf); }
     }
 
@@ -273,6 +286,13 @@ export class Film {
         return new THREE.Vector3(v.x, h.y + ry * Math.cos(a) - rz * Math.sin(a), h.z + ry * Math.sin(a) + rz * Math.cos(a));
       };
       s.cephPts = { ...this.ceph, Me: rot(this.ceph.Me0), Go: rot(this.ceph.Go0) };
+    }
+    if (s.protrArrow > 0) {
+      const me = this.ceph.Me0.clone(); const a = s.jaw, h = A.hinge;
+      const ry = me.y - h.y, rz = me.z - h.z;
+      me.set(me.x, h.y + ry * Math.cos(a) - rz * Math.sin(a), h.z + ry * Math.sin(a) + rz * Math.cos(a) + protr);
+      const p0 = me.clone().add(new THREE.Vector3(0, 0.010, 0.004)), p1 = p0.clone().add(new THREE.Vector3(0, 0, 0.013));
+      s.protrPts = [p0, p1];
     }
     s.gaps = this.gaps;
     // palatal vault comparison (coronal shot)

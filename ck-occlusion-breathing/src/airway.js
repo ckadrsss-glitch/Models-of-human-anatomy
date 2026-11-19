@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { tissueMaterial } from './materials.js';
+import { tissueMaterial, sectionPlane, coronalPlane } from './materials.js';
 import { hash, clamp, smooth } from './util.js';
 
 // ----------------------------------------------------------------------------
@@ -82,6 +82,50 @@ export class Adenoid {
   }
   // forward-most point of the free surface (for lumen narrowing)
   frontPoint() { return this.C.clone().addScaledVector(this.n, this._T); }
+}
+
+
+// --------------------------------------------------------------- palatine tonsil
+// Lateral oropharyngeal wall (tonsillar fossa between the palatine arches).
+// Generated: the Z-Anatomy tonsil mesh is a low-poly placeholder. Hypertrophy
+// grows medially and narrows the oropharynx, leaving a lumen (not a closure).
+export class Tonsil {
+  constructor(side) {           // side +1 = patient's left (+X), −1 = right
+    this.side = side;
+    this.C = V(0.0168 * side, -0.0062, -0.0312);
+    this.n = V(-side, 0, 0);     // medial, towards the lumen
+    this.up = V(0, 1, 0).applyAxisAngle(V(0, 0, 1), 0.12 * side).normalize(); // slight tilt
+    this.ap = new THREE.Vector3().crossVectors(this.n, this.up).normalize();
+    this.base = new THREE.SphereGeometry(1, 80, 56);
+    this.geo = this.base.clone();
+    this.mat = tissueMaterial(0xdf7f86, { sheenColor: new THREE.Color(0xffb6b6), roughness: 0.48 });
+    this.mat.clippingPlanes = [new THREE.Plane(this.n.clone(), -this.n.dot(this.C) + 0.0007), sectionPlane, coronalPlane];
+    this.mesh = new THREE.Mesh(this.geo, this.mat);
+    this.mesh.renderOrder = 8; this.mesh.frustumCulled = false;
+    this._T = -1;
+    this.setSize(0);
+  }
+  // s: 0 = physiological (within the pillars), 1 = marked hypertrophy
+  setSize(s) {
+    const T = 0.0022 + 0.0094 * s;
+    if (Math.abs(T - this._T) < 1e-6) return;
+    this._T = T;
+    const Rv = 0.0098 + 0.0016 * s, Ra = 0.0068 + 0.0012 * s;
+    const bp = this.base.attributes.position, p = this.geo.attributes.position;
+    const C = this.C, n = this.n, up = this.up, ap = this.ap;
+    for (let i = 0; i < bp.count; i++) {
+      const ux = bp.getX(i), uy = bp.getY(i), uz = bp.getZ(i); // uz → medial
+      const front = Math.pow(Math.max(0, uz), 0.8);
+      // crypt openings: scattered dimples + shallow lobulation of the free surface
+      const crypt = Math.max(0, Math.sin(ux * 17.0 + uy * 5.0) * Math.sin(uy * 15.0 - ux * 3.0)) ** 6;
+      const lob = 0.05 * Math.sin(uy * 9.0) * Math.cos(ux * 7.0);
+      const r = 1 - front * (0.22 * crypt - lob);
+      const a = ux * Ra * r, v = uy * Rv * r, m = uz * T * r;
+      p.setXYZ(i, C.x + ap.x * a + up.x * v + n.x * m, C.y + ap.y * a + up.y * v + n.y * m, C.z + ap.z * a + up.z * v + n.z * m);
+    }
+    p.needsUpdate = true;
+    this.geo.computeVertexNormals();
+  }
 }
 
 // --------------------------------------------------------------- lumen ribbon
@@ -169,7 +213,7 @@ export class Airflow {
     return a[i].clone().lerp(a[i + 1], k);
   }
   // nasal, oral ∈ [0,1] flow strength; narrow ∈ [0,1] nasopharyngeal narrowing
-  update(t, { nasal = 1, oral = 0, narrow = 0, opacity = 1 } = {}) {
+  update(t, { nasal = 1, oral = 0, narrow = 0, tonsil = 0, opacity = 1 } = {}) {
     const n = this.count;
     const v = new THREE.Vector3();
     for (let i = 0; i < n; i++) {
@@ -187,11 +231,19 @@ export class Airflow {
         const block = smooth(0.48, 0.56, u);
         if (h4 < narrow * 0.75) a *= 1 - block;
       }
+      // oropharyngeal narrowing by enlarged palatine tonsils (both paths pass there)
+      if (tonsil > 0) {
+        const uc = isOral ? 0.74 : 0.8;
+        const near = Math.exp(-((u - uc) ** 2) / 0.003);
+        if (h2 < tonsil * 0.45) a *= 1 - smooth(uc - 0.05, uc + 0.01, u) * 0.85;
+        a *= 1 - 0.15 * tonsil * near;
+      }
       a *= h4 < strength ? 1 : 0;
       const c = this._at(key, u);
       // cross-sectional jitter, narrower where the lumen narrows
       let rad = isOral ? 0.0035 : 0.0028;
       if (!isOral) rad *= 1 - 0.55 * narrow * Math.exp(-((u - 0.55) ** 2) / 0.004);
+      rad *= 1 - 0.5 * tonsil * Math.exp(-((u - (isOral ? 0.74 : 0.8)) ** 2) / 0.004);
       const ang = h3 * 6.283 + t * 0.7 * (h2 - 0.5);
       v.set(Math.cos(ang) * rad * Math.sqrt(h2), Math.sin(ang) * rad * Math.sqrt(h2) * 1.4, 0);
       this.pos[i * 3] = c.x + v.x; this.pos[i * 3 + 1] = c.y + v.y; this.pos[i * 3 + 2] = c.z + v.x * 0.3;

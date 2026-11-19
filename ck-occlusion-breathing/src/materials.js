@@ -2,7 +2,10 @@ import * as THREE from 'three';
 
 // One shared section plane (sagittal: keeps x >= -constant; coronal: keeps z <= constant).
 // constant = 1 → nothing is cut. The camera looks from the patient's left (−X).
-export const sectionPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 1);
+export const sectionPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 1);   // sagittal: keeps x >= -constant
+// Second, independent coronal plane (keeps z <= constant). Both act together, so a
+// coronal cut can sweep away while the sagittal cut is already in place.
+export const coronalPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 1);
 
 // Shared maxillary "arch form" uniforms (scene 5): narrowing + palatal vault height.
 export const archUniforms = {
@@ -81,7 +84,7 @@ export function glassMaterial({ color = 0xdfe8f5, rim = 0xffffff, opacity = 0.5,
     side: THREE.DoubleSide,
     clipping: true,
   });
-  m.clippingPlanes = [sectionPlane];
+  m.clippingPlanes = [sectionPlane, coronalPlane];
   return m;
 }
 
@@ -104,7 +107,7 @@ export function toothMaterial({ root = false, primary = false, arch = false } = 
     side: THREE.DoubleSide,
     transparent: false,
   });
-  m.clippingPlanes = [sectionPlane];
+  m.clippingPlanes = [sectionPlane, coronalPlane];
   m.userData.uCut = { value: 0 };
   m.userData.uGlow = { value: 0 };
   m.userData.uGerm = { value: 0 };

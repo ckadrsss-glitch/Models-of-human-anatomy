@@ -3,6 +3,7 @@ import { DURATION, FPS, WIDTH, HEIGHT, SCENES, VOICE } from './timeline.js';
 
 const params = new URLSearchParams(location.search);
 const RENDER = params.has('render');
+const MIX_FILE = 'assets/audio/mix.m4a';
 if (RENDER) document.body.classList.add('render');
 
 const gl = document.getElementById('gl');
@@ -42,23 +43,26 @@ function initPlayer() {
   const $ = (id) => document.getElementById(id);
   const playBtn = $('play'), scrub = $('scrub'), time = $('time'), status = $('status');
   let playing = false, t = +params.get('t') || 0, startWall = 0, startT = 0, muted = false;
-  let actx = null, buffers = null, sources = [], gain = null;
+  let actx = null, buffers = null, tracks = [], sources = [], gain = null;
 
+  scrub.max = DURATION.toFixed(3);
   const fmt = (x) => `${Math.floor(x / 60)}:${(x % 60).toFixed(1).padStart(4, '0')}`;
 
   async function loadAudio() {
     if (buffers) return;
     actx = new AudioContext();
     gain = actx.createGain(); gain.connect(actx.destination);
-    buffers = await Promise.all(VOICE.map(async (v) => {
-      try { const r = await fetch(v.file); return await actx.decodeAudioData(await r.arrayBuffer()); } catch { return null; }
-    }));
+    // full mix (voice + music + sound design) built by tools/build_audio.mjs; fallback: voice clips only
+    const load = async (f) => { try { const r = await fetch(f); if (!r.ok) return null; return await actx.decodeAudioData(await r.arrayBuffer()); } catch { return null; } };
+    const mix = await load(MIX_FILE);
+    if (mix) { buffers = [mix]; tracks = [{ start: 0 }]; }
+    else { buffers = await Promise.all(VOICE.map((v) => load(v.file))); tracks = VOICE; }
   }
   function stopAudio() { for (const s of sources) try { s.stop(); } catch {} sources = []; }
   function startAudio(from) {
     stopAudio();
     if (!buffers || muted) return;
-    VOICE.forEach((v, i) => {
+    tracks.forEach((v, i) => {
       const b = buffers[i]; if (!b) return;
       const end = v.start + b.duration; if (end <= from) return;
       const src = actx.createBufferSource(); src.buffer = b; src.connect(gain);
@@ -134,7 +138,7 @@ function initPlayer() {
     // mix voice-over offline
     const SR = 48000;
     const off = new OfflineAudioContext(2, Math.ceil(DURATION * SR), SR);
-    VOICE.forEach((v, i) => { const b = buffers[i]; if (!b) return; const s = off.createBufferSource(); s.buffer = b; s.connect(off.destination); s.start(v.start); });
+    tracks.forEach((v, i) => { const b = buffers[i]; if (!b) return; const s = off.createBufferSource(); s.buffer = b; s.connect(off.destination); s.start(v.start); });
     const mix = await off.startRendering();
     const target = new ArrayBufferTarget();
     const muxer = new Muxer({ target, fastStart: 'in-memory', video: { codec: 'avc', width: WIDTH, height: HEIGHT, frameRate: FPS }, audio: { codec: 'aac', numberOfChannels: 2, sampleRate: SR } });

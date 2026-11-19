@@ -6,7 +6,7 @@
 // Voice: "Evgeniy Rybakov" (ws3YyKFd5whKb21yaXES, Russian) — approved project voice; do not replace without the owner's permission.
 // After regenerating, check clip lengths: each clip must end before the next
 // start time (node tools/voiceover.mjs --check), then rebuild the audio mix.
-import { VOICE } from '../src/timeline.js';
+import { VOICE, DURATION } from '../src/timeline.js';
 import { writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
@@ -14,7 +14,7 @@ const check = process.argv.includes('--check');
 if (check) {
   VOICE.forEach((v, i) => {
     const d = +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', v.file]).toString();
-    const next = VOICE[i + 1] ? VOICE[i + 1].start : 69;
+    const next = VOICE[i + 1] ? VOICE[i + 1].start : DURATION;
     console.log(`${v.file}: ${d.toFixed(2)} s, ends ${(v.start + d).toFixed(2)} / next ${next} ${v.start + d > next ? '⚠ OVERLAP' : 'ok'}`);
   });
   process.exit(0);

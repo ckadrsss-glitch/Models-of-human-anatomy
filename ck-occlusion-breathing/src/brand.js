@@ -27,7 +27,7 @@ export const BRAND = {
   },
   // glow centre (fraction of frame) — behind the subject
   glowCenter: [0.5, 0.46],
-  outroDuration: 3.0,
+  outroDuration: 3.8,  // circle+CK by 1.35 s, BIOMECHANICS by 1.95 s, then ≈ 1.9 s hold
 };
 
 const ease = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };

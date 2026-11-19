@@ -6,27 +6,68 @@ import { smooth, smoother, track, win, lerp, clamp, easeInOut } from './util.js'
 // ============================================================================
 
 export const FPS = 30;
-export const DURATION = 69;
 export const WIDTH = 1080, HEIGHT = 1920;
+// The original 69-s animation is kept intact as the "base clock" (evaluateBase).
+// v2 re-times its scenes to the new narration and inserts the palatine-tonsil
+// scene between the tongue and dental-arch scenes (see LAYOUT below).
+export const BASE_DURATION = 69;
 
-export const SCENES = [
-  { id: 1, t0: 0, t1: 15, name: 'Как формируется прикус' },
-  { id: 2, t0: 15, t1: 24, name: 'Дыхание и положение языка' },
-  { id: 3, t0: 24, t1: 37, name: 'Аденоиды и ротовое дыхание' },
-  { id: 4, t0: 37, t1: 49, name: 'Что происходит с языком' },
-  { id: 5, t0: 49, t1: 62, name: 'Возможные изменения прикуса' },
-  { id: 6, t0: 62, t1: 69, name: 'Финал' },
-];
-
-// ElevenLabs voice-over clips (assets/voice/*.mp3) and their start times.
+// ElevenLabs voice-over — voice "Evgeniy Rybakov" (ws3YyKFd5whKb21yaXES),
+// eleven_multilingual_v2. dur = clip length (s); start is computed by the layout.
 export const VOICE = [
-  { file: 'assets/voice/vo1.mp3', start: 0.9, text: 'С первых лет жизни у ребёнка постепенно формируется молочный прикус. Затем начинается смена зубов, и развивается постоянный зубной ряд.' },
-  { file: 'assets/voice/vo2.mp3', start: 15.15, text: 'Но на развитие зубочелюстной системы влияют не только зубы. Важную роль играют дыхание и функция окружающих мышц.' },
-  { file: 'assets/voice/vo3.mp3', start: 25.2, text: 'При увеличении аденоидов носовое дыхание может затрудняться. Некоторые дети начинают чаще дышать через рот.' },
-  { file: 'assets/voice/vo4.mp3', start: 37.8, text: 'При привычном ротовом дыхании положение языка и нижней челюсти может изменяться. Это меняет функциональные условия развития зубных дуг.' },
-  { file: 'assets/voice/vo5.mp3', start: 49.7, text: 'У части детей такие особенности сопровождаются сужением верхней зубной дуги и более вертикальным паттерном роста лица. Однако эти изменения возникают не у всех.' },
-  { file: 'assets/voice/vo6.mp3', start: 62.4, text: 'Поэтому важно оценивать не только зубы, но и носовое дыхание, и положение языка.' },
+  { file: 'assets/voice/vo1.mp3', dur: 10.11, text: 'Прикус формируется с раннего детства. Сначала прорезываются молочные зубы, затем их сменяют постоянные. Но развитие зубочелюстной системы зависит не только от зубов.' },
+  { file: 'assets/voice/vo2.mp3', dur: 9.33, text: 'Важную роль играют носовое дыхание, положение языка и работа окружающих мышц. В покое язык обычно располагается вблизи нёба, а губы сомкнуты.' },
+  { file: 'assets/voice/vo3.mp3', dur: 8.78, text: 'При увеличении аденоидов просвет носоглотки может сужаться. Ребёнку становится сложнее дышать носом, и он может переходить на ротовое дыхание.' },
+  { file: 'assets/voice/vo4.mp3', dur: 8.96, text: 'При привычном ротовом дыхании положение языка и нижней челюсти иногда изменяется. Это может влиять на функциональное равновесие зубочелюстной системы в период роста.' },
+  { file: 'assets/voice/vo5.mp3', dur: 13.27, text: 'Но аденоиды — не единственная причина. Увеличенные нёбные миндалины тоже могут сужать ротоглотку. Иногда ребёнок адаптирует положение языка и выдвигает челюсть вперёд. Это не означает обязательного мезиального прикуса.' },
+  { file: 'assets/voice/vo6.mp3', dur: 9.61, text: 'У части детей нарушения дыхания сопровождаются сужением верхней зубной дуги, высоким нёбом и изменениями окклюзии. Однако эти признаки возникают не у каждого ребёнка.' },
+  { file: 'assets/voice/vo7.mp3', dur: 9.04, text: 'Исследования также связывают нарушения носового дыхания с более вертикальным ростом лица. При этом направление роста определяется множеством факторов.' },
+  { file: 'assets/voice/vo8.mp3', dur: 10.68, text: 'Поэтому важно оценивать не только зубы, но и дыхание, язык, мягкие ткани и рост челюстей. Своевременная диагностика помогает выбрать правильное лечение.' },
 ];
+
+// ---------------------------------------------------------------- layout
+// Each segment lasts lead + narration + gap, so speech is continuous (gaps ≈ 0.32 s).
+// Base segments are linearly re-timed; the tonsil scene has its own clock.
+const GAP = 0.32;
+export const OUTRO_DURATION = 3.8;
+export const LAYOUT = [
+  { name: 'Как формируется прикус', base: [0, 15], vo: 0, lead: 0.35 },
+  { name: 'Дыхание и положение языка', base: [15, 24], vo: 1 },
+  { name: 'Аденоиды и ротовое дыхание', base: [24, 37], vo: 2 },
+  { name: 'Что происходит с языком', base: [37, 49], vo: 3 },
+  { name: 'Нёбные миндалины', tonsil: true, vo: 4 },
+  { name: 'Изменения зубных дуг', base: [50.0, 56.8], vo: 5 },
+  { name: 'Вертикальная тенденция роста', base: [56.8, 62], vo: 6 },
+  { name: 'Заключение', base: [62, 66], vo: 7, overlapOutro: 1.3 },
+  { name: 'Логотип', base: [66, 69], outro: true },
+];
+{
+  let t = 0;
+  for (const seg of LAYOUT) {
+    seg.t0 = t;
+    let dur;
+    if (seg.outro) dur = OUTRO_DURATION;
+    else {
+      const lead = seg.lead ?? 0;
+      VOICE[seg.vo].start = +(t + lead).toFixed(3);
+      dur = lead + VOICE[seg.vo].dur + (seg.overlapOutro ? -seg.overlapOutro : GAP);
+    }
+    t += dur; seg.t1 = t;
+  }
+}
+export const DURATION = Math.ceil(LAYOUT[LAYOUT.length - 1].t1 * FPS) / FPS;
+export const OUTRO_T0 = LAYOUT[LAYOUT.length - 1].t0;
+export const SCENES = LAYOUT.filter((g) => !g.outro).map((g, i) => ({ id: i + 1, t0: g.t0, t1: g.t1, name: g.name }));
+
+// base clock → new clock (used to place sound cues authored on the base clock)
+export function newFromBase(b) {
+  for (const g of LAYOUT) {
+    if (!g.base) continue;
+    if (b >= g.base[0] && b <= g.base[1]) return g.t0 + (b - g.base[0]) / (g.base[1] - g.base[0]) * (g.t1 - g.t0);
+  }
+  return null;
+}
+export const tonsilSeg = () => LAYOUT.find((g) => g.tonsil);
 
 // ---------------------------------------------------------------- dentition
 // Approximate eruption windows (years) — used only to order the animation; the
@@ -106,7 +147,7 @@ export const TITLES = [
   { text: 'ГИПЕРТРОФИЯ АДЕНОИДОВ', t0: 25.4, t1: 31.4, y: 300, size: 70 },
   { text: 'РОТОВОЕ ДЫХАНИЕ', t0: 32.0, t1: 36.8, y: 300, size: 74 },
   { text: 'ИЗМЕНЕНИЕ ПОЛОЖЕНИЯ ЯЗЫКА', t0: 37.6, t1: 48.6, y: 300, size: 68 },
-  { text: 'ИЗМЕНЕНИЯ ЗУБНЫХ ДУГ', t0: 49.6, t1: 56.2, y: 300, size: 72 },
+  { text: 'ИЗМЕНЕНИЯ ЗУБНЫХ ДУГ', t0: 50.1, t1: 56.2, y: 300, size: 72 },
   { text: 'ВЕРТИКАЛЬНАЯ ТЕНДЕНЦИЯ РОСТА', t0: 56.8, t1: 61.8, y: 300, size: 64 },
 ];
 
@@ -122,7 +163,7 @@ export const CHIPS = [
 ];
 
 // ---------------------------------------------------------------- state
-export function evaluate(t) {
+export function evaluateBase(t) {
   const s = {};
   s.t = t;
   s.cam = camAt(t);
@@ -184,6 +225,142 @@ export function evaluate(t) {
   s.final = win(t, 63.2, 64.0, 65.5, 66.0);   // «ПРИКУС — ЭТО НЕ ТОЛЬКО ЗУБЫ»
   s.credit = win(t, 63.6, 64.3, 65.5, 66.0);
   s.disclaimer = win(t, 58.0, 58.8, 61.6, 62.2);
-  s.outro = Math.max(0, t - (DURATION - 3));   // universal 3-s brand outro
   return s;
 }
+
+// ============================================================================
+//  v2: palatine-tonsil scene (inserted between the tongue and arch scenes)
+//  u = seconds into the scene, D = scene length. Starts from the base state at
+//  49.0 s (end of the tongue scene) and ends exactly on the base state at
+//  49.5 s, where the dental-arch scene resumes.
+// ============================================================================
+const NUMERIC_SKIP = new Set(['t', 'age']);
+function mixState(a, b, k) {
+  if (k <= 0) return a;
+  if (k >= 1) return { ...b };
+  const o = { ...a };
+  for (const key of Object.keys(b)) {
+    const va = a[key], vb = b[key];
+    if (typeof va === 'number' && typeof vb === 'number' && !NUMERIC_SKIP.has(key)) o[key] = lerp(va, vb, k);
+  }
+  o.cam = {
+    pos: a.cam.pos.map((x, j) => lerp(x, b.cam.pos[j], k)),
+    target: a.cam.target.map((x, j) => lerp(x, b.cam.target[j], k)),
+    up: a.cam.up.map((x, j) => lerp(x, b.cam.up[j], k)),
+    fov: lerp(a.cam.fov, b.cam.fov, k),
+  };
+  return o;
+}
+
+const TCAM = [
+  // [u, pos, target, fov]
+  [1.8, [0.0, -0.004, 0.300], [0, -0.006, -0.030], 24],
+  [5.2, [0.0, -0.005, 0.275], [0, -0.007, -0.030], 24],
+  [6.8, [-0.300, -0.004, 0.030], [0, -0.012, 0.010], 26],
+  [12.6, [-0.285, -0.004, 0.034], [0, -0.013, 0.012], 26],
+];
+
+function tonsilState(u, D) {
+  const A = evaluateBase(49.0), B = evaluateBase(50.0);
+  const T = { ...A };
+  T.t = 49.05;                       // base title clock: nothing from the base scenes shows here
+  T.arrows = 0; T.balance = 0;
+  T.coronal = win(u, -1, 0.1, 5.4, 6.2);
+  T.skin = lerp(A.skin, 0.3, smooth(5.6, 7.0, u));
+  T.mucosa = 0.55; T.soft = 1; T.tongueVis = 1;
+  T.lowerJaw = 1; T.upperJaw = 1; T.neuro = 1;
+  T.adenoid = 0.35; T.adenoidVis = 0.6;
+  T.jaw = track([[0, A.jaw], [1.3, 0], [8.0, 0], [9.8, 0.035], [11.8, 0.035], [12.9, 0]], u);
+  T.protr = track([[0, 0], [8.0, 0], [10.0, 0.0035], [11.8, 0.0035], [12.9, 0]], u);
+  T.tongueUp = track([[0, A.tongueUp], [1.3, 1], [3.4, 1], [5.6, 0.3], [8.0, 0.3], [9.8, -0.45], [11.8, -0.45], [12.9, 1]], u);
+  T.tonsil = track([[0, 0], [2.2, 0], [5.4, 1]], u);
+  T.tonsilVis = smooth(0.3, 1.2, u);
+  T.nasalFlow = track([[0, 1], [3.0, 1], [5.6, 0.55]], u);
+  T.oralFlow = track([[0, 0], [8.0, 0], [9.8, 0.65], [11.8, 0.65], [12.9, 0]], u);
+  T.flowOpacity = smooth(0.8, 1.8, u);
+  T.lumen = 0.75 * smooth(0.8, 1.8, u);
+  T.protrArrow = win(u, 8.4, 9.0, 11.8, 12.4);
+  // camera
+  let cam;
+  if (u <= TCAM[0][0]) {
+    const k = easeInOut(clamp(u / TCAM[0][0]));
+    cam = { pos: A.cam.pos.map((x, j) => lerp(x, TCAM[0][1][j], k)), target: A.cam.target.map((x, j) => lerp(x, TCAM[0][2][j], k)), fov: lerp(A.cam.fov, TCAM[0][3], k), up: [0, 1, 0] };
+  } else {
+    let i = 0; while (i < TCAM.length - 2 && u > TCAM[i + 1][0]) i++;
+    const a = TCAM[i], b = TCAM[i + 1], k = easeInOut(clamp((u - a[0]) / (b[0] - a[0])));
+    cam = { pos: a[1].map((x, j) => lerp(x, b[1][j], k)), target: a[2].map((x, j) => lerp(x, b[2][j], k)), fov: lerp(a[3], b[3], k), up: [0, 1, 0] };
+  }
+  T.cam = cam;
+  // overlays (titles + chips use the scene clock u)
+  T.extra = [
+    { kind: 'title', text: 'НЁБНЫЕ МИНДАЛИНЫ', t0: 0.3, t1: 6.0, size: 72 },
+    { kind: 'title', text: 'ВОЗМОЖНОЕ ВЫДВИЖЕНИЕ НИЖНЕЙ ЧЕЛЮСТИ', t0: 7.3, t1: 12.6, size: 62 },
+    { kind: 'chip', text: 'НОРМАЛЬНЫЙ РАЗМЕР', tag: 'А', t0: 1.0, t1: 2.6 },
+    { kind: 'chip', text: 'ГИПЕРТРОФИЯ · УЖЕ РОТОГЛОТКА', tag: 'Б', t0: 3.4, t1: 6.0, warm: true },
+    { kind: 'chip', text: 'ФУНКЦИОНАЛЬНАЯ АДАПТАЦИЯ', tag: 'Б', t0: 8.6, t1: 12.5, warm: true },
+  ].map((e) => ({ ...e, u }));
+
+  // blend in from the end of the tongue scene, blend out into the arch scene
+  const kIn = smooth(0, 1.4, u), kOut = smooth(D - 1.5, D, u);
+  let s = mixState(mixState(A, T, kIn), B, kOut);
+  s.extra = T.extra; s.t = 49.05; s.age = A.age;
+  // pull the camera back mid-flight so the transitions stay clear of the anatomy
+  const boost = 1 + 0.55 * Math.sin(Math.PI * kOut) + 0.25 * Math.sin(Math.PI * kIn);
+  s.cam = { ...s.cam, pos: s.cam.pos.map((x, j) => s.cam.target[j] + (x - s.cam.target[j]) * boost) };
+  s.protr = T.protr * (1 - kOut); s.tonsil = T.tonsil; s.tonsilVis = T.tonsilVis * (1 - kOut) * kIn;
+  s.protrArrow = T.protrArrow;
+  // section planes: coronal cut through the tonsils → camera orbits to lateral while
+  // the sagittal cut closes in → the coronal cut sweeps forward and releases.
+  s.cor = lerp(0.008, -0.0285, smoother(0.2, 1.9, u)) + (0.2 + 0.0285) * smoother(6.5, 7.6, u);
+  s.sag = lerp(lerp(1, 0.0, smoother(5.3, 6.4, u)), 1, kOut);
+  s.cor = lerp(s.cor, 1, smooth(7.6, 7.8, u));
+  s.tongueClip = s.sectionMode === 'coronal';
+  return s;
+}
+
+// ============================================================================
+//  v2 master evaluate: new clock → base clock / tonsil scene, plus global layers
+// ============================================================================
+export function evaluate(t) {
+  let seg = LAYOUT[LAYOUT.length - 1];
+  for (const g of LAYOUT) if (t < g.t1) { seg = g; break; }
+  let s;
+  if (seg.tonsil) s = tonsilState(t - seg.t0, seg.t1 - seg.t0);
+  else {
+    const k = clamp((t - seg.t0) / (seg.t1 - seg.t0));
+    s = evaluateBase(seg.base[0] + k * (seg.base[1] - seg.base[0]));
+    s.protr = 0; s.tonsil = 0; s.tonsilVis = 0; s.protrArrow = 0;
+  }
+  s.clock = t;                               // continuous clock (particles, breathing)
+  s.outro = Math.max(0, t - OUTRO_T0);       // universal CK BIOMECHANICS outro
+  s.brandBar = 1;                            // persistent top wordmark (fades in the outro)
+  s.extra = s.extra || [];
+  return s;
+}
+
+// ============================================================================
+//  Sound design cues. `b` = base-clock time, `u` = seconds into the tonsil
+//  scene, `o` = seconds into the outro. Placed on actual visual events.
+// ============================================================================
+export const SFX = [
+  // eruption accents (primary teeth, then first permanent molars / incisors)
+  ...[2.33, 2.75, 3.0, 3.59, 4.18, 5.27, 8.83, 9.3, 10.53, 12.23].map((b) => ({ file: 'assets/sfx/tick.mp3', b, gain: 0.22 })),
+  // camera moves
+  ...[6.0, 9.4, 10.9, 14.2, 25.2, 32.2, 44.4, 54.4, 56.9, 64.5].map((b) => ({ file: 'assets/sfx/whoosh.mp3', b: b - 0.25, gain: 0.2 })),
+  { file: 'assets/sfx/whoosh.mp3', u: 0.05, gain: 0.2 },
+  { file: 'assets/sfx/whoosh.mp3', u: 5.2, gain: 0.2 },
+  { file: 'assets/sfx/whoosh.mp3', uEnd: -1.5, gain: 0.2 },
+  // tongue / jaw motion accents
+  ...[32.2, 37.4, 40.9, 46.9, 57.3].map((b) => ({ file: 'assets/sfx/move.mp3', b, gain: 0.28 })),
+  { file: 'assets/sfx/move.mp3', u: 2.3, gain: 0.24 },
+  { file: 'assets/sfx/move.mp3', u: 8.0, gain: 0.28 },
+  // logo accent when the circle appears
+  { file: 'assets/sfx/logo.mp3', o: 0.5, gain: 0.42 },
+];
+// quiet looped airflow while breathing is shown
+export const SFX_BEDS = [
+  { file: 'assets/sfx/breath.mp3', b0: 16.6, b1: 44.6, gain: 0.09 },
+  { file: 'assets/sfx/breath.mp3', u0: 0.6, u1: -1.2, gain: 0.08 },
+  { file: 'assets/sfx/breath.mp3', b0: 62.4, b1: 66.0, gain: 0.07 },
+];
+export const MUSIC = { file: 'assets/music/ambient_bed.mp3', gain: 0.32 };

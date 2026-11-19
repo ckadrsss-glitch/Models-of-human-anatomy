@@ -4,7 +4,7 @@
 set -euo pipefail
 FR=${1:-build/frames}; OUT=${2:-export/CK_BIOMECHANICS_occlusion_breathing.mp4}
 mkdir -p "$(dirname "$OUT")" build
-DUR=69; AUDIO_KBPS=128; MAX_MB=23.2   # MiB → ≈ 24.3 MB decimal, safely under 25 MB
+DUR=$(node -e "import('./src/timeline.js').then(m=>console.log(m.DURATION))"); AUDIO_KBPS=128; MAX_MB=23.2   # MiB → ≈ 24.3 MB decimal, safely under 25 MB
 VKBPS=$(python3 -c "print(int(($MAX_MB*8*1024*1024/$DUR - $AUDIO_KBPS*1000)/1000*0.97))")
 echo "video bitrate: ${VKBPS}k"
 IN=(-framerate 30 -i "$FR/%05d.jpg")

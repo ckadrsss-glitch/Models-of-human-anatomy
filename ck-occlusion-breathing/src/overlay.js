@@ -48,11 +48,26 @@ export class Overlay {
     ctx.textBaseline = 'alphabetic';
     const t = s.t;
 
-    // titles
-    for (const T of TITLES) {
-      const a = smooth(T.t0, T.t0 + 0.6, t) * (1 - smooth(T.t1 - 0.5, T.t1, t));
+    // persistent brand wordmark (top, Instagram-safe); hidden during the logo outro
+    const outroFade = smooth(0, 0.9, s.outro || 0);
+    if ((s.brandBar || 0) * (1 - outroFade) > 0) {
+      ctx.save();
+      ctx.globalAlpha = 0.92 * s.brandBar * (1 - outroFade);
+      ctx.font = `600 30px ${F}`; ctx.fillStyle = '#eef5ff'; ctx.textBaseline = 'alphabetic';
+      ctx.shadowColor = 'rgba(0,8,24,0.7)'; ctx.shadowBlur = 10;
+      spaced(ctx, 'CK BIOMECHANICS', WIDTH / 2, 178, 10);
+      ctx.restore();
+    }
+
+    // titles (base scenes on the base clock, inserted scenes on their own clock)
+    const extra = s.extra || [];
+    const titles = TITLES.map((T) => ({ ...T, now: t }))
+      .concat(extra.filter((e) => e.kind === 'title').map((e) => ({ ...e, y: 300, now: e.u })));
+    for (const T of titles) {
+      const tt = T.now;
+      const a = smooth(T.t0, T.t0 + 0.6, tt) * (1 - smooth(T.t1 - 0.5, T.t1, tt));
       if (a <= 0) continue;
-      const rise = (1 - easeOut((t - T.t0) / 0.8)) * 26;
+      const rise = (1 - easeOut((tt - T.t0) / 0.8)) * 26;
       ctx.save();
       ctx.globalAlpha = a;
       ctx.font = `800 ${T.size}px ${F}`;
@@ -62,15 +77,17 @@ export class Overlay {
       lines.forEach((ln, i) => spaced(ctx, ln, WIDTH / 2, T.y + rise + i * T.size * 1.12, 3));
       ctx.shadowBlur = 0;
       // accent bar grows under the title
-      const bw = 140 * easeOut((t - T.t0 - 0.2) / 0.9);
+      const bw = 140 * easeOut((tt - T.t0 - 0.2) / 0.9);
       ctx.fillStyle = TEAL;
       ctx.fillRect(WIDTH / 2 - bw / 2, T.y + rise + (lines.length - 1) * T.size * 1.12 + 34, bw, 5);
       ctx.restore();
     }
 
     // state chips
-    for (const C of CHIPS) {
-      const a = smooth(C.t0, C.t0 + 0.4, t) * (1 - smooth(C.t1 - 0.35, C.t1, t));
+    const chips = CHIPS.map((C) => ({ ...C, now: t }))
+      .concat(extra.filter((e) => e.kind === 'chip').map((e) => ({ ...e, y: 1500, now: e.u })));
+    for (const C of chips) {
+      const a = smooth(C.t0, C.t0 + 0.4, C.now) * (1 - smooth(C.t1 - 0.35, C.t1, C.now));
       if (a <= 0) continue;
       ctx.save(); ctx.globalAlpha = a;
       ctx.font = `600 34px ${F}`; ctx.letterSpacing = '2px';
@@ -88,6 +105,7 @@ export class Overlay {
       ctx.restore();
     }
 
+    if (s.protrArrow > 0 && s.protrPts && project) this.drawProtrusion(s, project);
     if (s.ageUI > 0) this.drawAge(s);
     if (s.spacing > 0 && project) this.drawSpacing(s, project);
     if (s.arrowsLabels && s.arrows > 0) this.drawArrowLabels(s, project);
@@ -153,6 +171,21 @@ export class Overlay {
     ctx.font = `500 20px ${F}`; ctx.textAlign = 'center';
     for (let k = 0; k <= 12; k += 3) ctx.fillText(String(k), pos(k), y + 44);
     ctx.beginPath(); ctx.fillStyle = '#fff'; ctx.arc(pos(age), y + 2, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  drawProtrusion(s, project) {
+    const ctx = this.ctx;
+    const a = project(s.protrPts[0]), b = project(s.protrPts[1]);
+    if (!a || !b) return;
+    const ang = Math.atan2(b.y - a.y, b.x - a.x);
+    ctx.save(); ctx.globalAlpha = s.protrArrow;
+    ctx.strokeStyle = TEAL; ctx.fillStyle = TEAL; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    ctx.shadowColor = TEAL; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x - Math.cos(ang) * 18, b.y - Math.sin(ang) * 18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(b.x, b.y);
+    ctx.lineTo(b.x - Math.cos(ang - 0.45) * 32, b.y - Math.sin(ang - 0.45) * 32);
+    ctx.lineTo(b.x - Math.cos(ang + 0.45) * 32, b.y - Math.sin(ang + 0.45) * 32); ctx.closePath(); ctx.fill();
     ctx.restore();
   }
 

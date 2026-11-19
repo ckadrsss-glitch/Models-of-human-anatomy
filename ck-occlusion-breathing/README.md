@@ -8,9 +8,10 @@
 | Формат | 9:16, 1080×1920, 30 fps |
 | Итоговый файл | `export/CK_BIOMECHANICS_occlusion_breathing.mp4` (H.264 + AAC, ≤ 25 МБ) |
 | Анатомия | Z-Anatomy / BodyParts3D (CC BY-SA), см. [docs/ASSETS.md](docs/ASSETS.md) |
-| Озвучка | ElevenLabs, голос «Anthony Ultra — Medical Educator», `assets/voice/` |
+| Озвучка | ElevenLabs, голос **Evgeniy Rybakov** (`ws3YyKFd5whKb21yaXES`), eleven_multilingual_v2, `assets/voice/` |
 | Научные оговорки | [docs/SCIENCE.md](docs/SCIENCE.md) |
 | Раскадровка | [docs/STORYBOARD.md](docs/STORYBOARD.md) |
+| Бренд (фон, логотип, концовка) | [docs/BRAND.md](docs/BRAND.md), `src/brand.js`, `brand.html` |
 
 ## Запуск плеера
 
@@ -55,7 +56,8 @@ src/film.js           сборка сцены, применение состоя
 src/anatomy.js        загрузка GLB, зубы (ось, CEJ), молочные зубы, язык, кожа, десна, шарнир ВНЧС
 src/airway.js         аденоид (глоточная миндалина), просвет, частицы воздушного потока
 src/materials.js      «стеклянная» кость, PBR-эмаль с осевым срезом (формирование/резорбция корня)
-src/overlay.js        титры, возрастная шкала, чипы А/Б, цефалометрия, логотип CK BIOMECHANICS
+src/overlay.js        титры, возрастная шкала, чипы А/Б, цефалометрия
+src/brand.js          фирменный фон, логотип и универсальная 3-с концовка CK BIOMECHANICS
 assets/head.glb       экспорт из Z-Anatomy (tools/export_head.py)
 tools/                экспорт анатомии, рендер, звук, кодирование
 ```
@@ -64,4 +66,4 @@ tools/                экспорт анатомии, рендер, звук, �
 
 * Анатомические модели и производные (`assets/head.glb`, ролик) — **CC BY-SA 4.0**: Z-Anatomy (Gauthier Kervyn, Marcin Zielinski) на основе BodyParts3D © DBCLS (CC BY-SA 2.1 JP). Атрибуция выводится в финальном кадре.
 * three.js и mp4-muxer — MIT (`vendor/`). Шрифт Montserrat — SIL OFL 1.1.
-* Озвучка сгенерирована в ElevenLabs по аккаунту владельца проекта.
+* Озвучка сгенерирована в ElevenLabs (голос Evgeniy Rybakov) по аккаунту владельца проекта.

@@ -181,12 +181,9 @@ export function evaluate(t) {
   // --- overlay ----------------------------------------------------------------
   s.ageUI = win(t, 1.0, 1.8, 13.6, 14.4);
   s.spacing = win(t, 6.4, 7.0, 8.0, 8.6);     // highlight physiological spacing
-  s.final = smooth(65.4, 66.4, t);
-  s.logo = smooth(66.0, 67.2, t);
-  s.credit = smooth(65.8, 66.8, t);
+  s.final = win(t, 63.2, 64.0, 65.5, 66.0);   // «ПРИКУС — ЭТО НЕ ТОЛЬКО ЗУБЫ»
+  s.credit = win(t, 63.6, 64.3, 65.5, 66.0);
   s.disclaimer = win(t, 58.0, 58.8, 61.6, 62.2);
-  s.brand = smooth(0.2, 1.2, t) * (1 - smooth(65.4, 66.0, t));
-  s.fadeIn = smooth(0, 0.6, t);
-  s.fadeOut = 1 - smooth(68.5, 69.0, t) * 0.0;
+  s.outro = Math.max(0, t - (DURATION - 3));   // universal 3-s brand outro
   return s;
 }

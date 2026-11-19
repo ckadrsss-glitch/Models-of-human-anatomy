@@ -3,7 +3,7 @@
 //
 //   ELEVENLABS_API_KEY=... node tools/voiceover.mjs [voiceId] [modelId]
 //
-// Default voice: "Anthony Ultra — Medical Educator" (XSM4mqdpRhfh2p0LYyvW, Russian).
+// Voice: "Evgeniy Rybakov" (ws3YyKFd5whKb21yaXES, Russian) — approved project voice; do not replace without the owner's permission.
 // After regenerating, check clip lengths: each clip must end before the next
 // start time (node tools/voiceover.mjs --check), then rebuild the audio mix.
 import { VOICE } from '../src/timeline.js';
@@ -21,7 +21,7 @@ if (check) {
 }
 const key = process.env.ELEVENLABS_API_KEY;
 if (!key) { console.error('Set ELEVENLABS_API_KEY'); process.exit(1); }
-const voice = process.argv[2] || 'XSM4mqdpRhfh2p0LYyvW';
+const voice = process.argv[2] || 'ws3YyKFd5whKb21yaXES';
 const model = process.argv[3] || 'eleven_multilingual_v2';
 for (const v of VOICE) {
   const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`, {

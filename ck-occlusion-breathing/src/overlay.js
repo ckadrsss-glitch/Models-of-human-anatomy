@@ -1,5 +1,6 @@
 import { TITLES, CHIPS, WIDTH, HEIGHT } from './timeline.js';
 import { smooth, clamp, easeOut } from './util.js';
+import { drawOutro, BRAND } from './brand.js';
 
 const TEAL = '#2de2d0';
 const WARM = '#ff9a8a';
@@ -35,41 +36,6 @@ function wrap(ctx, text, maxW) {
   return lines;
 }
 
-export function drawLogo(ctx, cx, cy, scale, alpha) {
-  if (alpha <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.translate(cx, cy);
-  ctx.scale(scale, scale);
-  // emblem: open ring + "CK" monogram + biomechanical arc
-  const r = 64;
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = TEAL;
-  ctx.shadowColor = 'rgba(45,226,208,0.55)';
-  ctx.shadowBlur = 24;
-  ctx.beginPath(); ctx.arc(0, -96, r, Math.PI * 0.62, Math.PI * 2.38); ctx.stroke();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `800 58px ${F}`;
-  ctx.textBaseline = 'middle';
-  spaced(ctx, 'CK', 0, -94, 2);
-  ctx.beginPath(); ctx.fillStyle = TEAL; ctx.arc(0, -96 + r, 6, 0, Math.PI * 2); ctx.fill();
-  // wordmark — one word, never split
-  ctx.font = `700 54px ${F}`;
-  ctx.textBaseline = 'alphabetic';
-  const ck = 'CK', bio = 'BIOMECHANICS', gap = 22;
-  ctx.letterSpacing = '6px';
-  const w1 = ctx.measureText(ck).width;
-  ctx.font = `500 54px ${F}`;
-  const w2 = ctx.measureText(bio).width;
-  const total = w1 + gap + w2, x0 = -total / 2;
-  ctx.textAlign = 'left';
-  ctx.font = `800 54px ${F}`; ctx.fillStyle = TEAL; ctx.fillText(ck, x0, 40);
-  ctx.font = `500 54px ${F}`; ctx.fillStyle = '#ffffff'; ctx.fillText(bio, x0 + w1 + gap, 40);
-  ctx.letterSpacing = '0px';
-  ctx.restore();
-}
-
 export class Overlay {
   constructor(canvas) {
     this.c = canvas;
@@ -81,22 +47,6 @@ export class Overlay {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     ctx.textBaseline = 'alphabetic';
     const t = s.t;
-
-    // cinematic vignette
-    const g = ctx.createRadialGradient(WIDTH / 2, HEIGHT * 0.48, HEIGHT * 0.25, WIDTH / 2, HEIGHT * 0.5, HEIGHT * 0.75);
-    g.addColorStop(0, 'rgba(2,8,24,0)'); g.addColorStop(1, 'rgba(2,8,24,0.55)');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-    // brand bug
-    if (s.brand > 0) {
-      ctx.save(); ctx.globalAlpha = 0.85 * s.brand;
-      ctx.font = `800 26px ${F}`; ctx.fillStyle = TEAL; ctx.textAlign = 'left';
-      ctx.letterSpacing = '4px'; ctx.fillText('CK', 72, 140);
-      const w = ctx.measureText('CK').width;
-      ctx.font = `500 26px ${F}`; ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillText('BIOMECHANICS', 72 + w + 12, 140);
-      ctx.letterSpacing = '0px';
-      ctx.restore();
-    }
 
     // titles
     for (const T of TITLES) {
@@ -164,16 +114,16 @@ export class Overlay {
       spaced(ctx, 'Дыхание • Язык • Рост челюстей', WIDTH / 2, 450 + rise, 1);
       ctx.restore();
     }
-    drawLogo(ctx, WIDTH / 2, 1390, 1.0, s.logo);
     if (s.credit > 0) {
       ctx.save(); ctx.globalAlpha = 0.55 * s.credit;
       ctx.font = `500 21px ${F}`; ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
-      ctx.fillText('Схематическая визуализация. Не является индивидуальным прогнозом.', WIDTH / 2, 1560);
-      ctx.fillText('3D: Z-Anatomy · BodyParts3D (DBCLS) — CC BY-SA', WIDTH / 2, 1594);
+      ctx.fillText('Схематическая визуализация. Не является индивидуальным прогнозом.', WIDTH / 2, 1580);
+      ctx.fillText('3D: Z-Anatomy · BodyParts3D (DBCLS) — CC BY-SA', WIDTH / 2, 1614);
       ctx.restore();
     }
 
-    if (s.fadeIn < 1) { ctx.fillStyle = `rgba(3,9,26,${1 - s.fadeIn})`; ctx.fillRect(0, 0, WIDTH, HEIGHT); }
+    // universal CK BIOMECHANICS outro — last 3 seconds (src/brand.js)
+    if (s.outro > 0) drawOutro(ctx, s.outro);
   }
 
   drawAge(s) {

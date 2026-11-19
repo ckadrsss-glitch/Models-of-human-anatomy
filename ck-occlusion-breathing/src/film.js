@@ -3,19 +3,18 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { Anatomy } from './anatomy.js';
 import { Adenoid, Airflow, Lumen, buildPaths } from './airway.js';
 import { Overlay } from './overlay.js';
+import { backgroundCanvas } from './brand.js';
 import { sectionPlane, archUniforms, archShiftX, setOpacity } from './materials.js';
 import { evaluate, PRIMARY, PERMANENT, WIDTH, HEIGHT } from './timeline.js';
 import { smooth, smoother, easeInOut, easeOut, lerp, clamp } from './util.js';
 
 const TEAL = new THREE.Color(0x2de2d0);
 
+// Brand background (src/brand.js): sRGB canvas texture → drawn untone-mapped,
+// pixel-identical to the 2D outro background.
 function makeBackground() {
-  const c = document.createElement('canvas'); c.width = 64; c.height = 512;
-  const g = c.getContext('2d');
-  const lg = g.createLinearGradient(0, 0, 0, 512);
-  lg.addColorStop(0, '#0c2350'); lg.addColorStop(0.45, '#071a3d'); lg.addColorStop(1, '#020a1e');
-  g.fillStyle = lg; g.fillRect(0, 0, 64, 512);
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const tex = new THREE.CanvasTexture(backgroundCanvas());
+  tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 

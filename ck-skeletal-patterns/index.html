@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9 Skeletal Facial Patterns — CK BIOMECHANICS</title>
+<link rel="icon" href="data:,">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }</script>
+<style>
+  @font-face { font-family: Montserrat; src: url(assets/fonts/montserrat-latin.woff2) format('woff2'); font-weight: 100 900; font-display: block; }
+  :root { --bg: #02060d; --panel: #0a1834; --line: #1d3361; --accent: #2de2d0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: #fff; font-family: Montserrat, system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 16px; }
+  #stage { height: calc(100vh - 150px); aspect-ratio: 9 / 16; max-width: 100%; position: relative; }
+  #stage canvas { width: 100%; height: 100%; display: block; border-radius: 10px; box-shadow: 0 0 0 1px #13213d; }
+  #loading { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; letter-spacing: 3px; color: #8fa3c7; }
+  .ui { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 980px; }
+  button { background: var(--panel); color: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font: 600 13px Montserrat, sans-serif; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  #scrub { width: min(560px, 90vw); accent-color: var(--accent); }
+  #time { font: 500 13px ui-monospace, monospace; color: #a9b8d6; min-width: 120px; text-align: center; }
+  #status { font-size: 12px; color: #8fa3c7; min-height: 16px; }
+  #scenes button { font-weight: 500; font-size: 12px; padding: 5px 9px; }
+  body.render { padding: 0; } body.render #stage { height: 1920px; width: 1080px; } body.render #stage canvas { border-radius: 0; box-shadow: none; } body.render .ui, body.render #status { display: none; }
+</style>
+</head>
+<body>
+  <div id="stage"><div id="loading">LOADING 3D ANATOMY…</div></div>
+  <div class="ui">
+    <button id="play">▶ Play</button>
+    <button id="restart">↺ Restart</button>
+    <input id="scrub" type="range" min="0" max="1000" value="0">
+    <span id="time">00:00.0 / 00:40.0</span>
+    <button id="sound">🔇 Sound off</button>
+  </div>
+  <div class="ui" id="scenes"></div>
+  <div class="ui">
+    <button id="rec">● Record WebM</button>
+    <button id="mp4">⬇ Export MP4 (frame-accurate)</button>
+  </div>
+  <div id="status"></div>
+  <audio id="audio" src="assets/audio/ambient.m4a" preload="auto" muted></audio>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

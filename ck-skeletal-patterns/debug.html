@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Skull debug</title>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
+<style>body{margin:0;background:#000}canvas{display:block}</style></head><body>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { loadSkullGeometry, createSkull } from './src/skull.js';
+import { landmarks } from './src/morph.js';
+const q = new URLSearchParams(location.search);
+const W = +(q.get('w')||1400), H = +(q.get('h')||1400);
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setSize(W, H); document.body.appendChild(r.domElement);
+r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace;
+const sc = new THREE.Scene(); sc.background = new THREE.Color(0x0a0f18);
+sc.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(-300, 200, 180); sc.add(key);
+const g = await loadSkullGeometry();
+const sk = createSkull(g); sc.add(sk.group);
+if(q.has('clip')){ r.localClippingEnabled=true; const pl=new THREE.Plane(new THREE.Vector3(1,0,0), -(+q.get('clip'))); sk.mats.forEach(m=>{m.clippingPlanes=[pl]; m.side=THREE.DoubleSide;}); }
+sk.set(+(q.get('s')||0), +(q.get('v')||0), +(q.get('o')||0));
+const [z0,z1,y0,y1] = (q.get('box')||'-110,110,-110,110').split(',').map(Number);
+const cam = new THREE.OrthographicCamera(z0, z1, y1, y0, 1, 2000);
+cam.position.set(-600, 0, 0); cam.up.set(0,1,0); cam.lookAt(0,0,0);
+r.render(sc, cam);
+// grid overlay
+const c2 = document.createElement('canvas'); c2.width=W; c2.height=H; c2.style.cssText='position:absolute;left:0;top:0';
+document.body.appendChild(c2); const x = c2.getContext('2d');
+const px = (z)=> (z-z0)/(z1-z0)*W, py=(y)=> (y1-y)/(y1-y0)*H;
+const step = +(q.get('step')||10);
+x.font='11px sans-serif';
+for (let z=Math.ceil(z0/step)*step; z<=z1; z+=step){ x.strokeStyle= z%50?'rgba(0,255,255,.18)':'rgba(0,255,255,.5)'; x.beginPath(); x.moveTo(px(z),0); x.lineTo(px(z),H); x.stroke(); x.fillStyle='#0ff'; x.fillText(z, px(z)+2, 12); }
+for (let y=Math.ceil(y0/step)*step; y<=y1; y+=step){ x.strokeStyle= y%50?'rgba(255,255,0,.18)':'rgba(255,255,0,.5)'; x.beginPath(); x.moveTo(0,py(y)); x.lineTo(W,py(y)); x.stroke(); x.fillStyle='#ff0'; x.fillText(y, 2, py(y)-2); }
+const pts = (q.get('pts')||'').split(';').filter(Boolean).map(s=>s.split(',').map(Number));
+if(q.has('lm')){ const L=landmarks(+(q.get('s')||0), +(q.get('v')||0), +(q.get('o')||0)); for(const k in L){ pts.push(L[k]); x.fillStyle='#f0f'; x.fillText(k, px(L[k][0])+5, py(L[k][1])-5);} }
+for (const [z,y] of pts){ x.fillStyle='#f0f'; x.beginPath(); x.arc(px(z),py(y),4,0,7); x.fill(); }
+window.ready = true;
+</script></body></html>

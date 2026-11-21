@@ -9,8 +9,8 @@ export const SCENES = [
   { id: '01', name: 'Intro', t0: 0, t1: 5 },
   { id: '02', name: 'Sagittal', t0: 5, t1: 13 },
   { id: '03', name: 'Vertical', t0: 13, t1: 21 },
-  { id: '04', name: '9 patterns', t0: 21, t1: 35 },
-  { id: '05', name: 'Outro', t0: 35, t1: 40 },
+  { id: '04', name: '9 patterns', t0: 21, t1: 37 },
+  { id: '05', name: 'Outro', t0: 37, t1: 40 },
 ];
 
 export const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -96,17 +96,17 @@ export const TEXT = {
   hypo: (t) => win(t, 13.9, 16.4, 0.5, 0.45),
   normo: (t) => win(t, 16.5, 18.75, 0.5, 0.45),
   hyper: (t) => win(t, 18.85, 21.0, 0.5, 0.45),
-  gridTitle: (t) => win(t, 23.6, 35.6, 0.9, 0.3),
-  colHead: (t) => win(t, 23.9, 35.6, 0.8, 0.3),
-  rowHead: (t) => win(t, 24.3, 35.6, 0.8, 0.3),
-  footnote: (t) => win(t, 25.0, 35.6, 1.0, 0.3),
-  attribution: (t) => win(t, 25.6, 35.6, 1.0, 0.3),
+  gridTitle: (t) => win(t, 23.6, 37.6, 0.9, 0.3),
+  colHead: (t) => win(t, 23.9, 37.6, 0.8, 0.3),
+  rowHead: (t) => win(t, 24.3, 37.6, 0.8, 0.3),
+  footnote: (t) => win(t, 25.0, 37.6, 1.0, 0.3),
+  attribution: (t) => win(t, 25.6, 37.6, 1.0, 0.3),
 };
 
 /** cephalometric line visibility */
 export const LINES = {
   sagittal: (t) => win(t, 6.6, 13.3, 0.8, 0.6),     // S–N, N–A, N–B + points
   vertical: (t) => win(t, 13.4, 21.1, 0.8, 0.5),    // S–N, Go–Me, lower face height
-  grid: (t) => win(t, 26.2, 35.6, 1.4, 0.3),        // S–N & Go–Me in every cell
+  grid: (t) => win(t, 26.2, 37.6, 1.4, 0.3),        // S–N & Go–Me in every cell
 };
-export const OUTRO_T0 = 35;
+export const OUTRO_T0 = DURATION - 3; // brand-kit outro: exactly the last 3 s, as in every CK BIOMECHANICS film

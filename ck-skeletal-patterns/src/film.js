@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { loadSkullGeometry, createSkull } from './skull.js';
 import { landmarks, clearance } from './morph.js';
-import { BRAND, backgroundCanvas, drawOutro } from './brand.js';
+import { BRAND, backgroundCanvas, drawOutro, drawCaption, loadBackground, CAPTION } from './brand.js';
 import { stateAt, TEXT, LINES, COLS, ROWS, GRID, OUTRO_T0, DURATION, FPS } from './timeline.js';
 
 const W = BRAND.width, H = BRAND.height;
@@ -22,6 +22,7 @@ export class Film {
   }
 
   async init() {
+    await loadBackground();
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
     r.setPixelRatio(1); r.setSize(W, H, false);
     r.outputColorSpace = THREE.SRGBColorSpace;
@@ -47,7 +48,7 @@ export class Film {
     this.geometry = await loadSkullGeometry('assets/skull');
     this.skulls = [];
     for (let i = 0; i < 9; i++) { const s = createSkull(this.geometry); sc.add(s.group); this.skulls.push(s); }
-    await Promise.all([document.fonts.load(`700 60px ${F}`), document.fonts.load(`600 30px ${F}`), document.fonts.load(`500 30px ${F}`), document.fonts.load(`400 24px ${F}`)]);
+    await Promise.all([document.fonts.load(CAPTION.font), document.fonts.load(`700 60px ${F}`), document.fonts.load(`600 30px ${F}`), document.fonts.load(`500 30px ${F}`), document.fonts.load(`400 24px ${F}`)]);
     // compile all programs once
     this.renderFrame(0); this.renderFrame(Math.round(28 * FPS));
   }
@@ -77,6 +78,8 @@ export class Film {
     if (fade < 1) { x.drawImage(backgroundCanvas(), 0, 0); x.globalAlpha = fade; }
     x.drawImage(this.renderer.domElement, 0, 0);
     x.globalAlpha = 1;
+    // permanent series caption — on screen for the whole main animation, dissolves with the outro
+    drawCaption(x, Math.min(1, t / 0.6 + 0.0001));
     this.drawOverlay(x, t, st);
     if (t >= OUTRO_T0) drawOutro(x, t - OUTRO_T0);
     return this.out;
@@ -123,36 +126,36 @@ export class Film {
   drawOverlay(x, t, st) {
     const A = (f) => f(t);
     // ---- scene 1: title
-    this.text(x, '9 SKELETAL FACIAL PATTERNS', W / 2, 300, { size: 64, weight: 700, alpha: A(TEXT.title), spacing: 1.5 });
-    this.text(x, 'SAGITTAL × VERTICAL', W / 2, 380, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.subtitle), spacing: 10 });
+    this.text(x, '9 SKELETAL FACIAL PATTERNS', W / 2, 330, { size: 64, weight: 700, alpha: A(TEXT.title), spacing: 1.5 });
+    this.text(x, 'SAGITTAL × VERTICAL', W / 2, 410, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.subtitle), spacing: 10 });
 
     // ---- scene 2: sagittal
     const single = st.skulls.length === 1 ? st.skulls[0] : null;
-    this.text(x, 'SAGITTAL RELATIONSHIP', W / 2, 232, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.sagHeader), spacing: 8 });
+    this.text(x, 'SAGITTAL RELATIONSHIP', W / 2, 300, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.sagHeader), spacing: 8 });
     const cls = [['CLASS I', 'Balanced maxillo-mandibular relationship', TEXT.classI],
       ['CLASS II', 'Mandible distal relative to the maxilla', TEXT.classII],
       ['CLASS III', 'Mandible mesial relative to the maxilla', TEXT.classIII]];
     for (const [name, desc, f] of cls) {
       const a = f(t);
-      this.text(x, name, W / 2, 322, { size: 88, weight: 700, alpha: a, spacing: 3 });
+      this.text(x, name, W / 2, 392, { size: 88, weight: 700, alpha: a, spacing: 3 });
       this.text(x, desc, W / 2, 1636, { size: 34, weight: 500, alpha: a * 0.9 });
     }
     // ---- scene 3: vertical
-    this.text(x, 'VERTICAL PATTERN', W / 2, 232, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.vertHeader), spacing: 8 });
+    this.text(x, 'VERTICAL PATTERN', W / 2, 300, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.vertHeader), spacing: 8 });
     const ver = [['HYPODIVERGENT', 'Flat mandibular plane · shorter lower face', TEXT.hypo],
       ['NORMODIVERGENT', 'Average mandibular plane inclination', TEXT.normo],
       ['HYPERDIVERGENT', 'Steep mandibular plane · longer lower face', TEXT.hyper]];
     for (const [name, desc, f] of ver) {
       const a = f(t);
-      this.text(x, name, W / 2, 322, { size: 72, weight: 700, alpha: a, spacing: 3 });
+      this.text(x, name, W / 2, 392, { size: 72, weight: 700, alpha: a, spacing: 3 });
       this.text(x, desc, W / 2, 1636, { size: 34, weight: 500, alpha: a * 0.9 });
     }
     if (single) this.drawSingleCeph(x, t, single);
 
     // ---- scene 4: matrix
     const gt = A(TEXT.gridTitle);
-    this.text(x, '9 SKELETAL FACIAL PATTERNS', W / 2, 150, { size: 56, weight: 700, alpha: gt, spacing: 1.5 });
-    this.text(x, 'SAGITTAL × VERTICAL', W / 2, 218, { size: 26, weight: 600, color: C.accent, alpha: gt, spacing: 9 });
+    this.text(x, '9 SKELETAL FACIAL PATTERNS', W / 2, 296, { size: 52, weight: 700, alpha: gt, spacing: 1.5 });
+    this.text(x, 'SAGITTAL × VERTICAL', W / 2, 352, { size: 26, weight: 600, color: C.accent, alpha: gt, spacing: 9 });
     const ch = A(TEXT.colHead), rh = A(TEXT.rowHead);
     COLS.forEach((c, i) => this.text(x, c.label, GRID.colX[i], GRID.headerY, { size: 38, weight: 700, alpha: ch, spacing: 2 }));
     if (ch > 0) {
@@ -165,8 +168,8 @@ export class Film {
       this.text(x, r.label, 60, y, { size: 30, weight: 600, alpha: rh, spacing: 6, align: 'left' });
     });
     if (st.skulls.length === 9) this.drawGridCeph(x, t, st);
-    this.text(x, 'Schematic representation of skeletal relationships', W / 2, 1738, { size: 27, weight: 500, alpha: A(TEXT.footnote) * 0.85 });
-    this.text(x, 'Skull: Z-Anatomy / BodyParts3D © DBCLS · CC BY-SA 4.0', W / 2, 1782, { size: 20, weight: 400, alpha: A(TEXT.attribution) * 0.5 });
+    this.text(x, 'Schematic representation of skeletal relationships', W / 2, 1770, { size: 27, weight: 500, alpha: A(TEXT.footnote) * 0.85 });
+    this.text(x, 'Skull: Z-Anatomy / BodyParts3D © DBCLS · CC BY-SA 4.0', W / 2, 1812, { size: 20, weight: 400, alpha: A(TEXT.attribution) * 0.5 });
   }
 
   drawSingleCeph(x, t, d) {

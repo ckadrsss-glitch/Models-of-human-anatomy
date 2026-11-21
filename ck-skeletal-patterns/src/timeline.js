@@ -35,9 +35,9 @@ export const ROWS = [{ label: 'HYPODIVERGENT', v: -1 }, { label: 'NORMODIVERGENT
 export const GRID = {
   k: 1.56,                         // px per mm in the matrix
   colX: [192, 540, 888],           // cell centres (px)
-  rowLabelY: [418, 828, 1238],
-  rowY: [624, 1034, 1444],         // skull centres (px)
-  headerY: 336,
+  rowLabelY: [500, 896, 1292],
+  rowY: [698, 1094, 1490],         // skull centres (px)
+  headerY: 424,
 };
 
 // ---------------------------------------------------------------- single-skull morph schedule
@@ -50,10 +50,10 @@ export const T_GRID0 = 21.0, T_GRID1 = 24.6;
 function camera(t) {
   if (t < T_GRID0) {
     const u = ramp(t, 5.0, 6.4);
-    return { k: lerp(3.9, 4.3, u), cz: 0, cy: lerp(43.6, 6, u) };
+    return { k: lerp(3.9, 4.3, u), cz: 0, cy: lerp(36, -4, u) };
   }
   const u = ramp(t, T_GRID0, T_GRID1 - 0.6);
-  return { k: lerp(4.3, GRID.k, u), cz: 0, cy: lerp(6, 0, u) };
+  return { k: lerp(4.3, GRID.k, u), cz: 0, cy: lerp(-4, 0, u) };
 }
 
 export function cellWorld(c, r) {

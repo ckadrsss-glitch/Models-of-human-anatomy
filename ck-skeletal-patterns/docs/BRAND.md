@@ -1,35 +1,39 @@
-# Бренд-стандарт CK BIOMECHANICS (для всех роликов)
+# CK BIOMECHANICS — brand elements used in this film
 
-Эталонная реализация — `src/brand.js` (чистый Canvas 2D, без зависимостей). Предпросмотр: `brand.html`.
-Экспорт ассетов: `node tools/brand_export.cjs`.
+All elements come from previous CK films; nothing new was invented.
 
-| Ассет | Файл |
+| Element | Source | Implementation |
+|---|---|---|
+| **Permanent top caption** `CK ORTHODONTIC` | measured on a frame of a previous film, `assets/brand/source/reference_frame_ck_orthodontic.png` | `drawCaption()` in `src/brand.js` |
+| **Background** | same reference frame, reconstructed without the subject | `assets/brand/ck_background_original_1080x1920.png` (`tools/fit_background.py`) |
+| **Outro + logo** | CK BIOMECHANICS brand kit of the previous project (`ck-occlusion-breathing`, commit f23ea62) | `drawOutro()` / `drawLogo()` in `src/brand.js`, unchanged |
+
+## 1. Top caption
+
+* Text `CK ORTHODONTIC`, white `#eef2f7`, centred.
+* Font: Inter Medium (`assets/fonts/Inter-Medium.otf`, SIL OFL) — closest open match to the
+  reference typeface; cap height 19 px (font size 26.4 px), tracking 8.3 px, baseline y = 211.6 px
+  on the 1080 × 1920 frame (= measured position, size and width of the reference: x 365–714 px,
+  cap band y 192–212 px).
+* On screen for the entire main animation (fades in with the first 0.6 s, dissolves with the outro).
+* The film title «9 SKELETAL FACIAL PATTERNS» is placed separately below it.
+
+## 2. Background
+
+Reconstructed from the reference frame: the background pixels (subject, caption and subtitle
+masked out) are fitted with a smooth left/right-symmetric polynomial per colour channel;
+rms error 0.6–0.9 of one 8-bit level. Dark at the top, glow in the lower half of the frame, soft side
+vignette. Used unchanged for the whole film, as the WebGL background (sRGB, not tone-mapped) and
+in the outro, so it never changes between scenes.
+
+## 3. Outro (last 3 s — identical to previous films)
+
+| Time in outro | Action |
 |---|---|
-| Фирменный фон 1080×1920 | `assets/brand/ck_background_1080x1920.png` |
-| Логотип на прозрачном фоне | `assets/brand/ck_logo_transparent.png` |
-| Универсальная концовка 3 с (1080×1920, 30 fps, без звука) | `export/CK_BIOMECHANICS_outro_3s.mp4` |
+| 0.0–0.9 s | 3D content, lines and captions dissolve; background unchanged |
+| 0.55–1.35 s | circle with **CK** fades in |
+| 1.15–1.95 s | **BIOMECHANICS** (one word) fades in below the circle |
+| 1.95–3.0 s | static final frame |
 
-## 1. Фон
-
-* Глубокий тёмно-синий, близкий к чёрному: радиальный градиент `#0a1730` (центр) → `#06101f` → `#02060d` (края).
-* Едва заметное холодное голубое свечение позади модели: `rgba(70,150,255,0.10)`, центр на 46 % высоты кадра.
-* Одинаков во всём ролике: в Three.js он подаётся как sRGB-текстура `scene.background` (без тонмаппинга), поэтому пиксели совпадают с 2D-фоном концовки. Никаких виньеток, затемнений и смены фона на переходах.
-* Лёгкий дизеринг против полос (бандинга) после сжатия H.264.
-
-## 2. Логотип
-
-* По центру — круг (обводка бирюзовая `#2de2d0`), внутри — **CK** (белый, Montserrat 700).
-* Непосредственно под кругом — **BIOMECHANICS** (одно слово, заглавные, белый, Montserrat 600, разрядка).
-* Все элементы на одной вертикальной оси. Без слоганов, дополнительных слов и декора.
-* В ролике не используются отдельно стоящие буквы CK без круга.
-
-## 3. Концовка (последние 3 с)
-
-| Время внутри концовки | Действие |
-|---|---|
-| 0.0–0.9 с | основная 3D-модель и надписи плавно растворяются; фон неизменен |
-| 0.55–1.35 с | мягко проявляются круг с CK |
-| 1.15–1.95 с | проявляется BIOMECHANICS |
-| 1.95–3.0 с | статичный финальный кадр |
-
-Без вращения, вспышек и масштабирования. Подключение в любом проекте: нарисовать свой кадр, затем `drawOutro(ctx, secondsIntoOutro)`.
+Logo: turquoise circle `#2de2d0` with white **CK** (Montserrat 700), **BIOMECHANICS** below
+(Montserrat 600, tracking), one vertical axis, original proportions. No rotation, flashes or scaling.

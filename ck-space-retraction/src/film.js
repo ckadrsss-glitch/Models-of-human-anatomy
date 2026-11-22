@@ -8,9 +8,9 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { BRAND, backgroundCanvas, drawLogo } from './brand.js';
-import { DURATION, FPS, OUTRO_T0, SUBS, SCHEDULE, VIS, TEXT, cameraAt, clamp01, smooth, lerp, ramp, win, easeOut } from './timeline.js';
-import { buildModel, poseAt, startPose, progress, apply, V } from './model.js';
-import { KEYWORDS, KW, SYNC, keywordState, focusLevel, activeStem } from './kinetic.js';
+import { DURATION, FPS, OUTRO_T0, SUBS, SCHEDULE, VIS, TEXT, IPR_MM, storyAt, cameraAt, clamp01, smooth, lerp, ramp, win, easeOut } from './timeline.js';
+import { buildModel, poseAt, startPose, apply, V } from './model.js';
+import { KEYWORDS, KW, SYNC, keywordState, kickerState, noteState, focusLevel, activeStem } from './kinetic.js';
 
 const W = BRAND.width, H = BRAND.height;
 const F = BRAND.font;
@@ -28,8 +28,8 @@ const DEG = Math.PI / 180;
 //   A — Original Dark: brand background unchanged; refined enamel, lighting and typography.
 //   B — Enhanced Dark: + subtle radial illumination behind the model, stronger cyan rim, a little more contrast.
 export const LOOKS = {
-  A: { glow: 0, rim: 2.6, rim2: 1.4, rimColor: 0x9fd0ff, exposure: 1.0, edge: 0.16 },
-  B: { glow: 1, rim: 3.9, rim2: 2.2, rimColor: 0x8fe4ff, exposure: 1.06, edge: 0.24 },
+  A: { glow: 0, rim: 2.6, rim2: 1.4, rimColor: 0x9fd0ff, exposure: 1.0, edge: 0.16, key: 2.5, front: 0.45, env: 0.55 },
+  B: { glow: 1, rim: 3.9, rim2: 2.2, rimColor: 0x8fe4ff, exposure: 1.12, edge: 0.22, key: 3.0, front: 0.95, env: 0.68 },
 };
 
 /** brand background, optionally with a very soft radial light behind the model (variant B) */
@@ -41,12 +41,13 @@ function lookBackground(look) {
   const x = c.getContext('2d');
   x.drawImage(backgroundCanvas(), 0, 0);
   const g = x.createRadialGradient(W * 0.5, H * 0.43, 0, W * 0.5, H * 0.43, W * 0.78);
-  g.addColorStop(0, 'rgba(16,42,64,0.95)');      // #102A40
-  g.addColorStop(0.5, 'rgba(16,42,64,0.35)');
+  // V4: central region ≈ 15 % brighter than V2 (measured on the frame centre), edges unchanged
+  g.addColorStop(0, 'rgba(21,52,78,0.97)');      // between #102A40 and the cyan accent, low saturation
+  g.addColorStop(0.5, 'rgba(18,46,70,0.40)');
   g.addColorStop(1, 'rgba(16,42,64,0)');
   x.fillStyle = g; x.fillRect(0, 0, W, H);
   const g2 = x.createRadialGradient(W * 0.5, H * 0.43, 0, W * 0.5, H * 0.43, W * 0.42);
-  g2.addColorStop(0, 'rgba(88,223,255,0.06)'); g2.addColorStop(1, 'rgba(88,223,255,0)');
+  g2.addColorStop(0, 'rgba(88,223,255,0.075)'); g2.addColorStop(1, 'rgba(88,223,255,0)');
   x.fillStyle = g2; x.fillRect(0, 0, W, H);
   _bgB = c; return c;
 }
@@ -159,15 +160,16 @@ function toothMaterial() {
   const m = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.42, metalness: 0, clearcoat: 0.55, clearcoatRoughness: 0.32,
     sheen: 0.35, sheenRoughness: 0.5, sheenColor: new THREE.Color('#cfe3ff'), envMapIntensity: 0.6 });
   const u = { uTint: { value: new THREE.Color(COL.red) }, uTintAmt: { value: 0 }, uGlow: { value: new THREE.Color(COL.cyan) }, uGlowAmt: { value: 0 },
-    uTipY: { value: -1e3 }, uEdge: { value: 0.16 } };
+    uTipY: { value: -1e3 }, uEdge: { value: 0.16 }, uDim: { value: 0 },
+    uIprN: { value: new THREE.Vector3(1, 0, 0) }, uIprPlane: { value: 1e3 }, uIprAmt: { value: 0 } };
   m.userData.u = u;
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float aAO; attribute float aEnamel; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw; varying float vLy;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvAO = aAO; vEn = aEnamel; vLy = position.y; vVw = (modelMatrix*vec4(position,1.0)).xyz; vNw = normalize(mat3(modelMatrix)*normal);');
+      .replace('#include <common>', '#include <common>\nattribute float aAO; attribute float aEnamel; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw; varying float vLy;\nuniform vec3 uIprN; uniform float uIprPlane; uniform float uIprAmt; varying float vIpr;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvIpr = 0.0; if (uIprAmt > 0.0) { float dI = dot(transformed, uIprN) - uIprPlane; vIpr = uIprAmt * aEnamel * smoothstep(-0.3, 0.02, dI); if (dI > 0.0) transformed -= uIprN * dI; }\nvAO = aAO; vEn = aEnamel; vLy = position.y; vVw = (modelMatrix*vec4(position,1.0)).xyz; vNw = normalize(mat3(modelMatrix)*normal);');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 uTint; uniform float uTintAmt; uniform vec3 uGlow; uniform float uGlowAmt; uniform float uTipY; uniform float uEdge; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw; varying float vLy;')
+      .replace('#include <common>', '#include <common>\nuniform vec3 uTint; uniform float uTintAmt; uniform vec3 uGlow; uniform float uGlowAmt; uniform float uTipY; uniform float uEdge; uniform float uDim; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw; varying float vLy; varying float vIpr;')
       .replace('#include <color_fragment>', `#include <color_fragment>
         vec3 enamel = vec3(0.94, 0.92, 0.88);
         vec3 dentine = vec3(0.86, 0.76, 0.58);
@@ -179,7 +181,9 @@ function toothMaterial() {
         // contour definition: slightly darker at grazing angles → clearer silhouettes and interproximal boundaries
         float frC = pow(1.0 - abs(dot(normalize(vNw), normalize(cameraPosition - vVw))), 3.0);
         diffuseColor.rgb *= 1.0 - uEdge * frC;
-        diffuseColor.rgb = mix(diffuseColor.rgb, uTint, uTintAmt * 0.42);`)
+        diffuseColor.rgb = mix(diffuseColor.rgb, uTint, uTintAmt * 0.42);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.55, 0.88, 1.0), vIpr * 0.55);   // reduced proximal enamel
+        diffuseColor.rgb *= 1.0 - 0.24 * uDim;                                          // secondary structures step back`)
       .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(0.6, 0.27, vEn);')
       .replace('#include <aomap_fragment>', `#include <aomap_fragment>
         { float ao = mix(1.0, pow(clamp(vAO*1.05+0.05,0.0,1.0), 1.4), mix(0.75, 0.18, vEn));
@@ -188,7 +192,8 @@ function toothMaterial() {
         { float fr = pow(1.0 - abs(dot(normalize(vNw), normalize(cameraPosition - vVw))), 2.0);
           totalEmissiveRadiance += vec3(0.62, 0.70, 0.78) * 0.07 * vEn * pow(fr, 1.5);   // light scattering in the enamel
           totalEmissiveRadiance += uTint * uTintAmt * (0.10 + 0.9*fr);
-          totalEmissiveRadiance += uGlow * uGlowAmt * (0.05 + 0.8*fr); }`);
+          totalEmissiveRadiance += uGlow * uGlowAmt * (0.05 + 0.8*fr);
+          totalEmissiveRadiance += vec3(0.35, 0.87, 1.0) * vIpr * 0.25; }`);
   };
   m.customProgramCacheKey = () => 'ck-tooth';
   return m;
@@ -237,15 +242,16 @@ export class Film {
     sc.background = bg;
     const pm = new THREE.PMREMGenerator(r);
     sc.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
-    sc.environmentIntensity = 0.55;
+    sc.environmentIntensity = this.look.env;
 
     // camera + camera-relative soft studio lighting (same look from every angle)
     const cam = this.camera = new THREE.PerspectiveCamera(30, W / H, 5, 3000);
     sc.add(cam);
-    const key = new THREE.DirectionalLight(0xfff3e6, 2.5); key.position.set(-120, 200, 220); cam.add(key); key.target = cam;
+    const key = new THREE.DirectionalLight(0xfff3e6, this.look.key); key.position.set(-120, 200, 220); cam.add(key); key.target = cam;
     const fill = new THREE.DirectionalLight(0xdfe8ff, 1.1); fill.position.set(220, -40, 160); cam.add(fill); fill.target = cam;
     const rim = new THREE.DirectionalLight(this.look.rimColor, this.look.rim); rim.position.set(140, 160, -260); cam.add(rim); rim.target = cam;
     const rim2 = new THREE.DirectionalLight(0x8fc4ff, this.look.rim2); rim2.position.set(-200, -40, -220); cam.add(rim2); rim2.target = cam;
+    const front = new THREE.DirectionalLight(0xffffff, this.look.front); front.position.set(0, 40, 300); cam.add(front); front.target = cam;   // soft frontal light on the enamel
     sc.add(new THREE.HemisphereLight(0xdfe8ff, 0x141018, 0.25));
 
     const { hdr, geos } = await loadDentition();
@@ -271,13 +277,14 @@ export class Film {
         if (d > best1) { best1 = d; mesP = p; }
         if (d < best2) { best2 = d; disP = p; }
       }
-      return { th, mesh, mat, ghost, gmat, mesP, disP, M: new THREE.Matrix4(), pose: null };
+      mat.userData.u.uIprN.value.set(...th.md);
+      return { th, mesh, mat, ghost, gmat, mesP, disP, mesMax: V.dot(V.sub(mesP, th.cr), th.md), M: new THREE.Matrix4(), pose: null };
     });
     this.tByFdi = Object.fromEntries(this.teeth.map((o) => [o.th.fdi, o]));
     this.toothIndex = Object.fromEntries(hdr.meshes.filter((m) => m.fdi).map((m, i) => [m.fdi, i]));
 
     // translucent alveolar bone (follows the teeth near the roots: remodelling) and gingiva
-    this.boneMat = tissueMaterial({ color: '#d9cdb8', rim: '#b5e6ff', base: 0.06, rimA: 0.5, skinned: true, cropY: 23, cropSoft: 8, light: 0.55 });
+    this.boneMat = tissueMaterial({ color: '#dfd4c0', rim: '#b5e6ff', base: 0.075, rimA: 0.58, skinned: true, cropY: 23, cropSoft: 8, light: 0.55 });
     this.bone = new THREE.Mesh(geos.maxilla, this.boneMat); this.bone.renderOrder = 4; sc.add(this.bone);
     this.gumMat = tissueMaterial({ color: '#d4777f', rim: '#ffc7c9', base: 0.5, rimA: 0.4, skinned: true, light: 0.8, aoAlpha: true });
     this.gum = new THREE.Mesh(geos.gingiva, this.gumMat); this.gum.renderOrder = 3; sc.add(this.gum);
@@ -299,12 +306,19 @@ export class Film {
       // start-pose separation of the contact points (reference for "extra" space)
       const sA = startPose(A.th), sB = startPose(B.th);
       const L0 = V.dot(V.sub(apply(sA, A.disP), apply(sB, B.mesP)), V.norm(V.add(A.th.md, B.th.md)));
-      this.gaps.push({ m, mat, A, B, L0, q });
+      this.gaps.push({ m, mat, A, B, L0, q, kind: 'std' });
+    }
+    // 02: extraction space between the canine and the second premolar (first premolar removed)
+    for (const q of ['1', '2']) {
+      const mat = gapMaterial();
+      const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat); m.renderOrder = 7; m.visible = false; sc.add(m);
+      this.gaps.push({ m, mat, A: this.tByFdi[q + '3'], B: this.tByFdi[q + '5'], L0: 0.25, q, kind: 'ext' });
     }
 
     await Promise.all([document.fonts.load(`800 60px ${F}`), document.fonts.load(`700 40px ${F}`), document.fonts.load(`600 30px ${F}`),
       document.fonts.load(`600 30px ${F}`, 'ЗУБЫ'), document.fonts.load(`800 60px ${F}`, 'ЗУБЫ')]);
-    for (const t of [0.5, 6.5, 20, 28.5, 36, 46, 51]) this.renderTime(t);   // compile all programs once
+    for (const t of [0.5, 6.5, 20, 28.5, 40, 48, 53]) this.renderTime(t);   // compile all programs once
+    this.buildCards();
   }
 
   // ------------------------------------------------------------------ frame
@@ -313,59 +327,105 @@ export class Film {
   renderTime(t) {
     t = Math.min(Math.max(t, 0), DURATION - 1e-6);
     this.t = t;
+    const st = this.story = storyAt(t);
     this.applyCamera(t);
-    const P = progress(t);
-    const vRed = VIS.redFront(t);
-    const ghostP = VIS.ghostPost(t), ghostA = VIS.ghostAnt(t), ghostAll = VIS.ghostAll(t);
+    this.renderScene(t, st);
+    const x = this.ctx;
+    x.globalAlpha = 1;
+    // soft dips between demonstrations through the identical background (no see-through artefacts)
+    if (st.layer < 0.999) x.drawImage(this.bgCanvas, 0, 0);
+    if (st.layer > 0.001) { x.globalAlpha = st.layer; x.drawImage(this.renderer.domElement, 0, 0); x.globalAlpha = 1; }
+    this.dim = 1 - 0.6 * focusLevel(t);      // secondary labels step back while a keyword is shown
+    this.drawOverlay(x, t, st);
+    this.drawKeywords(x, t);
+    if (this.subtitles) this.drawSubtitle(x, t);
+    if (t >= OUTRO_T0) outro(x, t - OUTRO_T0, this.bgCanvas);
+    return this.out;
+  }
+
+  /** attention per tooth at time t: glow (cyan / gold), red tint, dim of secondary teeth */
+  attention(th, t, st) {
+    const S = SCHEDULE, k = th.k, ant = k <= 3;
+    let glow = 0, gold = 0, red = 0, dim = 0;
+    if (st.scen === 'start' || st.scen === 'dist') {
+      if (ant) { red = VIS.redFront(t); glow = 0.8 * VIS.cyanFront(t) + 0.5 * focusLevel(t, 'anterior'); }
+      if (st.scen === 'dist') {
+        if (k >= 4) { const [a, b] = S.dist[k]; glow = Math.max(win(t, a - 0.2, b + 0.35, 0.3, 0.5), 0.6 * focusLevel(t, 'posterior')); }
+        else dim = 0.7 * win(t, 13.0, 21.0, 0.4, 0.6);
+      }
+    } else if (st.scen === 'ext') {
+      if (k === 4) red = 0.85 * win(t, S.ext.highlight - 0.05, S.ext.remove[1], 0.3, 0.3);
+      if (ant) glow = 0.75 * win(t, S.ext.retr[0] - 0.3, S.ext.retr[1] + 0.5, 0.5, 0.6);
+      if (k >= 5) { gold = 0.6 * TEXT.anchorage(t); dim = 0.4 * win(t, S.ext.retr[0] - 0.3, 35.6, 0.5, 0.4) * (1 - TEXT.anchorage(t)); }
+    } else if (st.scen === 'ipr') {
+      if (th.fdi === '11' || th.fdi === '21') glow = 0.35 * win(t, 37.1, 46.0, 0.5, 0.5) + 0.3 * focusLevel(t, 'ipr');
+      else dim = win(t, 36.2, 46.2, 0.5, 0.4);
+    } else {
+      if (ant) glow = 0.75 * win(t, S.retr[0] - 0.3, S.retr[1] + 0.5, 0.5, 0.7) + 0.4 * focusLevel(t, 'control');
+      else dim = 0.5 * win(t, S.retr[0] - 0.3, 56.8, 0.5, 0.5);
+    }
+    return { glow: Math.min(1, glow), gold, red, dim };
+  }
+
+  /** 3D state of the scene at time t (teeth, tissues, markers) and the WebGL render */
+  renderScene(t, st) {
+    const P = st.P;
+    const ghostP = VIS.ghostPost(t), ghostA = VIS.ghostAnt(t);
     const _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _cr = new THREE.Vector3(), _pv = new THREE.Vector3();
     this.teeth.forEach((o, i) => {
       const th = o.th, pose = o.pose = poseAt(th, t, P);
+      const extracted = st.scen === 'ext' && th.k === 4;
       _q.setFromAxisAngle(new THREE.Vector3(...pose.axis), pose.angle);
       _cr.set(...th.cr); _pv.set(...pose.pivot);
       _p.copy(_cr).sub(_pv).applyQuaternion(_q).add(_pv).add(new THREE.Vector3(...pose.T));
       o.mesh.position.copy(_p); o.mesh.quaternion.copy(_q);
       o.mesh.updateMatrix();
-      // final-world → current-world transform for skinned tissue
+      // final-world → current-world transform for skinned tissue (the socket stays where the tooth was)
       o.M.copy(o.mesh.matrix).multiply(new THREE.Matrix4().makeTranslation(-th.cr[0], -th.cr[1], -th.cr[2]));
       this.boneMat.uniforms.uTooth.value[i].copy(o.M);
       this.gumMat.uniforms.uTooth.value[i].copy(o.M);
-      // highlights
-      const ant = th.k <= 3;
-      o.mat.userData.u.uTintAmt.value = ant ? vRed : 0;
-      let glow = 0;
-      if (th.k >= 4) { const [a, b] = SCHEDULE.dist[th.k]; glow = win(t, a - 0.2, b + 0.35, 0.35, 0.6); }
-      else glow = 0.75 * win(t, SCHEDULE.retr[0] - 0.3, SCHEDULE.retr[1] + 0.4, 0.6, 0.8);
-      // keyword emphasis (HEAR → READ → SEE): soft glow on the teeth the narration talks about
-      const kwGlow = th.k >= 4 ? Math.max(focusLevel(t, 'posterior'), 0) : Math.max(focusLevel(t, 'anterior'), focusLevel(t, 'control'));
-      const kwAnchor = th.k >= 4 ? focusLevel(t, 'anchor') : 0;
-      o.mat.userData.u.uGlow.value.set(kwAnchor > 0.01 ? COL.gold : COL.cyan);
-      o.mat.userData.u.uGlowAmt.value = Math.max(glow * 0.55, kwGlow * 0.6, kwAnchor * 0.55);
+      // 02: schematic removal of the illustrative premolar (moves occlusally and fades)
+      const vis = extracted ? 1 - st.removed : 1;
+      if (extracted) { o.mesh.position.y -= 4 * st.lift; o.mesh.updateMatrix(); }
+      o.mesh.visible = vis > 0.004;
+      o.mat.transparent = vis < 0.999; o.mat.opacity = vis; o.mat.depthWrite = vis > 0.5;
+      // 03: proximal enamel reduction on 11 | 21 (flat cut at the contact)
+      const ipr = (th.fdi === '11' || th.fdi === '21') && st.scen === 'ipr' ? st.ipr : 0;
+      o.mat.userData.u.uIprAmt.value = ipr > 0 ? Math.max(ipr, 0.001) : 0;
+      o.mat.userData.u.uIprPlane.value = o.mesMax - IPR_MM * ipr;
+      // attention
+      const at = this.attention(th, t, st);
+      o.mat.userData.u.uTintAmt.value = at.red;
+      o.mat.userData.u.uGlow.value.set(at.gold > at.glow ? COL.gold : COL.cyan);
+      o.mat.userData.u.uGlowAmt.value = Math.max(at.glow * 0.58, at.gold * 0.55);
+      o.mat.userData.u.uDim.value = at.dim;
       // ghost of the start position
-      const ga = th.k >= 4 ? ghostP : ghostA;
-      const gAll = ghostAll;
+      const ga = (st.scen === 'dist' && th.k >= 4) ? ghostP : ((st.scen === 'ext' || st.scen === 'retr') && th.k <= 3 ? ghostA : 0);
       const sp = startPose(th);
       const gq = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(...sp.axis), sp.angle);
       const gp = new THREE.Vector3(...th.cr).sub(new THREE.Vector3(...sp.pivot)).applyQuaternion(gq).add(new THREE.Vector3(...sp.pivot)).add(new THREE.Vector3(...sp.T));
       o.ghost.position.copy(gp); o.ghost.quaternion.copy(gq);
-      // show the ghost only once the tooth has left its start position
       const moved = Math.min(1, Math.hypot(...V.sub(apply(pose, th.crown), apply(sp, th.crown))) / 0.6);
-      const gAlpha = Math.max(ga * moved, gAll * 1.25);
+      const gAlpha = ga * moved;
       o.gmat.uniforms.uAlpha.value = gAlpha;
-      o.gmat.uniforms.uColor.value.set(gAll > ga * moved ? '#ff6b5e' : '#8fdcff');
+      o.gmat.uniforms.uColor.value.set('#8fdcff');
       o.ghost.visible = gAlpha > 0.004;
     });
 
     // tissues
-    const skinA = VIS.skin(t), lowA = VIS.lower(t);
-    this.skinMat.uniforms.uAlpha.value = skinA; this.skin.visible = skinA > 0.003;
+    const lowA = VIS.lower(t);
+    this.skin.visible = false;
     this.mandMat.uniforms.uAlpha.value = lowA; this.mand.visible = lowA > 0.003;
     this.lowMat.opacity = lowA; this.low.visible = lowA > 0.003; this.lowMat.depthWrite = lowA > 0.98;
     this.gumMat.uniforms.uAlpha.value = VIS.gingiva(t) / 0.62;
     this.boneMat.uniforms.uAlpha.value = VIS.bone(t);
 
     // space markers
-    const gv = VIS.gaps(t);
+    const gStd = (st.scen === 'dist' || st.scen === 'retr') ? VIS.gaps(t) : 0;
+    const gExt = st.scen === 'ext' ? VIS.extGap(t) * smooth((st.removed - 0.5) / 0.4) : 0;
     for (const g of this.gaps) {
+      const gv = g.kind === 'ext' ? gExt : gStd;
+      if (gv <= 0.003) { g.m.visible = false; continue; }
       const pa = apply(g.A.pose, g.A.disP), pb = apply(g.B.pose, g.B.mesP);
       const dir = V.norm(V.add(g.A.th.md, g.B.th.md));
       const L = V.dot(V.sub(pa, pb), dir), extra = L - g.L0;
@@ -378,23 +438,25 @@ export class Film {
       g.m.position.set(mid[0], crownY + 0.6, mid[2]);
       const xAxis = new THREE.Vector3(...dir), yAxis = new THREE.Vector3(0, 1, 0), zAxis = new THREE.Vector3().crossVectors(xAxis, yAxis).normalize();
       g.m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis));
-      const hgt = 6.8, dep = g.A.th.k >= 5 ? 9.5 : 8.2;
+      const hgt = 6.8, dep = g.A.th.k >= 5 ? 9.5 : 8.6;
       g.m.scale.set(len, hgt, dep);
       g.mat.uniforms.uSize.value.set(len, hgt, dep);
       g.mat.uniforms.uAlpha.value = Math.min(1, a * (1 + 0.9 * focusLevel(t, 'gaps')));
       g.center = [mid[0], crownY + 0.6, mid[2]];
     }
-
     this.renderer.render(this.scene, this.camera);
-    const x = this.ctx;
-    x.globalAlpha = 1;
-    x.drawImage(this.renderer.domElement, 0, 0);
-    this.dim = 1 - 0.6 * focusLevel(t);      // secondary labels step back while a keyword is shown
-    this.drawOverlay(x, t, P);
-    this.drawKeywords(x, t);
-    if (this.subtitles) this.drawSubtitle(x, t);
-    if (t >= OUTRO_T0) outro(x, t - OUTRO_T0, this.bgCanvas);
-    return this.out;
+  }
+
+  /** 3D snapshots for the summary cards (rendered once, deterministic) */
+  buildCards() {
+    const spec = [[21.0, 'ДИСТАЛИЗАЦИЯ', '01', [540, 760]], [28.4, 'УДАЛЕНИЕ', '02', [540, 760]], [42.0, 'СЕПАРАЦИЯ · IPR', '03', [540, 900]]];
+    this.cards = spec.map(([t, label, num, c]) => {
+      const st = storyAt(t); this.applyCamera(t); this.renderScene(t, st);
+      const cv = document.createElement('canvas'); cv.width = 300; cv.height = 420;
+      const cw = 700, ch = 980;
+      cv.getContext('2d').drawImage(this.renderer.domElement, c[0] - cw / 2, c[1] - ch / 2, cw, ch, 0, 0, 300, 420);
+      return { cv, label, num };
+    });
   }
 
   applyCamera(t) {
@@ -503,71 +565,39 @@ export class Film {
   }
 
   // ------------------------------------------------------------------ overlay
-  drawOverlay(x, t, P) {
+  drawOverlay(x, t, st) {
     const M = this.model.byFdi;
+    const S = SCHEDULE;
 
-    // ---- scene 1: hook
-    const hk = TEXT.hook(t);
-    if (hk > 0) {
-      const pop = 1 + 0.06 * (1 - easeOut((t - 0.25) / 0.5));
-      const a1 = hk * (1 - smooth((t - 2.75) / 0.35));
-      const a2 = hk * smooth((t - 2.95) / 0.4);
-      x.save(); x.translate(W / 2, 340); x.scale(pop, pop);
-      this.text(x, 'ЗУБЫ', 0, -52, { size: 104, weight: 800, alpha: a1, spacing: 4, glow: 'rgba(255,90,78,0.4)' });
-      this.text(x, 'ВЫШЛИ ВПЕРЁД?', 0, 58, { size: 88, weight: 800, alpha: a1, spacing: 3, color: '#ffffff', glow: 'rgba(255,90,78,0.35)' });
-      x.restore();
-      const rise = (1 - easeOut((t - 2.95) / 0.5)) * 18;
-      this.text(x, 'ГДЕ ВЗЯТЬ МЕСТО', W / 2, 300 + rise, { size: 82, weight: 800, alpha: a2, spacing: 3 });
-      this.text(x, 'ДЛЯ РЕТРАКЦИИ?', W / 2, 398 + rise, { size: 82, weight: 800, alpha: a2, spacing: 3, color: COL.cyan, glow: 'rgba(88,223,255,0.35)' });
-    }
-    const ba = TEXT.backArrow(t);
-    if (ba > 0) {
-      const tip = this.proj(this.at('11', M['11'].tip));
-      const p = easeOut((t - 3.0) / 0.7);
-      const y = tip[1] + 6, x0 = tip[0] + 70, x1 = tip[0] - 250;
-      this.arrow(x, [x0, y], [x1, y], { color: COL.cyan, width: 12, head: 48, alpha: ba, progress: p });
-      this.text(x, 'НАЗАД', (x0 + x1) / 2 - 20, y + 66, { size: 40, weight: 700, alpha: ba * smooth((t - 3.5) / 0.4), spacing: 6, color: COL.cyan });
-    }
+    // ---- 01 hook: stylised horse-incisor comparison (≈ 0.9 s), then back to the human dentition
+    const hz = TEXT.horse(t);
+    if (hz > 0) this.drawHorse(x, hz, t);
 
-    // ---- scene 2: where does the space come from?
-    const ra = TEXT.retrArrows(t);
-    if (ra > 0) {
-      const p = clamp01((t - SYNC.problem) / 1.3);             // grows from «проблема»
-      const halt = t > SYNC.noSpace - 0.08;                    // stops on «пространство»: no space
-      const shake = halt ? Math.sin((t - SYNC.noSpace) * 40) * Math.exp(-(t - SYNC.noSpace) * 5) * 3 : 0;
-      for (const q of ['1', '2']) {
-        const c3 = this.proj(this.at(q + '3', M[q + '3'].crown));
-        const c4 = this.proj(this.at(q + '4', M[q + '4'].crown));
-        const a = c3, b = [c3[0] + (c4[0] - c3[0]) * 0.95, c3[1] + (c4[1] - c3[1]) * 0.95];
-        this.arrow(x, [a[0] + shake, a[1]], [b[0] + shake, b[1]], { color: halt ? COL.red : COL.cyan, width: 7, head: 26, alpha: ra, progress: easeOut(p) * 0.92 });
-      }
-      const c1 = this.proj(this.at('11', M['11'].tip)), c2 = this.proj(this.at('21', M['21'].tip));
-      const mid = [(c1[0] + c2[0]) / 2, (c1[1] + c2[1]) / 2 - 30];
-      this.arrow(x, [mid[0], mid[1] - 40], [mid[0], mid[1] + 110], { color: halt ? COL.red : COL.cyan, width: 8, head: 30, alpha: ra, progress: easeOut(p) * 0.9 });
+    // ---- 02 the real problem: planned retraction direction + where the space would be needed
+    const pr = TEXT.plannedRetr(t);
+    if (pr > 0) {
+      const c = V.mul(V.add(this.at('11', M['11'].tip), this.at('21', M['21'].tip)), 0.5);
+      const a = this.proj(V.add(c, [0, 0, 5])), b = this.proj(V.add(c, [0, 0, -11]));
+      this.arrow(x, a, b, { color: COL.cyan, width: 9, head: 34, alpha: pr * 0.72, progress: easeOut((t - 6.0) / 0.9) });
     }
-    const ns = TEXT.noSpace(t);
-    if (ns > 0) {
-      // barrier at the canine / first premolar contacts (conventional graphic, no collision)
+    const sz = TEXT.spaceZone(t);
+    if (sz > 0) {
+      const grow = easeOut((t - SYNC.space) / 0.8);
       for (const q of ['1', '2']) {
         const A = this.tByFdi[q + '3'], B = this.tByFdi[q + '4'];
-        const c = V.mul(V.add(apply(A.pose, A.disP), apply(B.pose, B.mesP)), 0.5);
-        const f = A.th.f;
-        const p0 = this.proj(V.add(c, V.mul(f, 7))), p1 = this.proj(V.add(c, V.mul(f, -7)));
-        x.save(); x.globalAlpha = ns; x.strokeStyle = COL.red; x.lineWidth = 6; x.setLineDash([14, 10]); x.lineCap = 'round';
-        x.shadowColor = COL.red; x.shadowBlur = 18; x.beginPath(); x.moveTo(...p0); x.lineTo(...p1); x.stroke(); x.restore();
+        const c = this.proj(V.mul(V.add(apply(A.pose, A.disP), apply(B.pose, B.mesP)), 0.5));
+        x.save(); x.globalAlpha = sz * 0.85; x.strokeStyle = COL.cyan; x.lineWidth = 4; x.setLineDash([10, 8]);
+        x.shadowColor = COL.cyan; x.shadowBlur = 18;
+        x.beginPath(); x.ellipse(c[0], c[1], 26 + 26 * grow, 40 + 18 * grow, 0, 0, Math.PI * 2); x.stroke();
+        x.globalAlpha = sz * 0.12 * grow; x.fillStyle = COL.cyan; x.fill(); x.restore();
       }
-      const pop = 1 + 0.18 * Math.exp(-Math.max(0, t - SYNC.noSpace) * 7);
-      x.save(); x.translate(W / 2, 1290); x.scale(pop, pop);
-      this.text(x, 'NO SPACE', 0, 0, { size: 104, weight: 800, alpha: ns, spacing: 8, color: COL.red, glow: 'rgba(255,90,78,0.7)' });
-      x.restore();
-      this.text(x, 'нет места для ретракции', W / 2, 1385, { size: 40, weight: 600, alpha: ns * smooth((t - SYNC.noSpace - 0.4) / 0.4), color: COL.dim, spacing: 1 });
     }
 
-    // ---- scene 3: sequential distalisation
+    // ---- 03 distalisation: per-tooth distal vectors, sequence, anatomical limit, before / after
     const da = TEXT.distArrows(t);
     if (da > 0) {
       for (const k of [7, 6, 5, 4]) {
-        const [a, b] = SCHEDULE.dist[k];
+        const [a, b] = S.dist[k];
         const w = win(t, a - 0.15, b + 0.25, 0.3, 0.4);
         if (w <= 0) continue;
         for (const q of ['1', '2']) {
@@ -578,85 +608,153 @@ export class Film {
           this.arrow(x, s0, s1, { color: COL.cyan, width: 6, head: 22, alpha: da * w, progress: easeOut((t - a + 0.15) / 0.6) });
         }
       }
-      // step indicator 7 → 6 → 5 → 4
-      const keys = [7, 6, 5, 4];
-      const y = 1250, gap = 160, x0 = W / 2 - gap * 1.5;
+    }
+    const sp = TEXT.stepper(t);
+    if (sp > 0) {
+      const keys = [7, 6, 5, 4], y = 1250, gap = 160, x0 = W / 2 - gap * 1.5;
       keys.forEach((k, i) => {
-        const [a, b] = SCHEDULE.dist[k];
-        const active = win(t, a - 0.1, b + 0.1, 0.25, 0.25), done = t > b ? 1 : 0;
-        const px = x0 + i * gap;
-        x.save(); x.globalAlpha = da * this.dim;
-        x.strokeStyle = active > 0.5 ? COL.cyan : done ? 'rgba(79,216,255,0.75)' : 'rgba(185,200,228,0.35)';
+        const [a, b] = S.dist[k];
+        const active = win(t, a - 0.1, b + 0.1, 0.25, 0.25), done = t > b ? 1 : 0, px = x0 + i * gap;
+        x.save(); x.globalAlpha = sp * this.dim;
+        x.strokeStyle = active > 0.5 ? COL.cyan : done ? 'rgba(88,223,255,0.75)' : 'rgba(169,193,210,0.4)';
         x.lineWidth = 4; x.beginPath(); x.arc(px, y, 44, 0, Math.PI * 2); x.stroke();
-        if (active > 0.01) { x.globalAlpha = da * active * 0.9; x.fillStyle = COL.cyan; x.shadowColor = COL.cyan; x.shadowBlur = 24; x.beginPath(); x.arc(px, y, 44, 0, Math.PI * 2); x.fill(); }
+        if (active > 0.01) { x.globalAlpha = sp * active * 0.9 * this.dim; x.fillStyle = COL.cyan; x.shadowColor = COL.cyan; x.shadowBlur = 24; x.beginPath(); x.arc(px, y, 44, 0, Math.PI * 2); x.fill(); }
         x.restore();
-        this.text(x, String(k), px, y + 2, { size: 46, weight: 800, alpha: da * this.dim, color: active > 0.5 ? '#03101f' : done ? COL.cyan : COL.dim, shadow: false });
-        if (i < 3) this.text(x, '→', px + gap / 2, y, { size: 34, weight: 700, alpha: da * 0.6 * this.dim, color: COL.dim, shadow: false });
+        this.text(x, String(k), px, y + 2, { size: 46, weight: 800, alpha: sp * this.dim, color: active > 0.5 ? '#03101f' : done ? COL.cyan : COL.dim, shadow: false });
+        if (i < 3) this.text(x, '→', px + gap / 2, y, { size: 34, weight: 700, alpha: sp * 0.6 * this.dim, color: COL.dim, shadow: false });
       });
-      this.text(x, 'вторые моляры → первые моляры → премоляры', W / 2, y + 86, { size: 32, weight: 600, alpha: da * 0.9 * this.dim, color: COL.dim });
-      this.text(x, 'схема · план лечения всегда индивидуален', W / 2, y + 136, { size: 28, weight: 500, alpha: da * 0.75 * this.dim * smooth((t - 15.0) / 0.6), color: COL.dim });
+      this.text(x, 'схема · последовательность и объём — по плану лечения', W / 2, y + 86, { size: 28, weight: 500, alpha: sp * 0.85 * this.dim, color: COL.dim });
     }
     const tb = TEXT.tuberosity(t);
     if (tb > 0) {
-      // conventional limit behind the second molars: maxillary tuberosity (anatomical limit of distalisation)
       for (const q of ['1', '2']) {
         const th = M[q + '7'];
-        const pts = [];
-        const back = (th.bmax[2] - th.bmin[2]) / 2 + 2.5;
+        const back = (th.bmax[2] - th.bmin[2]) / 2 + 2.5, pts = [];
         for (let s = -1; s <= 1.001; s += 0.1) pts.push(this.proj(V.add(V.add(th.crown, V.mul(th.md, -back)), V.mul(th.f, s * 7.5))));
-        x.save(); x.globalAlpha = tb * 0.8; x.strokeStyle = COL.gold; x.lineWidth = 4; x.setLineDash([10, 10]); x.lineCap = 'round';
+        x.save(); x.globalAlpha = tb * 0.85; x.strokeStyle = COL.gold; x.lineWidth = 4; x.setLineDash([10, 10]); x.lineCap = 'round';
         x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(...p) : x.moveTo(...p))); x.stroke(); x.restore();
       }
-      // label in the empty palatal area between the two limits
       const l1 = this.proj(V.add(M['17'].crown, V.mul(M['17'].md, -6))), l2 = this.proj(V.add(M['27'].crown, V.mul(M['27'].md, -6)));
-      this.text(x, 'граница бугра', (l1[0] + l2[0]) / 2, (l1[1] + l2[1]) / 2 - 10, { size: 32, weight: 600, alpha: tb * 0.9 * this.dim, color: COL.gold, align: 'center' });
+      this.text(x, 'анатомическая граница', (l1[0] + l2[0]) / 2, (l1[1] + l2[1]) / 2 - 10, { size: 32, weight: 600, alpha: tb * 0.95 * this.dim, color: COL.gold });
     }
-    const sc = TEXT.spaceCreated(t);
-    if (sc > 0) {
-      const pop = 1 + 0.1 * Math.exp(-Math.max(0, t - SYNC.place) * 6);
-      x.save(); x.translate(W / 2, 330); x.scale(pop, pop);
-      this.text(x, 'SPACE CREATED', 0, 0, { size: 92, weight: 800, alpha: sc, spacing: 6, color: COL.cyan, glow: 'rgba(79,216,255,0.75)' });
-      x.restore();
-      // pointer to the space on the visible (right) side
-      const A = this.tByFdi['13'], B = this.tByFdi['14'];
-      const c = V.mul(V.add(apply(A.pose, A.disP), apply(B.pose, B.mesP)), 0.5);
-      const p = this.proj(V.add(c, V.mul(A.th.f, 3)));
-      x.save(); x.globalAlpha = sc * (0.6 + 0.4 * Math.sin(t * 5)); x.strokeStyle = COL.cyan; x.lineWidth = 4; x.shadowColor = COL.cyan; x.shadowBlur = 20;
-      x.beginPath(); x.arc(p[0], p[1], 64, 0, Math.PI * 2); x.stroke(); x.restore();
+    const ba = TEXT.beforeAfter(t);
+    if (ba > 0) {
+      x.save(); x.globalAlpha = ba; x.strokeStyle = '#8fdcff'; x.lineWidth = 3; x.setLineDash([6, 6]);
+      x.beginPath(); x.roundRect(W / 2 - 330, 1236, 46, 30, 8); x.stroke(); x.restore();
+      this.text(x, 'контур — исходное положение', W / 2 - 270, 1252, { size: 32, weight: 600, alpha: ba, color: COL.dim, align: 'left' });
+      x.save(); x.globalAlpha = ba * 0.9; x.fillStyle = COL.cyan; x.beginPath(); x.roundRect(W / 2 - 330, 1296, 46, 30, 8); x.fill(); x.restore();
+      this.text(x, 'созданное пространство', W / 2 - 270, 1312, { size: 32, weight: 600, alpha: ba, color: COL.dim, align: 'left' });
     }
 
-    // ---- scene 4: retraction of the anterior segment
+    // ---- 04 extraction: canine retraction vectors into the space, anchorage control
+    if (st.scen === 'ext') {
+      const rw = win(t, S.ext.retr[0] - 0.2, 35.5, 0.4, 0.5);
+      if (rw > 0) for (const q of ['1', '2']) {
+        const c3 = M[q + '3'], cc = this.at(q + '3', c3.crown);
+        const s0 = this.proj(V.add(cc, V.mul(c3.f, 8))), s1 = this.proj(V.add(V.add(cc, V.mul(c3.f, 8)), V.mul(c3.md, -6)));
+        this.arrow(x, s0, s1, { color: COL.cyan, width: 6, head: 22, alpha: rw * 0.95, progress: easeOut((t - S.ext.retr[0]) / 0.8) });
+      }
+      const an = TEXT.anchorage(t);
+      if (an > 0) {
+        const m6 = M['16'], c6 = this.at('16', m6.crown);
+        const a0 = this.proj(V.add(V.add(c6, V.mul(m6.f, 9)), V.mul(m6.md, -2))), a1 = this.proj(V.add(V.add(c6, V.mul(m6.f, 9)), V.mul(m6.md, 5)));
+        this.arrow(x, a0, a1, { color: COL.gold, width: 6, head: 22, alpha: an * 0.95 });
+        this.tag(x, 'КОНТРОЛЬ ОПОРЫ', W / 2, 1260, { color: COL.gold, alpha: an, size: 34 });
+        this.text(x, 'пространство закрывается постепенно', W / 2, 1330, { size: 30, weight: 600, alpha: an * 0.9, color: COL.dim });
+      }
+    }
+
+    // ---- 05 IPR: magnified contact, small space with a measurement-style indicator (no number)
+    if (st.scen === 'ipr') {
+      const c11 = this.tByFdi['11'], c21 = this.tByFdi['21'];
+      const pa = apply(c11.pose, V.sub(c11.mesP, V.mul(c11.th.md, IPR_MM * st.ipr)));
+      const pb = apply(c21.pose, V.sub(c21.mesP, V.mul(c21.th.md, IPR_MM * st.ipr)));
+      const A = this.proj(pa), B = this.proj(pb), mid = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2];
+      const ring = win(t, 37.0, 41.0, 0.5, 0.6);
+      if (ring > 0) { x.save(); x.globalAlpha = ring * 0.8; x.strokeStyle = COL.cyan; x.lineWidth = 3; x.setLineDash([8, 8]); x.beginPath(); x.arc(mid[0], mid[1], 130, 0, Math.PI * 2); x.stroke(); x.restore(); }
+      const ms = TEXT.measure(t);
+      if (ms > 0) {
+        const y = Math.max(A[1], B[1]) + 150, g = easeOut((t - SYNC.little) / 0.5);
+        x.save(); x.globalAlpha = ms; x.strokeStyle = COL.cyan; x.fillStyle = COL.cyan; x.lineWidth = 3; x.shadowColor = COL.cyan; x.shadowBlur = 14;
+        x.setLineDash([5, 6]);
+        x.beginPath(); x.moveTo(A[0], A[1] + 20); x.lineTo(A[0], y + 16); x.moveTo(B[0], B[1] + 20); x.lineTo(B[0], y + 16); x.stroke();
+        x.setLineDash([]);
+        const half = (B[0] - A[0]) / 2 * g, cx = mid[0];
+        x.beginPath(); x.moveTo(cx - half, y); x.lineTo(cx + half, y); x.stroke();
+        for (const [px, d] of [[cx - half, 1], [cx + half, -1]]) { x.beginPath(); x.moveTo(px, y); x.lineTo(px + 12 * d, y - 8); x.lineTo(px + 12 * d, y + 8); x.closePath(); x.fill(); }
+        x.restore();
+        this.text(x, 'немного места', mid[0], y + 60, { size: 34, weight: 700, alpha: ms * g, color: COL.cyan });
+        this.text(x, 'не заменяет удаление при выраженном дефиците места', W / 2, 330, { size: 32, weight: 600, alpha: ms * smooth((t - 42.6) / 0.5) * this.dim, color: COL.dim });
+      }
+    }
+
+    // ---- 06 conclusion: three methods summary, then controlled anterior retraction
+    const cd = TEXT.cards(t);
+    if (cd > 0 && this.cards) this.drawCards(x, t, cd);
     const rv = TEXT.retrVec(t);
     if (rv > 0) {
-      const run = win(t, SCHEDULE.retr[0] - 0.4, SCHEDULE.retr[1] + 0.2, 0.5, 0.6);
-      const th = M['11'];
-      const tip = this.proj(this.at('11', th.tip));
-      const apex = this.proj(this.at('11', th.apex));
-      const sc_ = this.camScale();
-      // crown moves more, apex less: controlled movement (root position monitored)
-      const fc = focusLevel(t, 'control');
-      this.arrow(x, [tip[0] + 30, tip[1] - 18], [tip[0] - 4.6 * sc_ - 30, tip[1] - 18], { color: COL.cyan, width: 8 + 4 * fc, head: 30 + 8 * fc, alpha: rv * run, progress: easeOut((t - 31.4) / 0.9) });
-      this.arrow(x, [apex[0] + 22, apex[1]], [apex[0] - 1.2 * sc_ - 22, apex[1]], { color: COL.accent, width: 5 + 4 * fc, head: 20 + 8 * fc, alpha: rv * run * Math.max(0.95, fc), progress: easeOut((t - 32.0) / 0.9) });
+      const run = win(t, S.retr[0] - 0.4, S.retr[1] + 0.3, 0.5, 0.6);
+      const th = M['11'], tip = this.proj(this.at('11', th.tip)), apex = this.proj(this.at('11', th.apex));
+      const sc_ = this.camScale(), fc = focusLevel(t, 'control');
+      this.arrow(x, [tip[0] + 30, tip[1] - 18], [tip[0] - 4.6 * sc_ - 30, tip[1] - 18], { color: COL.cyan, width: 8 + 4 * fc, head: 30 + 8 * fc, alpha: rv * run, progress: easeOut((t - S.retr[0]) / 0.9) });
+      this.arrow(x, [apex[0] + 22, apex[1]], [apex[0] - 1.2 * sc_ - 22, apex[1]], { color: COL.accent, width: 5 + 4 * fc, head: 20 + 8 * fc, alpha: rv * run * Math.max(0.95, fc), progress: easeOut((t - S.retr[0] - 0.4) / 0.9) });
       this.text(x, 'коронка', tip[0] - 2.3 * sc_, tip[1] + 40, { size: 34, weight: 600, alpha: rv * run * this.dim, color: COL.cyan });
       this.text(x, 'корень', apex[0] - 0.6 * sc_, apex[1] - 40, { size: 34, weight: 600, alpha: rv * run * this.dim, color: COL.accent });
-      // canine: distal vector into the space
-      const c3 = M['13'];
-      const cc = this.at('13', c3.crown);
-      const s0 = this.proj(V.add(cc, V.mul(c3.f, 8))), s1 = this.proj(V.add(V.add(cc, V.mul(c3.f, 8)), V.mul(c3.md, -6)));
-      this.arrow(x, s0, s1, { color: COL.cyan, width: 6, head: 22, alpha: rv * run * 0.9, progress: easeOut((t - 31.8) / 0.9) });
     }
+    const dc = TEXT.disclaimer(t);
+    if (dc > 0) this.text(x, 'схема · результат у каждого пациента индивидуален', W / 2, 1330, { size: 30, weight: 600, alpha: dc, color: COL.dim });
+  }
 
-    // ---- scene 5: biomechanics
-    const bio = TEXT.bio(t);
-    if (bio > 0) this.drawBiomechanics(x, t, bio);
+  drawCards(x, t, a) {
+    const xs = [W / 2 - 330, W / 2, W / 2 + 330], y0 = 640;
+    this.cards.forEach((c, i) => {
+      const e = smooth((t - (46.7 + i * 0.3)) / 0.45) * a, rise = (1 - easeOut((t - (46.7 + i * 0.3)) / 0.6)) * 30;
+      if (e <= 0.003) return;
+      const cx = xs[i], cy = y0 + rise, w = 300, h = 420;
+      x.save(); x.globalAlpha = e;
+      x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 30;
+      x.beginPath(); x.roundRect(cx - w / 2, cy, w, h, 22); x.fillStyle = '#071522'; x.fill(); x.shadowBlur = 0;
+      x.save(); x.clip(); x.drawImage(c.cv, cx - w / 2, cy, w, h); x.restore();
+      x.strokeStyle = 'rgba(88,223,255,0.55)'; x.lineWidth = 2.5; x.stroke();
+      x.restore();
+      this.text(x, c.num, cx - w / 2 + 22, cy + 34, { size: 30, weight: 800, alpha: e, color: COL.cyan, align: 'left' });
+      this.text(x, c.label, cx, cy + h + 44, { size: i === 2 ? 28 : 30, weight: 700, alpha: e, color: '#ffffff' });
+    });
+  }
 
-    // ---- scene 6: comparison
-    const cp = TEXT.compare(t);
-    if (cp > 0) {
-      this.tag(x, 'ДО', W / 2 - 130, 1330, { color: COL.red, alpha: cp, size: 38, fg: '#ffffff' });
-      this.tag(x, 'ПОСЛЕ', W / 2 + 110, 1330, { color: '#f3efe6', alpha: cp, size: 38, fg: '#03101f' });
-      this.text(x, 'все зубы сохранены', W / 2, 1415, { size: 36, weight: 600, alpha: cp * smooth((t - 49.9) / 0.5), color: COL.dim, spacing: 1 });
+  /** stylised, clearly non-human line drawing of a horse head with prominent incisors (hook comparison) */
+  drawHorse(x, a, t) {
+    const s = 1.35, ox = W / 2 - 300 * s, oy = 640;
+    const pop = 0.97 + 0.03 * easeOut((t - 3.0) / 0.3);
+    x.save(); x.globalAlpha = a;
+    x.fillStyle = 'rgba(4,14,26,0.72)'; x.beginPath(); x.roundRect(W / 2 - 400, oy - 40, 800, 860, 40); x.fill();
+    x.translate(W / 2, oy + 400); x.scale(pop, pop); x.translate(-W / 2, -(oy + 400));
+    x.translate(ox, oy); x.scale(s, s);
+    x.lineJoin = 'round'; x.lineCap = 'round';
+    x.strokeStyle = '#e8f4ff'; x.lineWidth = 4 / s * 1.4; x.shadowColor = 'rgba(88,223,255,0.6)'; x.shadowBlur = 10;
+    x.beginPath();
+    x.moveTo(150, 70); x.bezierCurveTo(190, 40, 230, 60, 260, 90);
+    x.bezierCurveTo(330, 160, 420, 250, 480, 330);
+    x.bezierCurveTo(520, 380, 545, 405, 548, 432);
+    x.bezierCurveTo(550, 452, 540, 460, 528, 462);
+    x.moveTo(530, 494); x.bezierCurveTo(538, 508, 522, 526, 495, 528);
+    x.bezierCurveTo(430, 532, 360, 515, 300, 480);
+    x.bezierCurveTo(230, 440, 190, 420, 170, 380);
+    x.bezierCurveTo(150, 340, 140, 300, 120, 280);
+    x.moveTo(120, 280); x.bezierCurveTo(90, 360, 70, 450, 60, 600);
+    x.moveTo(150, 70); x.bezierCurveTo(110, 120, 70, 220, 20, 330);
+    x.moveTo(168, 78); x.lineTo(186, 12); x.lineTo(214, 70);                 // ear
+    x.stroke();
+    x.beginPath(); x.ellipse(275, 175, 13, 8, -0.3, 0, Math.PI * 2); x.stroke();     // eye
+    x.beginPath(); x.arc(512, 410, 9, 0.4, 4.2); x.stroke();                           // nostril
+    // prominent incisors (upper and lower), restrained red accent
+    x.shadowBlur = 0;
+    for (let i = 0; i < 4; i++) {
+      x.fillStyle = '#f4efe6'; x.strokeStyle = 'rgba(255,90,78,0.9)'; x.lineWidth = 2.2;
+      x.beginPath(); x.roundRect(472 + i * 15, 461, 13.5, 28, 3); x.fill(); x.stroke();
+      x.beginPath(); x.roundRect(468 + i * 15, 490, 13.5, 22, 3); x.fill(); x.stroke();
     }
+    x.restore();
   }
 
   /** approximate px per mm at the camera target */
@@ -747,27 +845,30 @@ export class Film {
       const a = this.proj(this.at('16', M['16'].crown)), b = this.proj(this.at('26', M['26'].crown));
       return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 40];
     }
-    if (k.place === 'anchor' && this.anchorPt) return [this.anchorPt[0] + 30, Math.min(1405, this.anchorPt[1] + 98)];
     if (k.place === 'low') return [W / 2, 1300];
-    return [W / 2, 330];
+    return [W / 2, k.kicker ? 370 : 330];
   }
 
   drawKeywords(x, t) {
     for (const k of KEYWORDS) {
-      const s = keywordState(k, t);
-      if (!s || s.alpha <= 0.003) continue;
+      const s = keywordState(k, t), sk = kickerState(k, t), sn = noteState(k, t);
+      if (!s && !sk && !sn) continue;
       const [cx0, cy0] = this.kwPlace(k);
-      const cx = cx0 + k.dir[0] * s.drift, cy = cy0 + k.dir[1] * s.drift;
       const col = this.kwColor(k.color);
-      // 3D-linked guides (one focal point: keyword ↔ the structure it names)
+      // kicker (number or small lead word) above the keyword, enters on its own word
+      if (sk && sk.alpha > 0.003) this.text(x, k.kicker, cx0, cy0 - k.size * 0.95 - (1 - easeOut(sk.reveal)) * 14,
+        { size: Math.round(k.size * (k.kicker.length <= 2 ? 0.62 : 0.5)), weight: 800, alpha: sk.alpha, color: k.kicker.length <= 2 ? COL.cyan : '#ffffff', spacing: 6 });
+      if (sn && sn.alpha > 0.003) this.text(x, k.note, cx0, cy0 + k.size * 1.05, { size: Math.round(k.size * 0.42) + 6, weight: 700, alpha: sn.alpha, color: k.note === 'IPR' ? COL.cyan : COL.dim, spacing: 4 });
+      if (!s || s.alpha <= 0.003) continue;
+      const cx = cx0 + k.dir[0] * s.drift, cy = cy0 + k.dir[1] * s.drift;
+      const fill = k.from ? this.mixColor(this.kwColor(k.from), col, 1 - s.accent) : col;
       if (k.id === 'dist') this.distalGuides(x, s);
-      if (k.id === 'space') this.gapGuides(x, s, [cx, cy + k.size * 0.7]);
+      if (k.id === 'space' && this.story.scen !== 'start') this.gapGuides(x, s, [cx, cy + k.size * 0.7]);
       x.save();
       x.font = `800 ${k.size}px ${F}`;
       if ('letterSpacing' in x) x.letterSpacing = `${s.tracking.toFixed(1)}px`;
       const w = x.measureText(k.text).width, h = k.size * 1.25;
       x.translate(cx, cy); x.scale(s.scale, s.scale);
-      // directional reveal (wipe along the movement direction)
       x.beginPath();
       if (k.dir[0] < 0) x.rect(w / 2 + 20 - (w + 40) * s.reveal, -h, (w + 40) * s.reveal, h * 2);
       else if (k.dir[0] > 0) x.rect(-w / 2 - 20, -h, (w + 40) * s.reveal, h * 2);
@@ -775,20 +876,24 @@ export class Film {
       else x.rect(-w, h / 2 + 10 - (h + 20) * s.reveal, w * 2, (h + 20) * s.reveal);
       x.clip();
       x.textAlign = 'center'; x.textBaseline = 'middle';
-      // short motion-blur trail opposite to the movement (entrance only)
       for (let i = 3; i >= 1 && s.blur > 0.02; i--) {
-        x.globalAlpha = s.alpha * 0.16 * s.blur; x.fillStyle = col;
+        x.globalAlpha = s.alpha * 0.16 * s.blur; x.fillStyle = fill;
         x.fillText(k.text, -k.dir[0] * i * 9 * s.blur, -k.dir[1] * i * 9 * s.blur);
       }
       x.globalAlpha = s.alpha;
-      x.shadowColor = 'rgba(0,6,18,0.9)'; x.shadowBlur = 16; x.fillStyle = col; x.fillText(k.text, 0, 0);
-      if (k.color !== 'white') { x.globalCompositeOperation = 'lighter'; x.shadowColor = col; x.shadowBlur = 22; x.globalAlpha = s.alpha * 0.28 * (0.5 + 0.5 * s.pulse); x.fillText(k.text, 0, 0); }
+      x.shadowColor = 'rgba(0,6,18,0.9)'; x.shadowBlur = 16; x.fillStyle = fill; x.fillText(k.text, 0, 0);
+      if (k.color !== 'white' || k.from) { x.globalCompositeOperation = 'lighter'; x.shadowColor = fill; x.shadowBlur = 22; x.globalAlpha = s.alpha * 0.26 * Math.max(0.4, s.accent); x.fillText(k.text, 0, 0); }
       x.restore();
-      // thin scientific underline growing with the reveal
-      x.save(); x.globalAlpha = s.alpha * 0.85; x.strokeStyle = col; x.lineWidth = 3; x.lineCap = 'round';
+      x.save(); x.globalAlpha = s.alpha * 0.85; x.strokeStyle = fill; x.lineWidth = 3; x.lineCap = 'round';
       const uw = w * 0.42 * s.reveal * s.scale, uy = cy + k.size * 0.62;
       x.beginPath(); x.moveTo(cx - uw, uy); x.lineTo(cx + uw, uy); x.stroke(); x.restore();
     }
+  }
+
+  mixColor(a, b, u) {
+    const p = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+    const A = p(a), B = p(b);
+    return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * u)).join(',')})`;
   }
 
   guide(x, a, b, color, alpha) {

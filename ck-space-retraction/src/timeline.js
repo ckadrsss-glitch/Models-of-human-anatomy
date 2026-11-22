@@ -1,34 +1,33 @@
 // ============================================================================
-//  55-second timeline. Every value is a pure function of time t (s), so playback,
-//  scrubbing and frame-by-frame export always produce the same frame.
+//  V4 timeline (60 s). Every value is a pure function of time t (seconds), so
+//  playback, scrubbing and frame-by-frame export always give the same frame.
+//  Story: hook → the real problem → three ways to obtain space (01 distalisation,
+//  02 extraction when indicated, 03 IPR) → conclusion + controlled anterior
+//  retraction → CK BIOMECHANICS outro.
 // ============================================================================
-export const DURATION = 55;
+export const DURATION = 60;
 export const FPS = 30;
 export const OUTRO_T0 = DURATION - 3;          // brand-kit outro: exactly the last 3 s
 
 export const SCENES = [
-  { id: '01', name: 'Хук', t0: 0, t1: 5 },
-  { id: '02', name: 'Где взять место?', t0: 5, t1: 13 },
-  { id: '03', name: 'Дистализация', t0: 13, t1: 30 },
-  { id: '04', name: 'Ретракция фронта', t0: 30, t1: 43 },
-  { id: '05', name: 'Биомеханика', t0: 42.6, t1: 48.2 },
-  { id: '06', name: 'Финал', t0: 48.2, t1: 55 },
+  { id: '01', name: 'Хук', t0: 0, t1: 5.6 },
+  { id: '02', name: 'Проблема', t0: 5.6, t1: 11.6 },
+  { id: '03', name: 'Дистализация', t0: 11.6, t1: 24.4 },
+  { id: '04', name: 'Удаление', t0: 24.4, t1: 36.0 },
+  { id: '05', name: 'Сепарация', t0: 36.0, t1: 46.4 },
+  { id: '06', name: 'Вывод', t0: 46.4, t1: 57 },
+  { id: '07', name: 'Финал', t0: 57, t1: 60 },
 ];
 
 // Voice-over: ElevenLabs, voice «Принц Нури» (gJEfHTTiifXEDmO687lC), eleven_multilingual_v2, one take per line.
-// Lines 1, 2, 3, 6, 8, 9 — verbatim from the brief; 4, 5, 7 — short bridges that remove the 8–9 s silent
-// stretches during the distalisation and the retraction (viewer-retention).
-// `dur` = measured clip length (s), `chunks` = on-screen subtitle lines (timed by character share).
+// `speech` = end of the last word (Scribe), `chunks` = on-screen subtitle lines.
 export const VOICE = [
-  { file: 'assets/voice/nuri1.mp3', start: 0.3, dur: 2.82, speech: 2.54, text: 'Зубы вышли вперёд? А как вернуть их назад?', chunks: ['Зубы вышли вперёд?', 'А как вернуть их назад?'] },
-  { file: 'assets/voice/nuri2.mp3', start: 4.3, dur: 5.85, speech: 5.56, text: 'Казалось бы, просто переместить их назад. Но есть одна проблема. Для этого нужно пространство.', chunks: ['Казалось бы, просто переместить их назад.', 'Но есть одна проблема.', 'Для этого нужно пространство.'] },
-  { file: 'assets/voice/nuri3.mp3', start: 11.4, dur: 6.95, speech: 6.65, text: 'Один из вариантов — дистализация. Мы последовательно перемещаем боковые зубы назад, освобождая пространство для передних.', chunks: ['Один из вариантов — дистализация.', 'Мы последовательно перемещаем боковые зубы назад,', 'освобождая пространство для передних.'] },
-  { file: 'assets/voice/nuri4.mp3', start: 20.6, dur: 3.58, speech: 3.28, text: 'Каждый зуб идёт своей траекторией — не весь сегмент сразу.', chunks: ['Каждый зуб идёт своей траекторией —', 'не весь сегмент сразу.'] },
-  { file: 'assets/voice/nuri5.mp3', start: 26.6, dur: 2.51, speech: 2.4, text: 'И вот оно — место для передних зубов.', chunks: ['И вот оно — место для передних зубов.'] },
-  { file: 'assets/voice/nuri6.mp3', start: 30.0, dur: 4.0, speech: 3.7, text: 'Теперь созданное пространство можно использовать для ретракции фронтальной группы.', chunks: ['Теперь созданное пространство', 'можно использовать для ретракции фронтальной группы.'] },
-  { file: 'assets/voice/nuri7.mp3', start: 35.6, dur: 4.36, speech: 4.17, text: 'Коронки уходят назад, а корни и наклон резцов остаются под контролем.', chunks: ['Коронки уходят назад,', 'а корни и наклон резцов остаются под контролем.'] },
-  { file: 'assets/voice/nuri8.mp3', start: 42.6, dur: 3.89, speech: 3.59, text: 'Но важно не просто переместить коронки, а контролировать корни и опору.', chunks: ['Но важно не просто переместить коронки,', 'а контролировать корни и опору.'] },
-  { file: 'assets/voice/nuri9.mp3', start: 47.6, dur: 4.0, speech: 3.65, text: 'В ортодонтии главное — не просто двигать зубы, а понимать биомеханику.', chunks: ['В ортодонтии главное — не просто двигать зубы,', 'а понимать биомеханику.'] },
+  { file: 'assets/voice/v4_1.mp3', start: 0.25, dur: 3.60, speech: 3.58, text: 'Зубы вышли вперёд? Боишься, что улыбка станет как у лошади?', chunks: ['Зубы вышли вперёд?', 'Боишься, что улыбка станет как у лошади?'] },
+  { file: 'assets/voice/v4_2.mp3', start: 5.4, dur: 5.28, speech: 5.25, text: 'Чтобы вернуть передние зубы назад, сначала нужно создать пространство. Но где его взять?', chunks: ['Чтобы вернуть передние зубы назад,', 'сначала нужно создать пространство.', 'Но где его взять?'] },
+  { file: 'assets/voice/v4_3.mp3', start: 12.0, dur: 6.22, speech: 6.18, text: 'Первый способ — дистализация. Перемещаем боковые зубы назад, если позволяют анатомические условия.', chunks: ['Первый способ — дистализация.', 'Перемещаем боковые зубы назад,', 'если позволяют анатомические условия.'] },
+  { file: 'assets/voice/v4_4.mp3', start: 24.8, dur: 5.67, speech: 5.62, text: 'Второй — удаление зубов по показаниям. Полученное пространство можно использовать для ретракции.', chunks: ['Второй — удаление зубов по показаниям.', 'Полученное пространство', 'можно использовать для ретракции.'] },
+  { file: 'assets/voice/v4_5.mp3', start: 36.4, dur: 6.35, speech: 6.32, text: 'Третий — сепарация. Контролируемо уменьшаем эмаль между зубами и получаем немного дополнительного места.', chunks: ['Третий — сепарация.', 'Контролируемо уменьшаем эмаль между зубами', 'и получаем немного дополнительного места.'] },
+  { file: 'assets/voice/v4_6.mp3', start: 46.8, dur: 7.60, speech: 7.57, text: 'Какой способ выбрать — зависит от диагностики. Главное — создать необходимое пространство и контролировать движение зубов.', chunks: ['Какой способ выбрать — зависит от диагностики.', 'Главное — создать необходимое пространство', 'и контролировать движение зубов.'] },
 ];
 
 // Subtitle chunks [start, end, text]: each voice line split by character share, held 0.3 s after the speech
@@ -53,34 +52,77 @@ export const ramp = (t, a, b, ease = easeInOut) => ease((t - a) / (b - a));
 export const win = (t, a, b, fi = 0.5, fo = 0.5) => Math.min(smooth((t - a) / fi), 1 - smooth((t - (b - fo)) / fo));
 
 // ---------------------------------------------------------------- tooth-movement schedule
+// (word onsets in comments come from src/words.js; tools/qa.mjs checks them)
 export const SCHEDULE = {
-  // sequential distalisation: second molars → first molars → second premolars → first premolars
-  dist: { 7: [14.3, 17.0], 6: [17.1, 19.8], 5: [19.9, 22.6], 4: [22.7, 25.4] },
-  retr: [31.6, 41.2],            // en-masse retraction of the six anterior teeth
+  // 01 distalisation, sequential: second molars → first molars → second premolars → first premolars
+  // starts on «дистализация» (13.15 s)
+  dist: { 7: [13.15, 14.95], 6: [15.0, 16.8], 5: [16.85, 18.65], 4: [18.7, 20.5] },
+  // 02 extraction (illustrative premolar 14/24): highlight on «удаление» (25.69), removal after «по показаниям»,
+  // partial retraction into the space after «ретракции» (29.49) — the space is NOT closed instantly
+  ext: { highlight: 25.69, remove: [26.95, 27.75], retr: [29.5, 34.8] },
+  // 03 IPR on 11 | 21: enamel reduction on «уменьшаем эмаль» (38.95–39.73), indicator on «немного» (40.88)
+  ipr: { reduce: [38.6, 40.5], measure: 40.88 },
+  // conclusion: anterior retraction into the space created by distalisation
+  retr: [51.0, 55.6],
 };
+export const IPR_MM = 0.3;   // schematic proximal enamel reduction per surface (never shown as a number)
+
+/**
+ * Scenario at time t: tooth-movement progress P (for model.poseAt), which teeth are hidden,
+ * IPR amount, 3D layer alpha (soft dips between demonstrations) and the scenario id.
+ */
+export function storyAt(t) {
+  const S = SCHEDULE;
+  const zero = { dist: { 7: 0, 6: 0, 5: 0, 4: 0 }, retrT: 0, retrR: 0 };
+  const dist = (t0) => { const d = {}; for (const k of [7, 6, 5, 4]) d[k] = ramp(t0, S.dist[k][0], S.dist[k][1]); return d; };
+  const retrP = (u) => ({ retrT: easeInOut(u), retrR: easeInOut(Math.min(1, Math.max(0, u * 1.04 - 0.02))) });
+  let scen, P, removed = 0, lift = 0, ipr = 0;
+  if (t < 24.4) { scen = t < 11.6 ? 'start' : 'dist'; P = { ...zero, dist: dist(t) }; }
+  else if (t < 36.0) {
+    scen = 'ext';
+    const r = (t - S.ext.retr[0]) / (S.ext.retr[1] - S.ext.retr[0]);
+    P = { dist: zero.dist, ...retrP(clamp01(r)) };
+    removed = ramp(t, S.ext.remove[0], S.ext.remove[1], smooth);
+    lift = ramp(t, S.ext.remove[0], S.ext.remove[1], easeInOut);
+  } else if (t < 46.4) { scen = 'ipr'; P = zero; ipr = ramp(t, S.ipr.reduce[0], S.ipr.reduce[1]); }
+  else {
+    scen = t < 50.6 ? 'cards' : 'retr';
+    const r = (t - S.retr[0]) / (S.retr[1] - S.retr[0]);
+    P = { dist: { 7: 1, 6: 1, 5: 1, 4: 1 }, ...retrP(clamp01(r)) };
+  }
+  // 3D layer: dips between demonstrations (camera cuts happen inside the dips); cards = 2D summary
+  const dip = (a, b) => Math.min(1, Math.max(smooth((a - t) / 0.4), smooth((t - b) / 0.4)));
+  let layer = Math.min(dip(24.0, 24.8), dip(35.6, 36.4));
+  if (t >= 46.0 && t <= 51.0) layer = Math.max(1 - smooth((t - 46.0) / 0.4), smooth((t - 50.6) / 0.4));
+  layer *= 1 - 0.78 * win(t, 3.0, 3.95, 0.12, 0.18);          // the horse comparison takes over for ~0.9 s
+  return { scen, P, removed, lift, ipr, layer };
+}
 
 // ---------------------------------------------------------------- camera
-// Orbit camera around a target: az (deg, 0 = in front, −90 = patient's right side, face to screen right),
-// el (deg, −90 = from below = occlusal view of the upper arch, incisors at the top of the frame),
-// dist (mm), tgt (mm), fov (deg, vertical). Interpolation is done on these parameters → smooth orbits.
+// Orbit camera: az (deg, 0 = in front, −90 = patient's right, face to screen right), el (deg, −90 = occlusal
+// view of the upper arch from below), dist (mm), tgt (mm), fov (deg). Keys 0.01 s apart = cut (inside a dip).
 const K = (t, az, el, dist, tgt, fov = 30, ease = 'io') => ({ t, az, el, dist, tgt, fov, ease });
 export const CAMERA = [
-  K(0.0, -90, 4, 560, [0, -22, 22]),
-  K(1.0, -90, 4, 300, [0, -18, 20], 30, 'out'),       // sharp push-in in the first second
-  K(4.9, -88, 3, 246, [0, -12, 16], 30, 'lin'),
-  K(5.6, -88, 3, 246, [0, -12, 16]),
-  K(8.0, 0, -90, 262, [0, -8, -9]),                   // lateral → occlusal
-  K(13.0, 0, -90, 256, [0, -8, -9], 30, 'lin'),
-  K(14.0, 0, -90, 254, [0, -8, -9]),
-  K(25.5, 4, -90, 246, [0, -8, -9], 30, 'lin'),
-  K(27.6, -68, -16, 175, [-18, -3, 3]),               // 45° turn: buccal segment, space visible
-  K(30.0, -71, -15, 170, [-18, -3, 3], 30, 'lin'),
-  K(32.0, -90, -3, 180, [-11, 7, 8]),                  // lateral projection, anterior segment
-  K(41.5, -84, -5, 172, [-11, 7, 8], 30, 'lin'),
-  K(44.2, -90, 0, 140, [-4, 3, 10]),                   // biomechanics (sagittal)
-  K(48.7, -90, 0, 134, [-4, 3, 10], 30, 'lin'),
-  K(50.0, -90, -4, 210, [-6, 0, 2]),                  // comparison: profile, start (red) vs end
-  K(55.0, -86, -5, 250, [-6, 0, 2], 30, 'lin'),
+  K(0.0, -90, 4, 290, [0, -13, 18]),                    // first frame: protruded incisors, lateral
+  K(5.4, -86, 3, 222, [0, -10, 16], 30, 'lin'),         // slow approach towards the incisors
+  K(7.3, -38, -32, 248, [0, -6, 0]),                    // three-quarter view of the upper arch
+  K(9.5, -42, -32, 240, [0, -6, 0], 30, 'lin'),
+  K(11.2, -68, -26, 205, [-16, -5, -3]),                // towards the posterior segment
+  K(12.6, 0, -90, 246, [0, -8, -9]),                    // 01 occlusal view
+  K(20.5, 4, -90, 238, [0, -8, -9], 30, 'lin'),
+  K(22.8, -68, -16, 175, [-18, -3, 3]),                 // turn: the space in the buccal segment
+  K(24.39, -70, -15, 170, [-18, -3, 3], 30, 'lin'),
+  K(24.4, 0, -90, 240, [0, -8, -6], 30, 'lin'),         // cut (dip) → 02 occlusal
+  K(29.2, 0, -90, 236, [0, -8, -6], 30, 'lin'),
+  K(31.2, -64, -24, 188, [-15, -4, 3]),                 // retraction into the extraction space
+  K(35.99, -67, -22, 182, [-15, -4, 3], 30, 'lin'),
+  K(36.0, 0, -4, 128, [0, -2.5, 25], 30, 'lin'),         // cut (dip) → 03 macro of the 11 | 21 contact
+  K(40.5, 0, -4, 98, [0, -3.5, 25]),
+  K(46.39, 0, -4, 94, [0, -3.5, 25], 30, 'lin'),
+  K(46.4, -90, -3, 182, [-11, 7, 8], 30, 'lin'),        // (hidden behind the summary cards)
+  K(50.6, -90, -3, 182, [-11, 7, 8], 30, 'lin'),
+  K(57.0, -84, -5, 170, [-11, 7, 8], 30, 'lin'),        // conclusion: controlled anterior retraction
+  K(60.0, -84, -5, 168, [-11, 7, 8], 30, 'lin'),
 ];
 const EASE = { io: easeInOut, out: easeOut, lin: (x) => clamp01(x) };
 export function cameraAt(t) {
@@ -98,28 +140,30 @@ export function cameraAt(t) {
 
 // ---------------------------------------------------------------- visibility of layers (0…1)
 export const VIS = {
-  skin: (t) => 1 - ramp(t, 1.3, 3.2, smooth),                  // soft tissue becomes translucent, then disappears
-  lower: (t) => 1 - ramp(t, 5.4, 6.8, smooth),                 // lower jaw (hook only)
-  gingiva: (t) => 0.62 * (1 - 0.55 * win(t, 42.8, 48.6, 0.8, 0.8)),
-  bone: (t) => 1 + 1.1 * win(t, 30.5, 48.6, 1.0, 0.8),         // bone emphasis in scenes 4–5
-  redFront: (t) => win(t, 0.9, 12.6, 0.45, 0.9),               // on «вперёд?» (0.93 s)               // anterior teeth highlighted
-  ghostPost: (t) => win(t, 14.0, 27.6, 0.8, 1.0),              // start positions of 4–7
-  ghostAnt: (t) => win(t, 31.2, 43.2, 0.8, 0.8),               // start positions of 1–3
-  ghostAll: (t) => win(t, 49.1, OUTRO_T0 + 0.6, 0.8, 0.6),     // comparison
-  gaps: (t) => win(t, 14.4, 42.0, 0.5, 0.8),
-  cr: (t) => win(t, 44.5, 48.9, 0.4, 0.5),
+  skin: () => 0,                                               // the first frame shows the dentition directly
+  lower: (t) => 1 - ramp(t, 4.8, 6.2, smooth),                 // lower jaw: overjet in the hook
+  gingiva: (t) => 0.55 * (1 - 0.5 * win(t, 36.2, 46.2, 0.6, 0.6)),
+  bone: (t) => 1.15 + 0.9 * win(t, 50.8, 57.2, 0.8, 0.6),
+  redFront: (t) => win(t, 0.86, 6.6, 0.4, 0.8),                // on «вперёд?» (0.89 s), brief, then cyan
+  cyanFront: (t) => win(t, 6.2, 9.6, 0.5, 0.8),                // anterior segment highlighted (planned retraction)
+  ghostPost: (t) => win(t, 13.3, 24.1, 0.6, 0.6),              // start positions of 4–7 (before / after)
+  ghostAnt: (t) => Math.max(win(t, 29.8, 35.7, 0.6, 0.5), win(t, 51.2, 56.9, 0.6, 0.5)),
+  gaps: (t) => Math.max(win(t, 13.3, 24.2, 0.4, 0.5), win(t, 50.8, 56.8, 0.5, 0.5)),
+  extGap: (t) => win(t, 27.6, 35.7, 0.4, 0.5),
 };
 
-// ---------------------------------------------------------------- overlay text windows
+// ---------------------------------------------------------------- overlay windows
 export const TEXT = {
-  hook: (t) => win(t, 0.25, 5.3, 0.35, 0.5),
-  backArrow: (t) => win(t, 3.0, 5.4, 0.5, 0.5),
-  retrArrows: (t) => win(t, 7.6, 12.4, 0.4, 0.5),             // from «проблема» (7.73 s)
-  noSpace: (t) => win(t, 9.08, 12.4, 0.3, 0.5),               // on «пространство» (9.14 s)
-  spaceCreated: (t) => win(t, 27.38, 30.2, 0.4, 0.6),          // on «место» (27.44 s)
-  distArrows: (t) => win(t, 14.15, 25.6, 0.4, 0.4),            // after ДИСТАЛИЗАЦИЯ leaves
-  tuberosity: (t) => win(t, 15.0, 25.8, 0.8, 0.6),
-  retrVec: (t) => win(t, 31.4, 41.6, 0.6, 0.8),
-  bio: (t) => win(t, 44.5, 48.9, 0.4, 0.5),
-  compare: (t) => win(t, 49.3, OUTRO_T0 + 0.4, 0.6, 0.5),
+  horse: (t) => win(t, 3.0, 3.95, 0.12, 0.18),                 // «как у лошади» (2.87–3.58 s)
+  plannedRetr: (t) => win(t, 6.0, 11.4, 0.5, 0.5),             // planned direction of anterior retraction
+  spaceZone: (t) => win(t, 8.18, 11.4, 0.4, 0.5),              // on «пространство» (8.23 s)
+  distArrows: (t) => win(t, 13.1, 20.8, 0.3, 0.4),
+  stepper: (t) => win(t, 14.6, 21.0, 0.4, 0.4),
+  tuberosity: (t) => win(t, 16.7, 21.2, 0.5, 0.5),             // on «анатомические» (16.76 s)
+  beforeAfter: (t) => win(t, 21.0, 24.1, 0.5, 0.5),
+  anchorage: (t) => win(t, 31.0, 35.6, 0.5, 0.5),
+  measure: (t) => win(t, 40.82, 46.1, 0.35, 0.5),              // on «немного» (40.88 s)
+  cards: (t) => win(t, 46.6, 50.9, 0.4, 0.4),
+  retrVec: (t) => win(t, 51.0, 56.6, 0.5, 0.6),
+  disclaimer: (t) => win(t, 55.2, 57.1, 0.5, 0.4),
 };

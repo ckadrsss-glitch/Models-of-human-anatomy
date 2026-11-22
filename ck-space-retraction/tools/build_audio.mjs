@@ -16,7 +16,7 @@ let seed = 2026; const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fff
 const env = (t, a, b, fi, fo) => Math.max(0, Math.min(1, (t - a) / fi, (b - t) / fo));
 
 // pad: A minor add9 → F maj7 (space created) → C → A (outro)
-const chords = [[0, [110, 164.81, 220, 246.94, 329.63]], [26.5, [87.31, 130.81, 174.61, 220, 329.63]], [40, [65.41, 130.81, 196, 246.94, 329.63]], [OUTRO_T0, [110, 164.81, 220, 277.18, 329.63]]];
+const chords = [[0, [110, 164.81, 220, 246.94, 329.63]], [24.4, [87.31, 130.81, 174.61, 220, 329.63]], [36.0, [98, 146.83, 196, 246.94, 293.66]], [46.4, [65.41, 130.81, 196, 246.94, 329.63]], [OUTRO_T0, [110, 164.81, 220, 277.18, 329.63]]];
 const chordAt = (t) => {
   let i = 0; while (i < chords.length - 1 && t >= chords[i + 1][0]) i++;
   const a = chords[i][1], b = chords[Math.min(i + 1, chords.length - 1)][1];
@@ -56,16 +56,19 @@ function thud(t0, gain) {
     const s = Math.sin(2 * Math.PI * f * u) * e * gain; L[i] += s; R[i] += s;
   }
 }
-whoosh(0.0, 1.2, 0.9);                       // hook push-in
-[[5.7, 2.2, 0.45], [24.9, 2.4, 0.4], [30.1, 1.8, 0.4], [41.8, 2.2, 0.4], [48.0, 1.4, 0.35], [OUTRO_T0 - 0.2, 1.2, 0.35]].forEach((w) => whoosh(...w));
-tone(3.05, 392, 0.9, 0.05, 5);               // back arrow
-thud(SYNC.noSpace - 0.05, 0.32); tone(SYNC.noSpace, 155.56, 1.2, 0.05, 3);   // arrows stop · NO SPACE (on «пространство»)
-for (const k of [7, 6, 5, 4]) { const [, b] = SCHEDULE.dist[k]; tone(b - 0.05, 880 + (7 - k) * 110, 0.6, 0.03, 9); }
-tone(SYNC.place, 1318.5, 1.6, 0.04, 2.5); tone(SYNC.place + 0.03, 1760, 1.6, 0.03, 2.5); tone(SYNC.place + 0.06, 2093, 1.6, 0.02, 2.5); // SPACE CREATED
+whoosh(0.0, 1.0, 0.6);                       // first frame
+// scene transitions (camera moves / dips)
+[[5.5, 1.8, 0.4], [11.2, 1.6, 0.4], [23.9, 1.2, 0.45], [35.5, 1.2, 0.45], [46.0, 1.0, 0.35], [50.5, 1.0, 0.35], [OUTRO_T0 - 0.2, 1.2, 0.35]].forEach((w) => whoosh(...w));
+tone(SYNC.horse + 0.13, 330, 0.7, 0.035, 6);                        // horse comparison (soft)
+tone(SYNC.space, 1318.5, 1.4, 0.03, 2.8); tone(SYNC.space + 0.03, 1760, 1.4, 0.022, 2.8);   // space region
+for (const k of [7, 6, 5, 4]) { const [, b] = SCHEDULE.dist[k]; tone(b - 0.05, 880 + (7 - k) * 110, 0.6, 0.028, 9); }
+thud(SCHEDULE.ext.remove[0], 0.18);                                 // premolar removed (schematic)
+tone(SYNC.extSpace, 1174.7, 1.0, 0.026, 3.5);
+tone(SCHEDULE.ext.retr[1] - 0.1, 659.25, 0.9, 0.025, 4);
+tone(SYNC.little, 1567.98, 0.6, 0.03, 8);                           // IPR indicator
+[0, 0.3, 0.6].forEach((d) => tone(46.7 + d, 987.77 + d * 200, 0.4, 0.02, 10));   // summary cards
 tone(SCHEDULE.retr[1] - 0.1, 659.25, 1.0, 0.03, 4);
-[[SYNC.control2, 880], [SYNC.anchor + 0.8, 987.77], [SYNC.anchor + 1.2, 783.99], [SYNC.anchor + 1.75, 1046.5]].forEach(([t, f]) => tone(t, f, 0.5, 0.025, 10));
-// a very soft 'tick' under each keyword entrance (no new music)
-KEYWORDS.forEach((k) => tone(k.at - 0.04, 1567.98, 0.35, 0.012, 14));
+KEYWORDS.forEach((k) => tone(k.at - 0.04, 1567.98, 0.35, 0.012, 14));            // very soft tick under each keyword
 tone(OUTRO_T0 + 0.55, 440, 2.4, 0.05, 1.6); tone(OUTRO_T0 + 0.57, 659.25, 2.4, 0.04, 1.6); tone(OUTRO_T0 + 1.15, 880, 2, 0.035, 1.8);
 
 function wav(path, Lc, Rc) {

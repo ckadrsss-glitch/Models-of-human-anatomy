@@ -68,11 +68,21 @@ const t11 = model.byFdi['11'], s = startPose(t11);
 const dTip = apply(s, t11.tip).map((v, k) => v - t11.tip[k]), dApex = apply(s, t11.apex).map((v, k) => v - t11.apex[k]);
 console.log(`11 start vs final: incisal tip +${Math.hypot(...dTip).toFixed(2)} mm, apex +${Math.hypot(...dApex).toFixed(2)} mm, inclination ${(s.angle * 180 / Math.PI).toFixed(1)}°`);
 
-// audio-visual sync: overlay windows in src/timeline.js must start on the spoken words (src/words.js)
+// audio-visual sync: overlay windows / movements in src/timeline.js must start on the spoken words (src/words.js)
 const { SYNC, KEYWORDS } = await import('../src/kinetic.js');
-const { TEXT, VIS } = await import('../src/timeline.js');
-const firstOn = (fn) => { for (let t = 0; t < 55; t += 0.01) if (fn(t) > 0.001) return t; return NaN; };
-const checks = [['red accent «вперёд»', firstOn(VIS.redFront), SYNC.forward], ['NO SPACE «пространство»', firstOn(TEXT.noSpace), SYNC.noSpace], ['SPACE CREATED «место»', firstOn(TEXT.spaceCreated), SYNC.place], ['arrows «проблема»', firstOn(TEXT.retrArrows), SYNC.problem]];
-console.log('\naudio-visual sync (overlay start vs word onset):');
-for (const [n, a, w] of checks) console.log(`  ${n.padEnd(28)} ${a.toFixed(2)} s vs ${w.toFixed(2)} s  ${Math.abs(a - w) <= 0.15 ? 'ok' : '⚠ off by ' + (a - w).toFixed(2)}`);
-KEYWORDS.forEach((k) => console.log(`  keyword ${k.text.padEnd(14)} enters ${(k.at - 0.06).toFixed(2)} s (word ${k.at.toFixed(2)} s)`));
+const { TEXT, VIS, SCHEDULE: SC } = await import('../src/timeline.js');
+const firstOn = (fn) => { for (let t = 0; t < 60; t += 0.01) if (fn(t) > 0.001) return t; return NaN; };
+const checks = [
+  ['red accent «вперёд»', firstOn(VIS.redFront), SYNC.forward],
+  ['horse «как у лошади»', firstOn(TEXT.horse), SYNC.horse + 0.13],
+  ['space zone «пространство»', firstOn(TEXT.spaceZone), SYNC.space],
+  ['molars move «дистализация»', SC.dist[7][0], SYNC.distal],
+  ['limit «анатомические»', firstOn(TEXT.tuberosity), SYNC.anatomy],
+  ['premolar «удаление»', SC.ext.highlight, SYNC.extraction],
+  ['retraction «ретракции»', SC.ext.retr[0], SYNC.retraction],
+  ['enamel «уменьшаем»', SC.ipr.reduce[0], SYNC.enamel - 0.35],
+  ['indicator «немного»', firstOn(TEXT.measure), SYNC.little],
+];
+console.log('\naudio-visual sync (event start vs word onset):');
+for (const [n, a, w] of checks) console.log(`  ${n.padEnd(30)} ${a.toFixed(2)} s vs ${w.toFixed(2)} s  ${Math.abs(a - w) <= 0.15 ? 'ok' : '⚠ off by ' + (a - w).toFixed(2)}`);
+KEYWORDS.forEach((k) => console.log(`  keyword ${k.text.padEnd(14)} enters ${(k.at - 0.06).toFixed(2)} s (word ${k.at.toFixed(2)} s)${k.kicker ? ` · ${k.kicker} at ${k.kickerAt.toFixed(2)} s` : ''}`));

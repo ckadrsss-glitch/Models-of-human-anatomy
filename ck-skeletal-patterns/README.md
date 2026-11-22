@@ -1,6 +1,6 @@
 # CK BIOMECHANICS — 9 Skeletal Facial Patterns
 
-**Sagittal × Vertical + Jarabak analysis** · premium orthodontic 3D animation · 78 s · 9:16 (1080 × 1920) · 30 fps
+**Sagittal × Vertical** · premium orthodontic 3D animation · 40 s · 9:16 (1080 × 1920) · 30 fps
 
 Three.js / WebGL project that shows the illustrative 3 × 3 matrix of two independent diagnostic
 characteristics — sagittal skeletal relationship (Class I / II / III) and vertical pattern
@@ -8,7 +8,7 @@ characteristics — sagittal skeletal relationship (Class I / II / III) and vert
 
 | | |
 |---|---|
-| Final video | `export/CK_BIOMECHANICS_9_skeletal_patterns.mp4` (H.264 High + AAC, 1080×1920, 30 fps, 78 s) |
+| Final video | `export/CK_BIOMECHANICS_9_skeletal_patterns.mp4` (H.264 High + AAC, 1080×1920, 30 fps, 40 s) |
 | Live player | `index.html` (GitHub Pages: `…/Models-of-human-anatomy/ck-skeletal-patterns/`) |
 | Anatomy | Z-Anatomy / BodyParts3D skull, CC BY-SA 4.0 — see [docs/ASSETS.md](docs/ASSETS.md) |
 | Morphology model & QA | [docs/SCIENCE.md](docs/SCIENCE.md) |
@@ -22,8 +22,7 @@ characteristics — sagittal skeletal relationship (Class I / II / III) and vert
 | 00:05–00:13 | 02 Sagittal | Skull centres; *SAGITTAL RELATIONSHIP*: Class I → II → III by anatomical morphing; S–N, N–A, N–B tracing |
 | 00:13–00:21 | 03 Vertical | *VERTICAL PATTERN*: hypo → normo → hyperdivergent; mandibular plane (Go–Me) against S–N, lower-face-height bracket |
 | 00:21–00:37 | 04 Matrix | Camera pulls back, one skull becomes nine; 3 × 3 matrix (columns Class I/II/III, rows hypo/normo/hyper), static ≈ 12 s, S–N and Go–Me in every cell |
-| 00:37–01:15 | 05 Jarabak | Matrix collapses back into one skull (Class I · normodivergent); *JARABAK ANALYSIS*: Björk polygon N–S–Ar–Go–Me, saddle / articular / gonial angle (upper and lower parts by N–Go), sum of angles, posterior (S–Go) vs anterior (N–Me) face height with proportional bars; then live comparison hypo → hyper → normo |
-| 01:15–01:18 | 06 Outro | CK BIOMECHANICS brand-kit outro, unchanged (last 3 s, as in every film of the series): skulls dissolve over the unchanged background, CK circle, then BIOMECHANICS, hold |
+| 00:37–00:40 | 05 Outro | CK BIOMECHANICS brand-kit outro, unchanged (last 3 s, as in every film of the series): skulls dissolve over the unchanged background, CK circle, then BIOMECHANICS, hold |
 
 No numbers (angles, thresholds) are shown anywhere in the film.
 
@@ -43,7 +42,7 @@ scene buttons, sound toggle (licence-free procedural ambience, `assets/audio/amb
 ### Recording / export in the browser
 
 * **● Record WebM** — real-time recording of the 1080×1920 output canvas with `MediaRecorder`
-  (VP9/VP8, 16 Mbit/s). Playback restarts at 0 and stops at the end (78 s); the file is downloaded automatically.
+  (VP9/VP8, 16 Mbit/s). Playback restarts at 0 and stops at 40 s; the file is downloaded automatically.
   Keep the tab visible while recording (browsers throttle hidden tabs). The WebM is silent.
 * **⬇ Export MP4 (frame-accurate)** — renders every frame deterministically and encodes H.264 with
   WebCodecs + mp4-muxer, independent of the machine's speed (Chrome / Edge ≥ 113). Silent.
@@ -63,7 +62,7 @@ ffmpeg -i CK_BIOMECHANICS_9_skeletal_patterns.webm -i assets/audio/ambient.m4a \
 
 ```bash
 npm i -D playwright && npx playwright install chromium   # if Playwright is not installed
-node tools/render.cjs build/frames 3      # headless Chromium (SwiftShader WebGL) → 2340 JPEG frames
+node tools/render.cjs build/frames 3      # headless Chromium (SwiftShader WebGL) → 1200 JPEG frames
 node tools/build_audio.mjs                # regenerates assets/audio/ambient.m4a (optional)
 bash tools/encode.sh build/frames         # → export/CK_BIOMECHANICS_9_skeletal_patterns.mp4
 node tools/stills.cjs build/stills 3 9.5 15 30 37    # control stills at given seconds

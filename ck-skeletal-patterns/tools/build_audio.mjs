@@ -3,7 +3,7 @@
 // usage: node tools/build_audio.mjs   → build/ambient.wav → assets/audio/ambient.m4a (−16 LUFS)
 import fs from 'fs';
 import { execFileSync } from 'child_process';
-const SR = 48000, DUR = 78, N = SR * DUR;
+const SR = 48000, DUR = 40, N = SR * DUR;
 const L = new Float32Array(N), R = new Float32Array(N);
 let seed = 12345; const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * 2 - 1;
 const env = (t, a, b, fi, fo) => Math.max(0, Math.min(1, (t - a) / fi, (b - t) / fo));
@@ -11,9 +11,9 @@ const env = (t, a, b, fi, fo) => Math.max(0, Math.min(1, (t - a) / fi, (b - t) /
 const chordA = [110, 164.81, 220, 246.94, 329.63], chordB = [87.31, 130.81, 174.61, 220, 261.63];
 for (let i = 0; i < N; i++) {
   const t = i / SR;
-  const sw = (a, d) => 0.5 - 0.5 * Math.cos(Math.min(1, Math.max(0, (t - a) / d)) * Math.PI);
-  // chord A → B (vertical) → A (Jarabak intro) → B (comparison) → A (logo)
-  const w = sw(18, 6) * (1 - sw(37, 4)) + sw(55, 6) * (1 - sw(73, 3));
+  const m = 0.5 - 0.5 * Math.cos(Math.min(1, Math.max(0, (t - 18) / 6)) * Math.PI);       // crossfade to chord B
+  const m2 = 0.5 - 0.5 * Math.cos(Math.min(1, Math.max(0, (t - 35) / 3)) * Math.PI);      // back to A for the logo
+  const w = m * (1 - m2);
   const g = env(t, 0, DUR, 3, 3.5) * 0.06;
   let l = 0, r = 0;
   for (let k = 0; k < 5; k++) {
@@ -40,7 +40,7 @@ function whoosh(t0, d, gain) {
     const pan = u; L[i] += y2 * e * gain * (1 - pan * 0.6); R[i] += y2 * e * gain * (0.4 + pan * 0.6);
   }
 }
-[[4.6, 1.6, 0.55], [12.9, 1.4, 0.45], [20.8, 3.2, 0.7], [36.8, 2.8, 0.6], [62.8, 1.4, 0.45], [74.9, 1.6, 0.5]].forEach((w) => whoosh(...w));
+[[4.6, 1.6, 0.55], [12.9, 1.4, 0.45], [20.8, 3.2, 0.7], [36.9, 1.6, 0.5]].forEach((w) => whoosh(...w));
 // 4) soft ticks on morph keys (sine blip with fast decay)
 function tick(t0, f, gain) {
   for (let i = Math.floor(t0 * SR); i < Math.min(N, (t0 + 0.6) * SR); i++) {
@@ -51,10 +51,7 @@ function tick(t0, f, gain) {
 [7.6, 10.0, 12.6, 13.5, 16.0, 18.3].forEach((t) => tick(t, 880, 0.05));
 [6.3, 8.8, 11.5, 14.7, 17.1, 19.5].forEach((t) => tick(t, 1318.5, 0.04));
 tick(24.6, 659.25, 0.07); tick(24.62, 987.77, 0.05);
-[40.0, 44.6, 48.0, 51.4, 55.0, 58.6].forEach((t) => tick(t, 880, 0.045));
-[40.8, 41.6, 42.4, 43.2].forEach((t) => tick(t, 1318.5, 0.025));
-[64.2, 68.6, 73.2].forEach((t) => tick(t, 1318.5, 0.04));
-tick(75.7, 440, 0.08); tick(75.72, 659.25, 0.06); tick(76.3, 880, 0.05);
+tick(37.7, 440, 0.08); tick(37.72, 659.25, 0.06); tick(38.3, 880, 0.05);
 // write WAV
 const buf = Buffer.alloc(44 + N * 4);
 buf.write('RIFF', 0); buf.writeUInt32LE(36 + N * 4, 4); buf.write('WAVEfmt ', 8); buf.writeUInt32LE(16, 16);

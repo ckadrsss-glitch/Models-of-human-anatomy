@@ -38,11 +38,10 @@ export const LM = {            // landmarks on the undeformed (Class I, normodiv
   Me:  [77.7, -104.2],
   Go:  [13.0, -76.0],
   Co:  [7.8, -22.2],
-  Ar:  [3.8, -31.0],           // articulare (posterior condylar border × inferior cranial-base contour)
   U6:  [66.3, -69.0],          // mesial of upper first molar
   L6:  [66.2, -68.0],
 };
-const PART_OF = { S: 0, N: 0, ANS: 0, A: 0, U1: 2, L1: 3, B: 1, Pog: 1, Me: 1, Go: 1, Co: 1, Ar: 1, U6: 2, L6: 3 };
+const PART_OF = { S: 0, N: 0, ANS: 0, A: 0, U1: 2, L1: 3, B: 1, Pog: 1, Me: 1, Go: 1, Co: 1, U6: 2, L6: 3 };
 
 export const K = {
   occDir: [0.981, -0.196],     // functional occlusal plane direction (posterior → anterior)

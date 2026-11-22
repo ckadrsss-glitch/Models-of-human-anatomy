@@ -8,7 +8,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { loadSkullGeometry, createSkull } from './skull.js';
 import { landmarks, clearance } from './morph.js';
 import { BRAND, backgroundCanvas, drawOutro, drawCaption, loadBackground, CAPTION } from './brand.js';
-import { stateAt, TEXT, LINES, COLS, ROWS, GRID, OUTRO_T0, DURATION, FPS, JARABAK_STEPS, JAR, T_COL1 } from './timeline.js';
+import { stateAt, TEXT, LINES, COLS, ROWS, GRID, OUTRO_T0, DURATION, FPS } from './timeline.js';
 
 const W = BRAND.width, H = BRAND.height;
 const C = BRAND.colors;
@@ -150,8 +150,7 @@ export class Film {
       this.text(x, name, W / 2, 392, { size: 72, weight: 700, alpha: a, spacing: 3 });
       this.text(x, desc, W / 2, 1636, { size: 34, weight: 500, alpha: a * 0.9 });
     }
-    if (single && t < T_COL1) this.drawSingleCeph(x, t, single);
-    if (single && t >= T_COL1) this.drawJarabak(x, t, single);
+    if (single) this.drawSingleCeph(x, t, single);
 
     // ---- scene 4: matrix
     const gt = A(TEXT.gridTitle);
@@ -168,7 +167,7 @@ export class Film {
       if (rh > 0) { x.save(); x.globalAlpha = rh; x.fillStyle = C.accent; x.fillRect(40, y - 13, 5, 26); x.restore(); }
       this.text(x, r.label, 60, y, { size: 30, weight: 600, alpha: rh, spacing: 6, align: 'left' });
     });
-    if (st.skulls.length === 9 && t < 38) this.drawGridCeph(x, t, st);
+    if (st.skulls.length === 9) this.drawGridCeph(x, t, st);
     this.text(x, 'Schematic representation of skeletal relationships', W / 2, 1770, { size: 27, weight: 500, alpha: A(TEXT.footnote) * 0.85 });
     this.text(x, 'Skull: Z-Anatomy / BodyParts3D © DBCLS · CC BY-SA 4.0', W / 2, 1812, { size: 20, weight: 400, alpha: A(TEXT.attribution) * 0.5 });
   }
@@ -205,68 +204,6 @@ export class Film {
       this.line(x, [bx - 14, m[1]], [bx + 14, m[1]], { color: '#ffffff', width: 2.5, alpha: al * 0.8 });
       this.line(x, a, [bx - 18, a[1]], { color: '#ffffff', width: 1.5, alpha: al * 0.35, dash: [6, 8] });
       this.line(x, m, [bx - 18, m[1]], { color: '#ffffff', width: 1.5, alpha: al * 0.35, dash: [6, 8] });
-    }
-  }
-
-  arc(x, O, A, B, r, color, alpha) {
-    if (alpha <= 0.003) return;
-    const a1 = Math.atan2(A[1] - O[1], A[0] - O[0]), a2 = Math.atan2(B[1] - O[1], B[0] - O[0]);
-    let d = a2 - a1; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
-    x.save(); x.globalAlpha = alpha * 0.28; x.fillStyle = color;
-    x.beginPath(); x.moveTo(O[0], O[1]); x.arc(O[0], O[1], r, a1, a1 + d, d < 0); x.closePath(); x.fill();
-    x.globalAlpha = alpha; x.strokeStyle = color; x.lineWidth = 3.5;
-    x.beginPath(); x.arc(O[0], O[1], r, a1, a1 + d, d < 0); x.stroke(); x.restore();
-  }
-
-  // ---- Jarabak (Björk polygon) — schematic, no numeric values
-  drawJarabak(x, t, d) {
-    const C2 = { saddle: C.accent, articular: '#ffd28a', gonial: '#ff9a8a' };
-    const hd = JAR.header(t);
-    this.text(x, 'JARABAK ANALYSIS', W / 2, 300, { size: 30, weight: 600, color: C.accent, alpha: hd, spacing: 8 });
-    for (const [name, desc, a, b] of JARABAK_STEPS) {
-      const al = Math.min(1, Math.max(0, (t - a) / 0.5), Math.max(0, (b - t) / 0.45));
-      if (al <= 0) continue;
-      this.text(x, name, W / 2, 392, { size: name.length > 13 ? 70 : 84, weight: 700, alpha: al, spacing: 3 });
-      this.text(x, desc, W / 2, 1660, { size: 31, weight: 500, alpha: al * 0.9 });
-    }
-    const L = landmarks(d.s, d.v, clearance(d.s));
-    const P = (k) => this.proj(d, L[k]);
-    const pol = JAR.polygon(t);
-    // angles (under the polygon lines)
-    this.arc(x, P('S'), P('N'), P('Ar'), 58, C2.saddle, JAR.saddle(t));
-    this.arc(x, P('Ar'), P('S'), P('Go'), 58, C2.articular, JAR.articular(t));
-    const gA = JAR.gonial(t), sp = JAR.split(t);
-    if (sp > 0.01) {
-      this.line(x, P('N'), P('Go'), { color: '#ffffff', width: 2, alpha: sp * 0.7, dash: [10, 8] });
-      this.arc(x, P('Go'), P('Ar'), P('N'), 66, C2.gonial, gA * (0.5 + 0.5 * sp));
-      this.arc(x, P('Go'), P('N'), P('Me'), 50, '#ffb3a8', gA * sp);
-      if (1 - sp > 0.01) this.arc(x, P('Go'), P('Ar'), P('Me'), 58, C2.gonial, gA * (1 - sp));
-    } else this.arc(x, P('Go'), P('Ar'), P('Me'), 58, C2.gonial, gA);
-    // polygon N–S–Ar–Go–Me, drawn segment by segment
-    const seq = ['N', 'S', 'Ar', 'Go', 'Me'];
-    for (let i = 0; i < 4; i++) {
-      const g = Math.min(1, Math.max(0, (t - (40.2 + i * 0.8)) / 0.7));
-      this.line(x, P(seq[i]), P(seq[i + 1]), { color: '#ffffff', width: 3, alpha: pol * 0.9, progress: g });
-    }
-    const off = { N: [16, -20], S: [-12, -28], Ar: [-58, -6], Go: [-60, 10], Me: [16, 24] };
-    seq.forEach((k, i) => {
-      const g = Math.min(1, Math.max(0, (t - (40.0 + i * 0.8)) / 0.4));
-      this.dot(x, P(k), { alpha: pol * g, label: k, dx: off[k][0], dy: off[k][1], color: '#ffffff' });
-    });
-    // face heights S–Go (posterior) and N–Me (anterior) + proportional bars (no values)
-    const h = JAR.heights(t);
-    if (h > 0) {
-      const g = Math.min(1, Math.max(0, (t - 58.8) / 1.0));
-      this.line(x, P('S'), P('Go'), { color: C.accent, width: 5, alpha: h, progress: g });
-      this.line(x, P('N'), P('Me'), { color: C2.articular, width: 5, alpha: h, progress: g });
-      const D = (a, b) => Math.hypot(L[a][0] - L[b][0], L[a][1] - L[b][1]);
-      const kpx = 3.9, x0 = 300;
-      const bars = [['POSTERIOR FACE HEIGHT · S–Go', D('S', 'Go'), C.accent, 1478], ['ANTERIOR FACE HEIGHT · N–Me', D('N', 'Me'), C2.articular, 1556]];
-      for (const [lab, mm, col, y] of bars) {
-        this.text(x, lab, x0, y, { size: 24, weight: 600, alpha: h * 0.9, spacing: 2, align: 'left' });
-        x.save(); x.globalAlpha = h * 0.18; x.fillStyle = '#ffffff'; x.fillRect(x0, y + 20, 125 * kpx, 10); x.restore();
-        x.save(); x.globalAlpha = h; x.fillStyle = col; x.fillRect(x0, y + 20, mm * kpx * g, 10); x.restore();
-      }
     }
   }
 

@@ -87,6 +87,28 @@ One analysis family only (Steiner-type reference lines), minimal:
 
 No angle values, no arcs with degrees, no mixing with Sassouni / Frankfort planes.
 
+## Jarabak analysis (scene 05) — schematic, no values on screen
+
+Björk polygon N–S–Ar–Go–Me on the same skull (S, N, Go, Me as above; Ar = articulare at the
+intersection of the posterior condylar border with the inferior cranial-base contour). Shown:
+saddle angle N–S–Ar, articular angle S–Ar–Go, gonial angle Ar–Go–Me split by N–Go into upper and
+lower parts, the sum of the three, and posterior (S–Go) vs anterior (N–Me) face height as lines and
+proportional bars. Interpretation is given qualitatively only: larger sum / relatively shorter
+posterior face → clockwise; smaller sum / relatively taller posterior face → counter-clockwise.
+
+Measured on the model (documentation only):
+
+| Pattern | saddle | articular | gonial (upper / lower) | sum | S–Go / N–Me |
+|---|---|---|---|---|---|
+| hypo | 123.9° | 138.8° | 120.2° (53.5 / 66.7) | 382.9° | 73 % |
+| normo | 124.6° | 139.5° | 124.9° (53.7 / 71.2) | 389.0° | 68 % |
+| hyper | 125.3° | 140.2° | 129.7° (53.9 / 75.8) | 395.2° | 62 % |
+
+The direction of change across the three patterns matches Jarabak's interpretation (sum rises, ratio
+falls from hypo to hyper). The absolute values are offset from Jarabak's norms (sum ≈ 396°, ratio
+≈ 62–65 %) because the source skull has a short anterior face (N–Me ≈ 107 mm) and gonion is
+constructed from the mesh, not from a radiograph. This is one reason no numbers are shown.
+
 ## Quality control
 
 | Question | Result |

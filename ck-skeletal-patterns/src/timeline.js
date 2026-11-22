@@ -112,7 +112,7 @@ export const LINES = {
   grid: (t) => win(t, 26.2, 34.8, 1.4, 0.7),        // S–N & Go–Me in every cell
 };
 export const TEASER = {
-  small: (t) => win(t, 34.9, 37.6, 0.7, 0.3),
-  big: (t) => win(t, 35.2, 37.6, 0.8, 0.3),
+  big: (t) => win(t, 34.9, 37.6, 0.7, 0.3),     // «TO BE CONTINUED» first, large
+  small: (t) => win(t, 35.6, 37.6, 0.6, 0.3),   // then the topic of the next film
 };
 export const OUTRO_T0 = DURATION - 3; // brand-kit outro: exactly the last 3 s, as in every CK BIOMECHANICS film

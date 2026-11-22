@@ -22,7 +22,7 @@ characteristics — sagittal skeletal relationship (Class I / II / III) and vert
 | 00:05–00:13 | 02 Sagittal | Skull centres; *SAGITTAL RELATIONSHIP*: Class I → II → III by anatomical morphing; S–N, N–A, N–B tracing |
 | 00:13–00:21 | 03 Vertical | *VERTICAL PATTERN*: hypo → normo → hyperdivergent; mandibular plane (Go–Me) against S–N, lower-face-height bracket |
 | 00:21–00:35 | 04 Matrix | Camera pulls back, one skull becomes nine; 3 × 3 matrix (columns Class I/II/III, rows hypo/normo/hyper), static ≈ 9 s, S–N and Go–Me in every cell |
-| 00:35–00:37 | Teaser | Matrix dissolves; *CONTINUED IN THE NEXT VIDEO — JARABAK ANALYSIS* |
+| 00:35–00:37 | Teaser | Matrix dissolves; large *TO BE CONTINUED*, then *NEXT · JARABAK ANALYSIS* |
 | 00:37–00:40 | 05 Outro | CK BIOMECHANICS brand-kit outro, unchanged (last 3 s, as in every film of the series): skulls dissolve over the unchanged background, CK circle, then BIOMECHANICS, hold |
 
 No numbers (angles, thresholds) are shown anywhere in the film.

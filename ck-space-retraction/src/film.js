@@ -548,7 +548,7 @@ export class Film {
     }
     const sc = TEXT.spaceCreated(t);
     if (sc > 0) {
-      const pop = 1 + 0.1 * Math.exp(-Math.max(0, t - 27.4) * 6);
+      const pop = 1 + 0.1 * Math.exp(-Math.max(0, t - 26.5) * 6);
       x.save(); x.translate(W / 2, 330); x.scale(pop, pop);
       this.text(x, 'SPACE CREATED', 0, 0, { size: 92, weight: 800, alpha: sc, spacing: 6, color: COL.cyan, glow: 'rgba(79,216,255,0.75)' });
       x.restore();

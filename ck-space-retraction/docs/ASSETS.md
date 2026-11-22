@@ -8,7 +8,7 @@
 | three.js r170, mp4-muxer | `vendor/` | MIT |
 | Montserrat, Inter | `assets/fonts/` | SIL OFL 1.1 |
 | Логотип и фон CK BIOMECHANICS | бренд-кит (`src/brand.js`, `assets/brand/`), без изменений | собственность владельца бренда |
-| Озвучка | ElevenLabs, голос Evgeniy Rybakov (аккаунт владельца проекта) | по условиям ElevenLabs |
+| Озвучка | ElevenLabs, голос «Принц Нури» (аккаунт владельца проекта); прежний дубль — Evgeniy Rybakov | по условиям ElevenLabs |
 | Саунд-дизайн | сгенерирован `tools/build_audio.mjs` | свободно |
 
 ## Ограничения и что нужно для финального медицинского рендера

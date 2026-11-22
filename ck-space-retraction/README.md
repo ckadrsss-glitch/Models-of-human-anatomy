@@ -1,6 +1,6 @@
 # CK BIOMECHANICS — Space Creation & Anterior Retraction
 
-Образовательная медицинская 3D-анимация (Three.js / WebGL) для Instagram Reels · **55 с · 9:16 · 1080 × 1920 · 30 fps** · русская озвучка (ElevenLabs, голос **Evgeniy Rybakov**).
+Образовательная медицинская 3D-анимация (Three.js / WebGL) для Instagram Reels · **55 с · 9:16 · 1080 × 1920 · 30 fps** · русская озвучка (ElevenLabs, голос **Принц Нури**).
 
 Тема: как вернуть выступающие передние зубы назад за счёт пространства, созданного **последовательной дистализацией боковых зубов** (7 → 6 → 5 → 4), с последующей **контролируемой ретракцией фронта**. **Без удаления зубов** — все 28 зубов сохраняются.
 
@@ -11,7 +11,7 @@
 | Сценарий и таймкоды | [docs/SCRIPT.md](docs/SCRIPT.md), субтитры [docs/subtitles_ru.srt](docs/subtitles_ru.srt), фразы озвучки [docs/voiceover_ru.srt](docs/voiceover_ru.srt) |
 | Модель движения, допущения, ограничения | [docs/SCIENCE.md](docs/SCIENCE.md) |
 | 3D-модели и лицензии | [docs/ASSETS.md](docs/ASSETS.md) |
-| Озвучка / звук | `assets/voice/vo1…6.mp3` (Evgeniy Rybakov), `assets/audio/mix.m4a` (голос + саунд-дизайн), `voiceover.m4a`, `sfx.m4a` |
+| Озвучка / звук | `assets/voice/nuri1…9.mp3` (Принц Нури; прежний дубль Evgeniy Rybakov — `assets/voice/rybakov/`), `assets/audio/mix.m4a` (голос + саунд-дизайн), `voiceover.m4a`, `sfx.m4a` |
 
 ## Запуск локально
 
@@ -58,7 +58,8 @@ node tools/make_srt.mjs               # SRT из таймингов
 
 ## Озвучка
 
-Сгенерирована через ElevenLabs голосом **Evgeniy Rybakov** (`ws3YyKFd5whKb21yaXES`, eleven_multilingual_v2), по одному дублю на фразу, тексты — дословно из ТЗ. Перегенерация: `ELEVENLABS_API_KEY=… node tools/voiceover.mjs`, проверка длительностей: `node tools/voiceover.mjs --check`. Свою дорожку можно подложить: `node tools/build_audio.mjs my_vo.wav`.
+Голос **Принц Нури** (`gJEfHTTiifXEDmO687lC`, eleven_multilingual_v2), по одному дублю на фразу. Фразы 1, 2, 3, 6, 8, 9 — дословно из ТЗ; 4, 5, 7 — короткие связки, добавленные, чтобы убрать паузы по 8–9 с во время дистализации и ретракции (максимальная пауза теперь ≈ 2,8 с). Тексты и время — `VOICE` в `src/timeline.js`, субтитры строятся из них автоматически.
+Перегенерация: `ELEVENLABS_API_KEY=… node tools/voiceover.mjs`, проверка длительностей: `node tools/voiceover.mjs --check`. Свою дорожку можно подложить: `node tools/build_audio.mjs my_vo.wav`.
 
 ## Структура
 

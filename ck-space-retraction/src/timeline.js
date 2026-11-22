@@ -11,30 +11,36 @@ export const SCENES = [
   { id: '02', name: 'Где взять место?', t0: 5, t1: 13 },
   { id: '03', name: 'Дистализация', t0: 13, t1: 30 },
   { id: '04', name: 'Ретракция фронта', t0: 30, t1: 43 },
-  { id: '05', name: 'Биомеханика', t0: 43, t1: 48.2 },
+  { id: '05', name: 'Биомеханика', t0: 42.6, t1: 48.2 },
   { id: '06', name: 'Финал', t0: 48.2, t1: 55 },
 ];
 
-// Voice-over: ElevenLabs, voice “Evgeniy Rybakov” (ws3YyKFd5whKb21yaXES), eleven_multilingual_v2.
-// `dur` = measured clip length (s) — used for subtitles; tools/voiceover.mjs --check verifies it.
+// Voice-over: ElevenLabs, voice «Принц Нури» (gJEfHTTiifXEDmO687lC), eleven_multilingual_v2, one take per line.
+// Lines 1, 2, 3, 6, 8, 9 — verbatim from the brief; 4, 5, 7 — short bridges that remove the 8–9 s silent
+// stretches during the distalisation and the retraction (viewer-retention).
+// `dur` = measured clip length (s), `chunks` = on-screen subtitle lines (timed by character share).
 export const VOICE = [
-  { file: 'assets/voice/vo1.mp3', start: 0.45, dur: 2.40, text: 'Зубы вышли вперёд? А как вернуть их назад?' },
-  { file: 'assets/voice/vo2.mp3', start: 5.5, dur: 4.86, text: 'Казалось бы, просто переместить их назад. Но есть одна проблема. Для этого нужно пространство.' },
-  { file: 'assets/voice/vo3.mp3', start: 13.6, dur: 7.55, text: 'Один из вариантов — дистализация. Мы последовательно перемещаем боковые зубы назад, освобождая пространство для передних.' },
-  { file: 'assets/voice/vo4.mp3', start: 30.5, dur: 4.31, text: 'Теперь созданное пространство можно использовать для ретракции фронтальной группы.' },
-  { file: 'assets/voice/vo5.mp3', start: 43.4, dur: 4.36, text: 'Но важно не просто переместить коронки, а контролировать корни и опору.' },
-  { file: 'assets/voice/vo6.mp3', start: 48.2, dur: 4.00, text: 'В ортодонтии главное — не просто двигать зубы, а понимать биомеханику.' },
+  { file: 'assets/voice/nuri1.mp3', start: 0.3, dur: 2.82, speech: 2.54, text: 'Зубы вышли вперёд? А как вернуть их назад?', chunks: ['Зубы вышли вперёд?', 'А как вернуть их назад?'] },
+  { file: 'assets/voice/nuri2.mp3', start: 4.3, dur: 5.85, speech: 5.56, text: 'Казалось бы, просто переместить их назад. Но есть одна проблема. Для этого нужно пространство.', chunks: ['Казалось бы, просто переместить их назад.', 'Но есть одна проблема.', 'Для этого нужно пространство.'] },
+  { file: 'assets/voice/nuri3.mp3', start: 11.4, dur: 6.95, speech: 6.65, text: 'Один из вариантов — дистализация. Мы последовательно перемещаем боковые зубы назад, освобождая пространство для передних.', chunks: ['Один из вариантов — дистализация.', 'Мы последовательно перемещаем боковые зубы назад,', 'освобождая пространство для передних.'] },
+  { file: 'assets/voice/nuri4.mp3', start: 20.6, dur: 3.58, speech: 3.28, text: 'Каждый зуб идёт своей траекторией — не весь сегмент сразу.', chunks: ['Каждый зуб идёт своей траекторией —', 'не весь сегмент сразу.'] },
+  { file: 'assets/voice/nuri5.mp3', start: 26.6, dur: 2.51, speech: 2.4, text: 'И вот оно — место для передних зубов.', chunks: ['И вот оно — место для передних зубов.'] },
+  { file: 'assets/voice/nuri6.mp3', start: 30.0, dur: 4.0, speech: 3.7, text: 'Теперь созданное пространство можно использовать для ретракции фронтальной группы.', chunks: ['Теперь созданное пространство', 'можно использовать для ретракции фронтальной группы.'] },
+  { file: 'assets/voice/nuri7.mp3', start: 35.6, dur: 4.36, speech: 4.17, text: 'Коронки уходят назад, а корни и наклон резцов остаются под контролем.', chunks: ['Коронки уходят назад,', 'а корни и наклон резцов остаются под контролем.'] },
+  { file: 'assets/voice/nuri8.mp3', start: 42.6, dur: 3.89, speech: 3.59, text: 'Но важно не просто переместить коронки, а контролировать корни и опору.', chunks: ['Но важно не просто переместить коронки,', 'а контролировать корни и опору.'] },
+  { file: 'assets/voice/nuri9.mp3', start: 47.6, dur: 4.0, speech: 3.65, text: 'В ортодонтии главное — не просто двигать зубы, а понимать биомеханику.', chunks: ['В ортодонтии главное — не просто двигать зубы,', 'а понимать биомеханику.'] },
 ];
 
-// Subtitle chunks (short lines for a 9:16 frame), timed inside each voice clip
-export const SUBS = [
-  [0.45, 1.75, 'Зубы вышли вперёд?'], [1.75, 3.1, 'А как вернуть их назад?'],
-  [5.5, 7.35, 'Казалось бы, просто переместить их назад.'], [7.35, 8.75, 'Но есть одна проблема.'], [8.75, 10.6, 'Для этого нужно пространство.'],
-  [13.6, 15.55, 'Один из вариантов — дистализация.'], [15.55, 18.6, 'Мы последовательно перемещаем боковые зубы назад,'], [18.6, 21.4, 'освобождая пространство для передних.'],
-  [30.5, 32.45, 'Теперь созданное пространство'], [32.45, 35.0, 'можно использовать для ретракции фронтальной группы.'],
-  [43.4, 45.6, 'Но важно не просто переместить коронки,'], [45.6, 47.95, 'а контролировать корни и опору.'],
-  [48.2, 50.2, 'В ортодонтии главное — не просто двигать зубы,'], [50.2, 51.9, 'а понимать биомеханику.'],
-];
+// Subtitle chunks [start, end, text]: each voice line split by character share, held 0.3 s after the speech
+export const SUBS = VOICE.flatMap((v) => {
+  const total = v.chunks.reduce((n, c) => n + c.length, 0);
+  let t = v.start;
+  return v.chunks.map((c, i) => {
+    const d = v.speech * c.length / total;
+    const cue = [t, i === v.chunks.length - 1 ? v.start + v.speech + 0.3 : t + d, c];
+    t += d; return cue;
+  });
+});
 
 // ---------------------------------------------------------------- helpers
 export const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -67,7 +73,7 @@ export const CAMERA = [
   K(13.0, 0, -90, 256, [0, -8, 0], 30, 'lin'),
   K(14.0, 0, -90, 254, [0, -8, 0]),
   K(25.5, 4, -90, 246, [0, -8, 0], 30, 'lin'),
-  K(28.0, -68, -16, 175, [-18, -3, 3]),               // 45° turn: buccal segment, space visible
+  K(27.6, -68, -16, 175, [-18, -3, 3]),               // 45° turn: buccal segment, space visible
   K(30.0, -71, -15, 170, [-18, -3, 3], 30, 'lin'),
   K(32.0, -90, -3, 180, [-11, 7, 8]),                  // lateral projection, anterior segment
   K(41.5, -84, -5, 172, [-11, 7, 8], 30, 'lin'),
@@ -110,7 +116,7 @@ export const TEXT = {
   backArrow: (t) => win(t, 3.0, 5.4, 0.5, 0.5),
   retrArrows: (t) => win(t, 8.2, 13.2, 0.5, 0.6),
   noSpace: (t) => win(t, 10.0, 13.4, 0.35, 0.6),
-  spaceCreated: (t) => win(t, 27.4, 30.4, 0.5, 0.6),
+  spaceCreated: (t) => win(t, 26.5, 30.0, 0.5, 0.6),
   distArrows: (t) => win(t, 14.0, 25.6, 0.3, 0.4),
   tuberosity: (t) => win(t, 15.0, 25.8, 0.8, 0.6),
   retrVec: (t) => win(t, 31.4, 41.6, 0.6, 0.8),

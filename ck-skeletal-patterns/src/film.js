@@ -79,7 +79,7 @@ export class Film {
     x.drawImage(this.renderer.domElement, 0, 0);
     x.globalAlpha = 1;
     // permanent series caption — on screen for the whole main animation, dissolves with the outro
-    drawCaption(x, Math.min(1, t / 0.6 + 0.0001));
+    drawCaption(x, 1);
     this.drawOverlay(x, t, st);
     if (t >= OUTRO_T0) drawOutro(x, t - OUTRO_T0);
     return this.out;

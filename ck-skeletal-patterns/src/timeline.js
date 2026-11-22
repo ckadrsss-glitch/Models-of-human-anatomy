@@ -68,7 +68,7 @@ export function stateAt(t) {
   const s1 = keys(t, S_KEYS), v1 = keys(t, V_KEYS);
   const skulls = [];
   if (t < T_GRID0) {
-    skulls.push({ s: s1, v: v1, z: 0, y: 0, depth: 0, alpha: smooth((t - 0.2) / 2.2), cell: null });
+    skulls.push({ s: s1, v: v1, z: 0, y: 0, depth: 0, alpha: 1, cell: null });   // skull on screen from the first frame
   } else {
     // the single skull (Class I · hyperdivergent) becomes cell (0, 2); eight copies emerge from behind it.
     // Positions are interpolated in screen space so the spread reads as one clean motion while the camera pulls back.
@@ -88,8 +88,8 @@ export function stateAt(t) {
 
 // ---------------------------------------------------------------- texts (alpha windows)
 export const TEXT = {
-  title: (t) => win(t, 1.1, 5.4, 1.4, 0.6),
-  subtitle: (t) => win(t, 2.0, 5.4, 1.2, 0.6),
+  title: (t) => win(t, 0.3, 5.4, 0.9, 0.6),
+  subtitle: (t) => win(t, 0.9, 5.4, 0.9, 0.6),
   sagHeader: (t) => win(t, 5.6, 13.2, 0.7, 0.5),
   classI: (t) => Math.max(win(t, 6.0, 8.1, 0.6, 0.45), 0),
   classII: (t) => win(t, 8.25, 10.65, 0.5, 0.45),

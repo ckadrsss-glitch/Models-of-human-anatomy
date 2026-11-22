@@ -69,10 +69,10 @@ export const CAMERA = [
   K(1.0, -90, 4, 300, [0, -18, 20], 30, 'out'),       // sharp push-in in the first second
   K(4.9, -88, 3, 246, [0, -12, 16], 30, 'lin'),
   K(5.6, -88, 3, 246, [0, -12, 16]),
-  K(8.0, 0, -90, 262, [0, -8, 0]),                   // lateral → occlusal
-  K(13.0, 0, -90, 256, [0, -8, 0], 30, 'lin'),
-  K(14.0, 0, -90, 254, [0, -8, 0]),
-  K(25.5, 4, -90, 246, [0, -8, 0], 30, 'lin'),
+  K(8.0, 0, -90, 262, [0, -8, -9]),                   // lateral → occlusal
+  K(13.0, 0, -90, 256, [0, -8, -9], 30, 'lin'),
+  K(14.0, 0, -90, 254, [0, -8, -9]),
+  K(25.5, 4, -90, 246, [0, -8, -9], 30, 'lin'),
   K(27.6, -68, -16, 175, [-18, -3, 3]),               // 45° turn: buccal segment, space visible
   K(30.0, -71, -15, 170, [-18, -3, 3], 30, 'lin'),
   K(32.0, -90, -3, 180, [-11, 7, 8]),                  // lateral projection, anterior segment
@@ -102,7 +102,7 @@ export const VIS = {
   lower: (t) => 1 - ramp(t, 5.4, 6.8, smooth),                 // lower jaw (hook only)
   gingiva: (t) => 0.62 * (1 - 0.55 * win(t, 42.8, 48.6, 0.8, 0.8)),
   bone: (t) => 1 + 1.1 * win(t, 30.5, 48.6, 1.0, 0.8),         // bone emphasis in scenes 4–5
-  redFront: (t) => win(t, 2.4, 13.6, 0.7, 1.2),               // anterior teeth highlighted
+  redFront: (t) => win(t, 1.6, 13.6, 0.7, 1.2),               // anterior teeth highlighted
   ghostPost: (t) => win(t, 14.0, 27.6, 0.8, 1.0),              // start positions of 4–7
   ghostAnt: (t) => win(t, 31.2, 43.2, 0.8, 0.8),               // start positions of 1–3
   ghostAll: (t) => win(t, 48.8, OUTRO_T0 + 0.6, 0.8, 0.6),     // comparison

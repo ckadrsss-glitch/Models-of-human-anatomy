@@ -8,6 +8,7 @@ const q = new URLSearchParams(location.search);
 const RENDER = q.has('render');
 const film = new Film();
 film.subtitles = q.get('subs') !== '0';
+film.setLook((q.get('look') || 'B').toUpperCase());
 const $ = (id) => document.getElementById(id);
 const NAME = 'CK_BIOMECHANICS_Space_Creation_Anterior_Retraction';
 

@@ -7,21 +7,56 @@
 // ============================================================================
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { BRAND, backgroundCanvas, drawOutro } from './brand.js';
+import { BRAND, backgroundCanvas, drawLogo } from './brand.js';
 import { DURATION, FPS, OUTRO_T0, SUBS, SCHEDULE, VIS, TEXT, cameraAt, clamp01, smooth, lerp, ramp, win, easeOut } from './timeline.js';
 import { buildModel, poseAt, startPose, progress, apply, V } from './model.js';
 
 const W = BRAND.width, H = BRAND.height;
 const F = BRAND.font;
 const COL = {
-  cyan: '#4fd8ff',           // space / movement vectors
+  cyan: '#58dfff',           // space / movement vectors
   accent: BRAND.colors.accent, // brand turquoise
   red: '#ff5a4e',            // problem: protruded anterior teeth, "no space"
   white: '#ffffff',
-  dim: '#b9c8e4',
+  dim: '#a9c1d2',            // secondary typography
   gold: '#ffd28a',
 };
 const DEG = Math.PI / 180;
+
+// Visual treatments (same geometry, timing, camera and text):
+//   A — Original Dark: brand background unchanged; refined enamel, lighting and typography.
+//   B — Enhanced Dark: + subtle radial illumination behind the model, stronger cyan rim, a little more contrast.
+export const LOOKS = {
+  A: { glow: 0, rim: 2.6, rim2: 1.4, rimColor: 0x9fd0ff, exposure: 1.0, edge: 0.16 },
+  B: { glow: 1, rim: 3.9, rim2: 2.2, rimColor: 0x8fe4ff, exposure: 1.06, edge: 0.24 },
+};
+
+/** brand background, optionally with a very soft radial light behind the model (variant B) */
+let _bgB = null;
+function lookBackground(look) {
+  if (!look.glow) return backgroundCanvas();
+  if (_bgB) return _bgB;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.drawImage(backgroundCanvas(), 0, 0);
+  const g = x.createRadialGradient(W * 0.5, H * 0.43, 0, W * 0.5, H * 0.43, W * 0.78);
+  g.addColorStop(0, 'rgba(16,42,64,0.95)');      // #102A40
+  g.addColorStop(0.5, 'rgba(16,42,64,0.35)');
+  g.addColorStop(1, 'rgba(16,42,64,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const g2 = x.createRadialGradient(W * 0.5, H * 0.43, 0, W * 0.5, H * 0.43, W * 0.42);
+  g2.addColorStop(0, 'rgba(88,223,255,0.06)'); g2.addColorStop(1, 'rgba(88,223,255,0)');
+  x.fillStyle = g2; x.fillRect(0, 0, W, H);
+  _bgB = c; return c;
+}
+
+/** brand-kit outro (same timings as brand.js drawOutro) over the film's own background */
+function outro(ctx, u, bg) {
+  if (u <= 0) return;
+  const e = (v) => { const k = Math.min(1, Math.max(0, v)); return k * k * (3 - 2 * k); };
+  ctx.save(); ctx.globalAlpha = e(u / 0.9); ctx.drawImage(bg, 0, 0, W, H); ctx.restore();
+  drawLogo(ctx, W / 2, H * 0.455, { circleA: e((u - 0.55) / 0.8), wordA: e((u - 1.15) / 0.8) });
+}
 
 // ---------------------------------------------------------------------------- shaders
 const SKIN_VS = /* glsl */`
@@ -122,26 +157,35 @@ function gapMaterial() {
 function toothMaterial() {
   const m = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.42, metalness: 0, clearcoat: 0.55, clearcoatRoughness: 0.32,
     sheen: 0.35, sheenRoughness: 0.5, sheenColor: new THREE.Color('#cfe3ff'), envMapIntensity: 0.6 });
-  const u = { uTint: { value: new THREE.Color(COL.red) }, uTintAmt: { value: 0 }, uGlow: { value: new THREE.Color(COL.cyan) }, uGlowAmt: { value: 0 } };
+  const u = { uTint: { value: new THREE.Color(COL.red) }, uTintAmt: { value: 0 }, uGlow: { value: new THREE.Color(COL.cyan) }, uGlowAmt: { value: 0 },
+    uTipY: { value: -1e3 }, uEdge: { value: 0.16 } };
   m.userData.u = u;
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float aAO; attribute float aEnamel; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvAO = aAO; vEn = aEnamel; vVw = (modelMatrix*vec4(position,1.0)).xyz; vNw = normalize(mat3(modelMatrix)*normal);');
+      .replace('#include <common>', '#include <common>\nattribute float aAO; attribute float aEnamel; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw; varying float vLy;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvAO = aAO; vEn = aEnamel; vLy = position.y; vVw = (modelMatrix*vec4(position,1.0)).xyz; vNw = normalize(mat3(modelMatrix)*normal);');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 uTint; uniform float uTintAmt; uniform vec3 uGlow; uniform float uGlowAmt; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw;')
+      .replace('#include <common>', '#include <common>\nuniform vec3 uTint; uniform float uTintAmt; uniform vec3 uGlow; uniform float uGlowAmt; uniform float uTipY; uniform float uEdge; varying float vAO; varying float vEn; varying vec3 vVw; varying vec3 vNw; varying float vLy;')
       .replace('#include <color_fragment>', `#include <color_fragment>
-        vec3 enamel = vec3(0.93, 0.905, 0.86);
+        vec3 enamel = vec3(0.94, 0.92, 0.88);
         vec3 dentine = vec3(0.86, 0.76, 0.58);
-        diffuseColor.rgb = mix(dentine, enamel, smoothstep(0.15, 0.85, vEn));
+        float en = smoothstep(0.15, 0.85, vEn);
+        diffuseColor.rgb = mix(dentine, enamel, en);
+        // incisal third of anterior teeth: thinner, translucent enamel (cool grey-blue)
+        float inc = en * (1.0 - smoothstep(uTipY + 0.4, uTipY + 3.2, vLy));
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.76, 0.81, 0.86), inc * 0.38);
+        // contour definition: slightly darker at grazing angles → clearer silhouettes and interproximal boundaries
+        float frC = pow(1.0 - abs(dot(normalize(vNw), normalize(cameraPosition - vVw))), 3.0);
+        diffuseColor.rgb *= 1.0 - uEdge * frC;
         diffuseColor.rgb = mix(diffuseColor.rgb, uTint, uTintAmt * 0.42);`)
-      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(0.6, 0.3, vEn);')
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(0.6, 0.27, vEn);')
       .replace('#include <aomap_fragment>', `#include <aomap_fragment>
         { float ao = mix(1.0, pow(clamp(vAO*1.05+0.05,0.0,1.0), 1.4), mix(0.75, 0.18, vEn));
           reflectedLight.indirectDiffuse *= ao; reflectedLight.directDiffuse *= mix(1.0, ao, 0.6); reflectedLight.indirectSpecular *= ao; }`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
         { float fr = pow(1.0 - abs(dot(normalize(vNw), normalize(cameraPosition - vVw))), 2.0);
+          totalEmissiveRadiance += vec3(0.62, 0.70, 0.78) * 0.07 * vEn * pow(fr, 1.5);   // light scattering in the enamel
           totalEmissiveRadiance += uTint * uTintAmt * (0.10 + 0.9*fr);
           totalEmissiveRadiance += uGlow * uGlowAmt * (0.05 + 0.8*fr); }`);
   };
@@ -176,15 +220,19 @@ export class Film {
     this.out = document.createElement('canvas'); this.out.width = W; this.out.height = H;
     this.ctx = this.out.getContext('2d');
     this.subtitles = true;
+    this.look = LOOKS.A;
   }
+
+  setLook(id) { this.look = LOOKS[id] || LOOKS.A; }
 
   async init() {
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
     r.setPixelRatio(1); r.setSize(W, H, false);
     r.outputColorSpace = THREE.SRGBColorSpace;
-    r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.0;
+    r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = this.look.exposure;
     const sc = this.scene = new THREE.Scene();
-    const bg = new THREE.CanvasTexture(backgroundCanvas()); bg.colorSpace = THREE.SRGBColorSpace;
+    this.bgCanvas = lookBackground(this.look);
+    const bg = new THREE.CanvasTexture(this.bgCanvas); bg.colorSpace = THREE.SRGBColorSpace;
     sc.background = bg;
     const pm = new THREE.PMREMGenerator(r);
     sc.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -195,8 +243,8 @@ export class Film {
     sc.add(cam);
     const key = new THREE.DirectionalLight(0xfff3e6, 2.5); key.position.set(-120, 200, 220); cam.add(key); key.target = cam;
     const fill = new THREE.DirectionalLight(0xdfe8ff, 1.1); fill.position.set(220, -40, 160); cam.add(fill); fill.target = cam;
-    const rim = new THREE.DirectionalLight(0x9fd0ff, 2.6); rim.position.set(140, 160, -260); cam.add(rim); rim.target = cam;
-    const rim2 = new THREE.DirectionalLight(0x8fc4ff, 1.4); rim2.position.set(-200, -40, -220); cam.add(rim2); rim2.target = cam;
+    const rim = new THREE.DirectionalLight(this.look.rimColor, this.look.rim); rim.position.set(140, 160, -260); cam.add(rim); rim.target = cam;
+    const rim2 = new THREE.DirectionalLight(0x8fc4ff, this.look.rim2); rim2.position.set(-200, -40, -220); cam.add(rim2); rim2.target = cam;
     sc.add(new THREE.HemisphereLight(0xdfe8ff, 0x141018, 0.25));
 
     const { hdr, geos } = await loadDentition();
@@ -206,6 +254,8 @@ export class Film {
     // upper teeth (separate meshes, local coordinates around each tooth's centre of resistance)
     this.teeth = T.map((th) => {
       const mat = toothMaterial();
+      mat.userData.u.uEdge.value = this.look.edge;
+      if (th.k <= 3) mat.userData.u.uTipY.value = th.tip[1] - th.cr[1];
       const mesh = new THREE.Mesh(geos['U' + th.fdi], mat);
       mesh.renderOrder = 1; sc.add(mesh);
       const gmat = ghostMaterial('#8fdcff');
@@ -226,7 +276,7 @@ export class Film {
     this.toothIndex = Object.fromEntries(hdr.meshes.filter((m) => m.fdi).map((m, i) => [m.fdi, i]));
 
     // translucent alveolar bone (follows the teeth near the roots: remodelling) and gingiva
-    this.boneMat = tissueMaterial({ color: '#d9cdb8', rim: '#bfe2ff', base: 0.055, rimA: 0.42, skinned: true, cropY: 23, cropSoft: 8, light: 0.55 });
+    this.boneMat = tissueMaterial({ color: '#d9cdb8', rim: '#b5e6ff', base: 0.06, rimA: 0.5, skinned: true, cropY: 23, cropSoft: 8, light: 0.55 });
     this.bone = new THREE.Mesh(geos.maxilla, this.boneMat); this.bone.renderOrder = 4; sc.add(this.bone);
     this.gumMat = tissueMaterial({ color: '#d4777f', rim: '#ffc7c9', base: 0.5, rimA: 0.4, skinned: true, light: 0.8, aoAlpha: true });
     this.gum = new THREE.Mesh(geos.gingiva, this.gumMat); this.gum.renderOrder = 3; sc.add(this.gum);
@@ -335,7 +385,7 @@ export class Film {
     x.drawImage(this.renderer.domElement, 0, 0);
     this.drawOverlay(x, t, P);
     if (this.subtitles) this.drawSubtitle(x, t);
-    if (t >= OUTRO_T0) drawOutro(x, t - OUTRO_T0);
+    if (t >= OUTRO_T0) outro(x, t - OUTRO_T0, this.bgCanvas);
     return this.out;
   }
 
@@ -451,10 +501,15 @@ export class Film {
     const hk = TEXT.hook(t);
     if (hk > 0) {
       const pop = 1 + 0.06 * (1 - easeOut((t - 0.25) / 0.5));
-      x.save(); x.translate(W / 2, 300); x.scale(pop, pop);
-      this.text(x, 'ЗУБЫ', 0, -48, { size: 96, weight: 800, alpha: hk, spacing: 4, glow: 'rgba(255,90,78,0.55)' });
-      this.text(x, 'ВЫШЛИ ВПЕРЁД?', 0, 58, { size: 84, weight: 800, alpha: hk, spacing: 3, color: '#ffffff', glow: 'rgba(255,90,78,0.45)' });
+      const a1 = hk * (1 - smooth((t - 2.75) / 0.35));
+      const a2 = hk * smooth((t - 2.95) / 0.4);
+      x.save(); x.translate(W / 2, 340); x.scale(pop, pop);
+      this.text(x, 'ЗУБЫ', 0, -52, { size: 104, weight: 800, alpha: a1, spacing: 4, glow: 'rgba(255,90,78,0.4)' });
+      this.text(x, 'ВЫШЛИ ВПЕРЁД?', 0, 58, { size: 88, weight: 800, alpha: a1, spacing: 3, color: '#ffffff', glow: 'rgba(255,90,78,0.35)' });
       x.restore();
+      const rise = (1 - easeOut((t - 2.95) / 0.5)) * 18;
+      this.text(x, 'ГДЕ ВЗЯТЬ МЕСТО', W / 2, 300 + rise, { size: 82, weight: 800, alpha: a2, spacing: 3 });
+      this.text(x, 'ДЛЯ РЕТРАКЦИИ?', W / 2, 398 + rise, { size: 82, weight: 800, alpha: a2, spacing: 3, color: COL.cyan, glow: 'rgba(88,223,255,0.35)' });
     }
     const ba = TEXT.backArrow(t);
     if (ba > 0) {
@@ -462,7 +517,7 @@ export class Film {
       const p = easeOut((t - 3.0) / 0.7);
       const y = tip[1] + 6, x0 = tip[0] + 70, x1 = tip[0] - 250;
       this.arrow(x, [x0, y], [x1, y], { color: COL.cyan, width: 12, head: 48, alpha: ba, progress: p });
-      this.text(x, 'НАЗАД', (x0 + x1) / 2 - 20, y + 62, { size: 34, weight: 700, alpha: ba * smooth((t - 3.5) / 0.4), spacing: 6, color: COL.cyan });
+      this.text(x, 'НАЗАД', (x0 + x1) / 2 - 20, y + 66, { size: 40, weight: 700, alpha: ba * smooth((t - 3.5) / 0.4), spacing: 6, color: COL.cyan });
     }
 
     // ---- scene 2: where does the space come from?
@@ -496,7 +551,7 @@ export class Film {
       x.save(); x.translate(W / 2, 1290); x.scale(pop, pop);
       this.text(x, 'NO SPACE', 0, 0, { size: 104, weight: 800, alpha: ns, spacing: 8, color: COL.red, glow: 'rgba(255,90,78,0.7)' });
       x.restore();
-      this.text(x, 'нет места для ретракции', W / 2, 1380, { size: 34, weight: 600, alpha: ns * smooth((t - 10.4) / 0.4), color: COL.dim, spacing: 1 });
+      this.text(x, 'нет места для ретракции', W / 2, 1385, { size: 40, weight: 600, alpha: ns * smooth((t - 10.4) / 0.4), color: COL.dim, spacing: 1 });
     }
 
     // ---- scene 3: sequential distalisation
@@ -516,20 +571,21 @@ export class Film {
       }
       // step indicator 7 → 6 → 5 → 4
       const keys = [7, 6, 5, 4];
-      const y = 1460, gap = 150, x0 = W / 2 - gap * 1.5;
+      const y = 1250, gap = 160, x0 = W / 2 - gap * 1.5;
       keys.forEach((k, i) => {
         const [a, b] = SCHEDULE.dist[k];
         const active = win(t, a - 0.1, b + 0.1, 0.25, 0.25), done = t > b ? 1 : 0;
         const px = x0 + i * gap;
         x.save(); x.globalAlpha = da;
         x.strokeStyle = active > 0.5 ? COL.cyan : done ? 'rgba(79,216,255,0.75)' : 'rgba(185,200,228,0.35)';
-        x.lineWidth = 4; x.beginPath(); x.arc(px, y, 40, 0, Math.PI * 2); x.stroke();
-        if (active > 0.01) { x.globalAlpha = da * active * 0.9; x.fillStyle = COL.cyan; x.shadowColor = COL.cyan; x.shadowBlur = 24; x.beginPath(); x.arc(px, y, 40, 0, Math.PI * 2); x.fill(); }
+        x.lineWidth = 4; x.beginPath(); x.arc(px, y, 44, 0, Math.PI * 2); x.stroke();
+        if (active > 0.01) { x.globalAlpha = da * active * 0.9; x.fillStyle = COL.cyan; x.shadowColor = COL.cyan; x.shadowBlur = 24; x.beginPath(); x.arc(px, y, 44, 0, Math.PI * 2); x.fill(); }
         x.restore();
-        this.text(x, String(k), px, y + 2, { size: 40, weight: 800, alpha: da, color: active > 0.5 ? '#03101f' : done ? COL.cyan : COL.dim, shadow: false });
+        this.text(x, String(k), px, y + 2, { size: 46, weight: 800, alpha: da, color: active > 0.5 ? '#03101f' : done ? COL.cyan : COL.dim, shadow: false });
         if (i < 3) this.text(x, '→', px + gap / 2, y, { size: 34, weight: 700, alpha: da * 0.6, color: COL.dim, shadow: false });
       });
-      this.text(x, 'вторые моляры → первые моляры → премоляры', W / 2, y + 78, { size: 27, weight: 600, alpha: da * 0.85, color: COL.dim });
+      this.text(x, 'вторые моляры → первые моляры → премоляры', W / 2, y + 86, { size: 32, weight: 600, alpha: da * 0.9, color: COL.dim });
+      this.text(x, 'схема · план лечения всегда индивидуален', W / 2, y + 136, { size: 28, weight: 500, alpha: da * 0.75 * smooth((t - 15.0) / 0.6), color: COL.dim });
     }
     const tb = TEXT.tuberosity(t);
     if (tb > 0) {
@@ -542,9 +598,9 @@ export class Film {
         x.save(); x.globalAlpha = tb * 0.8; x.strokeStyle = COL.gold; x.lineWidth = 4; x.setLineDash([10, 10]); x.lineCap = 'round';
         x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(...p) : x.moveTo(...p))); x.stroke(); x.restore();
       }
-      const th = M['27'];
-      const lp = this.proj(V.add(V.add(th.crown, V.mul(th.md, -9.5)), V.mul(th.f, -2)));
-      this.text(x, 'граница бугра', lp[0] - 30, lp[1] + 40, { size: 26, weight: 600, alpha: tb * 0.9, color: COL.gold, align: 'center' });
+      // label in the empty palatal area between the two limits
+      const l1 = this.proj(V.add(M['17'].crown, V.mul(M['17'].md, -6))), l2 = this.proj(V.add(M['27'].crown, V.mul(M['27'].md, -6)));
+      this.text(x, 'граница бугра', (l1[0] + l2[0]) / 2, (l1[1] + l2[1]) / 2 - 10, { size: 32, weight: 600, alpha: tb * 0.9, color: COL.gold, align: 'center' });
     }
     const sc = TEXT.spaceCreated(t);
     if (sc > 0) {
@@ -571,8 +627,8 @@ export class Film {
       // crown moves more, apex less: controlled movement (root position monitored)
       this.arrow(x, [tip[0] + 30, tip[1] - 18], [tip[0] - 4.6 * sc_ - 30, tip[1] - 18], { color: COL.cyan, width: 8, head: 30, alpha: rv * run, progress: easeOut((t - 31.4) / 0.9) });
       this.arrow(x, [apex[0] + 22, apex[1]], [apex[0] - 1.2 * sc_ - 22, apex[1]], { color: COL.accent, width: 5, head: 20, alpha: rv * run * 0.95, progress: easeOut((t - 32.0) / 0.9) });
-      this.text(x, 'коронка', tip[0] - 2.3 * sc_, tip[1] + 34, { size: 26, weight: 600, alpha: rv * run, color: COL.cyan });
-      this.text(x, 'корень', apex[0] - 0.6 * sc_, apex[1] - 34, { size: 26, weight: 600, alpha: rv * run, color: COL.accent });
+      this.text(x, 'коронка', tip[0] - 2.3 * sc_, tip[1] + 40, { size: 34, weight: 600, alpha: rv * run, color: COL.cyan });
+      this.text(x, 'корень', apex[0] - 0.6 * sc_, apex[1] - 40, { size: 34, weight: 600, alpha: rv * run, color: COL.accent });
       // canine: distal vector into the space
       const c3 = M['13'];
       const cc = this.at('13', c3.crown);
@@ -587,9 +643,9 @@ export class Film {
     // ---- scene 6: comparison
     const cp = TEXT.compare(t);
     if (cp > 0) {
-      this.tag(x, 'ДО', W / 2 - 120, 1330, { color: COL.red, alpha: cp, size: 32, fg: '#ffffff' });
-      this.tag(x, 'ПОСЛЕ', W / 2 + 100, 1330, { color: '#f3efe6', alpha: cp, size: 32, fg: '#03101f' });
-      this.text(x, 'все зубы сохранены', W / 2, 1410, { size: 30, weight: 600, alpha: cp * smooth((t - 49.6) / 0.5), color: COL.dim, spacing: 1 });
+      this.tag(x, 'ДО', W / 2 - 130, 1330, { color: COL.red, alpha: cp, size: 38, fg: '#ffffff' });
+      this.tag(x, 'ПОСЛЕ', W / 2 + 110, 1330, { color: '#f3efe6', alpha: cp, size: 38, fg: '#03101f' });
+      this.text(x, 'все зубы сохранены', W / 2, 1415, { size: 36, weight: 600, alpha: cp * smooth((t - 49.6) / 0.5), color: COL.dim, spacing: 1 });
     }
   }
 
@@ -616,40 +672,41 @@ export class Film {
     x.save(); x.globalAlpha = a * k2 * 0.6; x.strokeStyle = COL.white; x.lineWidth = 2.5; x.setLineDash([10, 12]);
     x.beginPath(); x.moveTo(pf0[0] + 160, pf0[1]); x.lineTo(pf1[0] - 260, pf1[1]); x.stroke(); x.restore();
     this.arrow(x, pf0, pf1, { color: COL.cyan, width: 8, head: 30, alpha: a * k2, progress: easeOut((t - 45.2) / 0.6) });
-    this.tag(x, 'F', pf1[0] - 34, pf1[1] - 44, { color: COL.cyan, alpha: a * k2, size: 28 });
+    this.tag(x, 'F', pf1[0] - 34, pf1[1] - 50, { color: COL.cyan, alpha: a * k2, size: 34 });
     // perpendicular distance CR ↔ line of force (moment arm)
     x.save(); x.globalAlpha = a * k2 * 0.8; x.strokeStyle = COL.gold; x.lineWidth = 3; x.setLineDash([6, 8]);
     x.beginPath(); x.moveTo(pc[0], pc[1]); x.lineTo(pc[0], pf0[1]); x.stroke(); x.restore();
     // CR
     this.dot(x, pc, { r: 11, color: COL.accent, alpha: a * k1 });
-    this.tag(x, 'ЦС', pc[0] + 58, pc[1] - 8, { color: COL.accent, alpha: a * k1, size: 26 });
+    this.tag(x, 'ЦС', pc[0] + 66, pc[1] - 8, { color: COL.accent, alpha: a * k1, size: 34 });
     // tipping tendency (force occlusal to CR → crown lingual, root labial): red moment
     this.arcArrow(x, pc, 120, Math.PI * 0.62, Math.PI * 1.18, { color: COL.red, width: 6, head: 22, alpha: a * k3, progress: easeOut((t - 46.1) / 0.6) });
-    this.tag(x, 'M', pc[0] - 150, pc[1] - 90, { color: COL.red, alpha: a * k3, size: 26, fg: '#fff' });
+    this.tag(x, 'M', pc[0] - 158, pc[1] - 96, { color: COL.red, alpha: a * k3, size: 34, fg: '#fff' });
     // counter-moment (torque control)
     this.arcArrow(x, pc, 168, Math.PI * 1.22, Math.PI * 0.66, { color: COL.accent, width: 6, head: 22, alpha: a * k4, progress: easeOut((t - 47.0) / 0.6) });
-    this.text(x, 'контроль торка', pc[0] - 40, pc[1] - 250, { size: 28, weight: 700, alpha: a * k4, color: COL.accent, align: 'center' });
+    this.text(x, 'контроль торка', pc[0] - 40, pc[1] - 256, { size: 36, weight: 700, alpha: a * k4, color: COL.accent, align: 'center' });
     // anchorage: the reciprocal force acts on the posterior teeth
     const p5 = this.at('14', M['14'].crown);
     const pa0 = this.proj([p5[0], fy, p5[2] - 2]), pa1 = this.proj([p5[0], fy, p5[2] + 6]);
     this.arrow(x, [pa0[0], pa0[1] + 175], [pa1[0], pa1[1] + 175], { color: COL.gold, width: 5, head: 20, alpha: a * k3 * 0.9 });
-    this.text(x, 'опора', (pa0[0] + pa1[0]) / 2, pa0[1] + 222, { size: 26, weight: 700, alpha: a * k3, color: COL.gold });
+    this.text(x, 'опора', (pa0[0] + pa1[0]) / 2, pa0[1] + 226, { size: 34, weight: 700, alpha: a * k3, color: COL.gold });
   }
 
   drawSubtitle(x, t) {
+    if (t < 5.3) return;                       // hook: the on-screen titles carry the message
     const cue = SUBS.find((c) => t >= c[0] && t < c[1]);
     if (!cue) return;
     const a = Math.min(smooth((t - cue[0]) / 0.15), smooth((cue[1] - t) / 0.15));
-    x.save(); x.font = `600 38px ${F}`;
+    x.save(); x.font = `600 42px ${F}`;
     const words = cue[2].split(' '), lines = []; let cur = '';
-    for (const w of words) { const s = cur ? cur + ' ' + w : w; if (x.measureText(s).width > 900 && cur) { lines.push(cur); cur = w; } else cur = s; }
+    for (const w of words) { const s = cur ? cur + ' ' + w : w; if (x.measureText(s).width > 860 && cur) { lines.push(cur); cur = w; } else cur = s; }
     lines.push(cur);
-    const lh = 52, y0 = 1700 - lines.length * lh;
+    const lh = 56, y0 = 1560 - lines.length * lh;
     const wmax = Math.max(...lines.map((l) => x.measureText(l).width));
     x.globalAlpha = a * 0.62; x.fillStyle = '#02060d';
     x.beginPath(); x.roundRect(W / 2 - wmax / 2 - 26, y0 - 14, wmax + 52, lines.length * lh + 24, 16); x.fill();
     x.restore();
-    lines.forEach((l, i) => this.text(x, l, W / 2, y0 + 12 + i * lh + lh / 2 - 12, { size: 38, weight: 600, alpha: a, shadow: false }));
+    lines.forEach((l, i) => this.text(x, l, W / 2, y0 + 12 + i * lh + lh / 2 - 12, { size: 42, weight: 600, alpha: a, shadow: false }));
   }
 
   grab(type = 'image/jpeg', q = 0.95) { return this.out.toDataURL(type, q); }

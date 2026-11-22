@@ -18,7 +18,7 @@ characteristics — sagittal skeletal relationship (Class I / II / III) and vert
 
 | Time | Scene | Content |
 |---|---|---|
-| 00:00–00:05 | 01 Intro | Skull on screen from the first frame, strict lateral view, static camera; *9 SKELETAL FACIAL PATTERNS* / *SAGITTAL × VERTICAL* |
+| 00:00–00:05 | 01 Intro | Skull on screen from the first frame, strict lateral view, static camera; voiced call to action «Подпишись, чтобы не пропустить продолжение» (ElevenLabs, voice Evgeniy Rybakov, `assets/voice/cta_subscribe.mp3`) with matching on-screen text; *9 SKELETAL FACIAL PATTERNS* / *SAGITTAL × VERTICAL* |
 | 00:05–00:13 | 02 Sagittal | Skull centres; *SAGITTAL RELATIONSHIP*: Class I → II → III by anatomical morphing; S–N, N–A, N–B tracing |
 | 00:13–00:21 | 03 Vertical | *VERTICAL PATTERN*: hypo → normo → hyperdivergent; mandibular plane (Go–Me) against S–N, lower-face-height bracket |
 | 00:21–00:35 | 04 Matrix | Camera pulls back, one skull becomes nine; 3 × 3 matrix (columns Class I/II/III, rows hypo/normo/hyper), static ≈ 9 s, S–N and Go–Me in every cell |
@@ -104,4 +104,4 @@ tools/                skull export (bpy), landmark tools, offline render, encodi
   Z-Anatomy (Gauthier Kervyn, Marcin Zielinski), derived from BodyParts3D © The Database Center for
   Life Science (CC BY-SA 2.1 JP). Attribution is shown on screen in the matrix scene.
 * three.js, mp4-muxer — MIT (`vendor/…/LICENSE`). Montserrat, Inter — SIL Open Font License 1.1.
-* Soundtrack — generated procedurally by `tools/build_audio.mjs`, no third-party music.
+* Soundtrack — generated procedurally by `tools/build_audio.mjs`, no third-party music. Voice line generated with ElevenLabs on the project owner's account.

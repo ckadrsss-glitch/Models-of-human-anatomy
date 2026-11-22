@@ -48,7 +48,7 @@ export class Film {
     this.geometry = await loadSkullGeometry('assets/skull');
     this.skulls = [];
     for (let i = 0; i < 9; i++) { const s = createSkull(this.geometry); sc.add(s.group); this.skulls.push(s); }
-    await Promise.all([document.fonts.load(CAPTION.font), document.fonts.load(`700 60px ${F}`), document.fonts.load(`600 30px ${F}`), document.fonts.load(`500 30px ${F}`), document.fonts.load(`400 24px ${F}`)]);
+    await Promise.all([document.fonts.load(`700 52px ${F}`, 'Подпишись'), document.fonts.load(`500 34px ${F}`, 'продолжение'), document.fonts.load(CAPTION.font), document.fonts.load(`700 60px ${F}`), document.fonts.load(`600 30px ${F}`), document.fonts.load(`500 30px ${F}`), document.fonts.load(`400 24px ${F}`)]);
     // compile all programs once
     this.renderFrame(0); this.renderFrame(Math.round(28 * FPS));
   }
@@ -126,7 +126,11 @@ export class Film {
   drawOverlay(x, t, st) {
     const A = (f) => f(t);
     // ---- scene 1: title
-    this.text(x, '9 SKELETAL FACIAL PATTERNS', W / 2, 330, { size: 64, weight: 700, alpha: A(TEXT.title), spacing: 1.5 });
+    this.text(x, '9 SKELETAL FACIAL PATTERNS', W / 2, 330, { size: 58, weight: 700, alpha: A(TEXT.title), spacing: 1.5 });
+    // call to action (voiced: assets/voice/cta_subscribe.mp3, 0.3 s)
+    const cta = A(TEXT.cta);
+    this.text(x, 'Подпишись,', W / 2, 1600, { size: 56, weight: 700, alpha: cta, spacing: 1 });
+    this.text(x, 'чтобы не пропустить продолжение', W / 2, 1670, { size: 36, weight: 600, color: C.accent, alpha: cta, spacing: 1 });
     this.text(x, 'SAGITTAL × VERTICAL', W / 2, 410, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.subtitle), spacing: 10 });
 
     // ---- scene 2: sagittal

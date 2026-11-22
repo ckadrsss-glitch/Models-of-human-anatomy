@@ -88,6 +88,7 @@ export function stateAt(t) {
 
 // ---------------------------------------------------------------- texts (alpha windows)
 export const TEXT = {
+  cta: (t) => win(t, 0.0, 3.8, 0.25, 0.6),
   title: (t) => win(t, 0.3, 5.4, 0.9, 0.6),
   subtitle: (t) => win(t, 0.9, 5.4, 0.9, 0.6),
   sagHeader: (t) => win(t, 5.6, 13.2, 0.7, 0.5),

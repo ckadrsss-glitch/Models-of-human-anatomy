@@ -78,8 +78,8 @@ export const CAMERA = [
   K(32.0, -90, -3, 180, [-11, 7, 8]),                  // lateral projection, anterior segment
   K(41.5, -84, -5, 172, [-11, 7, 8], 30, 'lin'),
   K(44.2, -90, 0, 140, [-4, 3, 10]),                   // biomechanics (sagittal)
-  K(48.0, -90, 0, 135, [-4, 3, 10], 30, 'lin'),
-  K(49.4, -90, -4, 210, [-6, 0, 2]),                  // comparison: profile, start (red) vs end
+  K(48.7, -90, 0, 134, [-4, 3, 10], 30, 'lin'),
+  K(50.0, -90, -4, 210, [-6, 0, 2]),                  // comparison: profile, start (red) vs end
   K(55.0, -86, -5, 250, [-6, 0, 2], 30, 'lin'),
 ];
 const EASE = { io: easeInOut, out: easeOut, lin: (x) => clamp01(x) };
@@ -102,24 +102,24 @@ export const VIS = {
   lower: (t) => 1 - ramp(t, 5.4, 6.8, smooth),                 // lower jaw (hook only)
   gingiva: (t) => 0.62 * (1 - 0.55 * win(t, 42.8, 48.6, 0.8, 0.8)),
   bone: (t) => 1 + 1.1 * win(t, 30.5, 48.6, 1.0, 0.8),         // bone emphasis in scenes 4–5
-  redFront: (t) => win(t, 1.6, 13.6, 0.7, 1.2),               // anterior teeth highlighted
+  redFront: (t) => win(t, 0.9, 12.6, 0.45, 0.9),               // on «вперёд?» (0.93 s)               // anterior teeth highlighted
   ghostPost: (t) => win(t, 14.0, 27.6, 0.8, 1.0),              // start positions of 4–7
   ghostAnt: (t) => win(t, 31.2, 43.2, 0.8, 0.8),               // start positions of 1–3
-  ghostAll: (t) => win(t, 48.8, OUTRO_T0 + 0.6, 0.8, 0.6),     // comparison
+  ghostAll: (t) => win(t, 49.1, OUTRO_T0 + 0.6, 0.8, 0.6),     // comparison
   gaps: (t) => win(t, 14.4, 42.0, 0.5, 0.8),
-  cr: (t) => win(t, 44.4, 48.4, 0.5, 0.5),
+  cr: (t) => win(t, 44.5, 48.9, 0.4, 0.5),
 };
 
 // ---------------------------------------------------------------- overlay text windows
 export const TEXT = {
   hook: (t) => win(t, 0.25, 5.3, 0.35, 0.5),
   backArrow: (t) => win(t, 3.0, 5.4, 0.5, 0.5),
-  retrArrows: (t) => win(t, 8.2, 13.2, 0.5, 0.6),
-  noSpace: (t) => win(t, 10.0, 13.4, 0.35, 0.6),
-  spaceCreated: (t) => win(t, 26.5, 30.0, 0.5, 0.6),
-  distArrows: (t) => win(t, 14.0, 25.6, 0.3, 0.4),
+  retrArrows: (t) => win(t, 7.6, 12.4, 0.4, 0.5),             // from «проблема» (7.73 s)
+  noSpace: (t) => win(t, 9.08, 12.4, 0.3, 0.5),               // on «пространство» (9.14 s)
+  spaceCreated: (t) => win(t, 27.38, 30.2, 0.4, 0.6),          // on «место» (27.44 s)
+  distArrows: (t) => win(t, 14.15, 25.6, 0.4, 0.4),            // after ДИСТАЛИЗАЦИЯ leaves
   tuberosity: (t) => win(t, 15.0, 25.8, 0.8, 0.6),
   retrVec: (t) => win(t, 31.4, 41.6, 0.6, 0.8),
-  bio: (t) => win(t, 44.4, 48.4, 0.5, 0.5),
-  compare: (t) => win(t, 49.0, OUTRO_T0 + 0.4, 0.7, 0.5),
+  bio: (t) => win(t, 44.5, 48.9, 0.4, 0.5),
+  compare: (t) => win(t, 49.3, OUTRO_T0 + 0.4, 0.6, 0.5),
 };

@@ -10,6 +10,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { BRAND, backgroundCanvas, drawLogo } from './brand.js';
 import { DURATION, FPS, OUTRO_T0, SUBS, SCHEDULE, VIS, TEXT, cameraAt, clamp01, smooth, lerp, ramp, win, easeOut } from './timeline.js';
 import { buildModel, poseAt, startPose, progress, apply, V } from './model.js';
+import { KEYWORDS, KW, SYNC, keywordState, focusLevel, activeStem } from './kinetic.js';
 
 const W = BRAND.width, H = BRAND.height;
 const F = BRAND.font;
@@ -334,7 +335,11 @@ export class Film {
       let glow = 0;
       if (th.k >= 4) { const [a, b] = SCHEDULE.dist[th.k]; glow = win(t, a - 0.2, b + 0.35, 0.35, 0.6); }
       else glow = 0.75 * win(t, SCHEDULE.retr[0] - 0.3, SCHEDULE.retr[1] + 0.4, 0.6, 0.8);
-      o.mat.userData.u.uGlowAmt.value = glow * 0.55;
+      // keyword emphasis (HEAR → READ → SEE): soft glow on the teeth the narration talks about
+      const kwGlow = th.k >= 4 ? Math.max(focusLevel(t, 'posterior'), 0) : Math.max(focusLevel(t, 'anterior'), focusLevel(t, 'control'));
+      const kwAnchor = th.k >= 4 ? focusLevel(t, 'anchor') : 0;
+      o.mat.userData.u.uGlow.value.set(kwAnchor > 0.01 ? COL.gold : COL.cyan);
+      o.mat.userData.u.uGlowAmt.value = Math.max(glow * 0.55, kwGlow * 0.6, kwAnchor * 0.55);
       // ghost of the start position
       const ga = th.k >= 4 ? ghostP : ghostA;
       const gAll = ghostAll;
@@ -376,21 +381,25 @@ export class Film {
       const hgt = 6.8, dep = g.A.th.k >= 5 ? 9.5 : 8.2;
       g.m.scale.set(len, hgt, dep);
       g.mat.uniforms.uSize.value.set(len, hgt, dep);
-      g.mat.uniforms.uAlpha.value = a;
+      g.mat.uniforms.uAlpha.value = Math.min(1, a * (1 + 0.9 * focusLevel(t, 'gaps')));
+      g.center = [mid[0], crownY + 0.6, mid[2]];
     }
 
     this.renderer.render(this.scene, this.camera);
     const x = this.ctx;
     x.globalAlpha = 1;
     x.drawImage(this.renderer.domElement, 0, 0);
+    this.dim = 1 - 0.6 * focusLevel(t);      // secondary labels step back while a keyword is shown
     this.drawOverlay(x, t, P);
+    this.drawKeywords(x, t);
     if (this.subtitles) this.drawSubtitle(x, t);
     if (t >= OUTRO_T0) outro(x, t - OUTRO_T0, this.bgCanvas);
     return this.out;
   }
 
   applyCamera(t) {
-    const c = cameraAt(t);
+    const c = { ...cameraAt(t) };
+    c.dist *= 1 - 0.022 * focusLevel(t);     // gentle push-in towards the active region on each keyword
     const az = c.az * DEG, el = c.el * DEG;
     const dir = [Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)];
     const up = [-Math.sin(el) * Math.sin(az), Math.cos(el), -Math.sin(el) * Math.cos(az)];
@@ -523,9 +532,9 @@ export class Film {
     // ---- scene 2: where does the space come from?
     const ra = TEXT.retrArrows(t);
     if (ra > 0) {
-      const p = clamp01((t - 8.3) / 1.4);
-      const halt = t > 9.75;                                     // the arrows stop: no space
-      const shake = halt ? Math.sin((t - 9.75) * 40) * Math.exp(-(t - 9.75) * 4) * 6 : 0;
+      const p = clamp01((t - SYNC.problem) / 1.3);             // grows from «проблема»
+      const halt = t > SYNC.noSpace - 0.08;                    // stops on «пространство»: no space
+      const shake = halt ? Math.sin((t - SYNC.noSpace) * 40) * Math.exp(-(t - SYNC.noSpace) * 5) * 3 : 0;
       for (const q of ['1', '2']) {
         const c3 = this.proj(this.at(q + '3', M[q + '3'].crown));
         const c4 = this.proj(this.at(q + '4', M[q + '4'].crown));
@@ -547,11 +556,11 @@ export class Film {
         x.save(); x.globalAlpha = ns; x.strokeStyle = COL.red; x.lineWidth = 6; x.setLineDash([14, 10]); x.lineCap = 'round';
         x.shadowColor = COL.red; x.shadowBlur = 18; x.beginPath(); x.moveTo(...p0); x.lineTo(...p1); x.stroke(); x.restore();
       }
-      const pop = 1 + 0.18 * Math.exp(-Math.max(0, t - 10.0) * 7);
+      const pop = 1 + 0.18 * Math.exp(-Math.max(0, t - SYNC.noSpace) * 7);
       x.save(); x.translate(W / 2, 1290); x.scale(pop, pop);
       this.text(x, 'NO SPACE', 0, 0, { size: 104, weight: 800, alpha: ns, spacing: 8, color: COL.red, glow: 'rgba(255,90,78,0.7)' });
       x.restore();
-      this.text(x, 'нет места для ретракции', W / 2, 1385, { size: 40, weight: 600, alpha: ns * smooth((t - 10.4) / 0.4), color: COL.dim, spacing: 1 });
+      this.text(x, 'нет места для ретракции', W / 2, 1385, { size: 40, weight: 600, alpha: ns * smooth((t - SYNC.noSpace - 0.4) / 0.4), color: COL.dim, spacing: 1 });
     }
 
     // ---- scene 3: sequential distalisation
@@ -576,16 +585,16 @@ export class Film {
         const [a, b] = SCHEDULE.dist[k];
         const active = win(t, a - 0.1, b + 0.1, 0.25, 0.25), done = t > b ? 1 : 0;
         const px = x0 + i * gap;
-        x.save(); x.globalAlpha = da;
+        x.save(); x.globalAlpha = da * this.dim;
         x.strokeStyle = active > 0.5 ? COL.cyan : done ? 'rgba(79,216,255,0.75)' : 'rgba(185,200,228,0.35)';
         x.lineWidth = 4; x.beginPath(); x.arc(px, y, 44, 0, Math.PI * 2); x.stroke();
         if (active > 0.01) { x.globalAlpha = da * active * 0.9; x.fillStyle = COL.cyan; x.shadowColor = COL.cyan; x.shadowBlur = 24; x.beginPath(); x.arc(px, y, 44, 0, Math.PI * 2); x.fill(); }
         x.restore();
-        this.text(x, String(k), px, y + 2, { size: 46, weight: 800, alpha: da, color: active > 0.5 ? '#03101f' : done ? COL.cyan : COL.dim, shadow: false });
-        if (i < 3) this.text(x, '→', px + gap / 2, y, { size: 34, weight: 700, alpha: da * 0.6, color: COL.dim, shadow: false });
+        this.text(x, String(k), px, y + 2, { size: 46, weight: 800, alpha: da * this.dim, color: active > 0.5 ? '#03101f' : done ? COL.cyan : COL.dim, shadow: false });
+        if (i < 3) this.text(x, '→', px + gap / 2, y, { size: 34, weight: 700, alpha: da * 0.6 * this.dim, color: COL.dim, shadow: false });
       });
-      this.text(x, 'вторые моляры → первые моляры → премоляры', W / 2, y + 86, { size: 32, weight: 600, alpha: da * 0.9, color: COL.dim });
-      this.text(x, 'схема · план лечения всегда индивидуален', W / 2, y + 136, { size: 28, weight: 500, alpha: da * 0.75 * smooth((t - 15.0) / 0.6), color: COL.dim });
+      this.text(x, 'вторые моляры → первые моляры → премоляры', W / 2, y + 86, { size: 32, weight: 600, alpha: da * 0.9 * this.dim, color: COL.dim });
+      this.text(x, 'схема · план лечения всегда индивидуален', W / 2, y + 136, { size: 28, weight: 500, alpha: da * 0.75 * this.dim * smooth((t - 15.0) / 0.6), color: COL.dim });
     }
     const tb = TEXT.tuberosity(t);
     if (tb > 0) {
@@ -600,11 +609,11 @@ export class Film {
       }
       // label in the empty palatal area between the two limits
       const l1 = this.proj(V.add(M['17'].crown, V.mul(M['17'].md, -6))), l2 = this.proj(V.add(M['27'].crown, V.mul(M['27'].md, -6)));
-      this.text(x, 'граница бугра', (l1[0] + l2[0]) / 2, (l1[1] + l2[1]) / 2 - 10, { size: 32, weight: 600, alpha: tb * 0.9, color: COL.gold, align: 'center' });
+      this.text(x, 'граница бугра', (l1[0] + l2[0]) / 2, (l1[1] + l2[1]) / 2 - 10, { size: 32, weight: 600, alpha: tb * 0.9 * this.dim, color: COL.gold, align: 'center' });
     }
     const sc = TEXT.spaceCreated(t);
     if (sc > 0) {
-      const pop = 1 + 0.1 * Math.exp(-Math.max(0, t - 26.5) * 6);
+      const pop = 1 + 0.1 * Math.exp(-Math.max(0, t - SYNC.place) * 6);
       x.save(); x.translate(W / 2, 330); x.scale(pop, pop);
       this.text(x, 'SPACE CREATED', 0, 0, { size: 92, weight: 800, alpha: sc, spacing: 6, color: COL.cyan, glow: 'rgba(79,216,255,0.75)' });
       x.restore();
@@ -625,10 +634,11 @@ export class Film {
       const apex = this.proj(this.at('11', th.apex));
       const sc_ = this.camScale();
       // crown moves more, apex less: controlled movement (root position monitored)
-      this.arrow(x, [tip[0] + 30, tip[1] - 18], [tip[0] - 4.6 * sc_ - 30, tip[1] - 18], { color: COL.cyan, width: 8, head: 30, alpha: rv * run, progress: easeOut((t - 31.4) / 0.9) });
-      this.arrow(x, [apex[0] + 22, apex[1]], [apex[0] - 1.2 * sc_ - 22, apex[1]], { color: COL.accent, width: 5, head: 20, alpha: rv * run * 0.95, progress: easeOut((t - 32.0) / 0.9) });
-      this.text(x, 'коронка', tip[0] - 2.3 * sc_, tip[1] + 40, { size: 34, weight: 600, alpha: rv * run, color: COL.cyan });
-      this.text(x, 'корень', apex[0] - 0.6 * sc_, apex[1] - 40, { size: 34, weight: 600, alpha: rv * run, color: COL.accent });
+      const fc = focusLevel(t, 'control');
+      this.arrow(x, [tip[0] + 30, tip[1] - 18], [tip[0] - 4.6 * sc_ - 30, tip[1] - 18], { color: COL.cyan, width: 8 + 4 * fc, head: 30 + 8 * fc, alpha: rv * run, progress: easeOut((t - 31.4) / 0.9) });
+      this.arrow(x, [apex[0] + 22, apex[1]], [apex[0] - 1.2 * sc_ - 22, apex[1]], { color: COL.accent, width: 5 + 4 * fc, head: 20 + 8 * fc, alpha: rv * run * Math.max(0.95, fc), progress: easeOut((t - 32.0) / 0.9) });
+      this.text(x, 'коронка', tip[0] - 2.3 * sc_, tip[1] + 40, { size: 34, weight: 600, alpha: rv * run * this.dim, color: COL.cyan });
+      this.text(x, 'корень', apex[0] - 0.6 * sc_, apex[1] - 40, { size: 34, weight: 600, alpha: rv * run * this.dim, color: COL.accent });
       // canine: distal vector into the space
       const c3 = M['13'];
       const cc = this.at('13', c3.crown);
@@ -645,7 +655,7 @@ export class Film {
     if (cp > 0) {
       this.tag(x, 'ДО', W / 2 - 130, 1330, { color: COL.red, alpha: cp, size: 38, fg: '#ffffff' });
       this.tag(x, 'ПОСЛЕ', W / 2 + 110, 1330, { color: '#f3efe6', alpha: cp, size: 38, fg: '#03101f' });
-      this.text(x, 'все зубы сохранены', W / 2, 1415, { size: 36, weight: 600, alpha: cp * smooth((t - 49.6) / 0.5), color: COL.dim, spacing: 1 });
+      this.text(x, 'все зубы сохранены', W / 2, 1415, { size: 36, weight: 600, alpha: cp * smooth((t - 49.9) / 0.5), color: COL.dim, spacing: 1 });
     }
   }
 
@@ -667,29 +677,33 @@ export class Film {
     const fy = tip[1] + 2.0;
     const pf0 = this.proj([cr[0], fy, tip[2] + 3.5]);
     const pf1 = this.proj([cr[0], fy, tip[2] - 12]);
-    const k1 = smooth((t - 44.5) / 0.5), k2 = smooth((t - 45.2) / 0.6), k3 = smooth((t - 46.1) / 0.6), k4 = smooth((t - 47.0) / 0.6);
+    // ЦС on «контролировать», reaction on the anchorage on «опору», then force, moment, counter-moment
+    const T2 = SYNC.control2, TA = SYNC.anchor, TF = TA + 0.8, TM = TA + 1.2, TC = TA + 1.75;
+    const k1 = smooth((t - T2) / 0.4), kA = smooth((t - TA) / 0.35), k2 = smooth((t - TF) / 0.5), k3 = smooth((t - TM) / 0.5), k4 = smooth((t - TC) / 0.5);
+    const dm = 0.45 + 0.55 * (1 - focusLevel(t, 'anchor'));
     // line of action (extended, dashed) and the retraction vector
     x.save(); x.globalAlpha = a * k2 * 0.6; x.strokeStyle = COL.white; x.lineWidth = 2.5; x.setLineDash([10, 12]);
     x.beginPath(); x.moveTo(pf0[0] + 160, pf0[1]); x.lineTo(pf1[0] - 260, pf1[1]); x.stroke(); x.restore();
-    this.arrow(x, pf0, pf1, { color: COL.cyan, width: 8, head: 30, alpha: a * k2, progress: easeOut((t - 45.2) / 0.6) });
+    this.arrow(x, pf0, pf1, { color: COL.cyan, width: 8, head: 30, alpha: a * k2, progress: easeOut((t - TF) / 0.5) });
     this.tag(x, 'F', pf1[0] - 34, pf1[1] - 50, { color: COL.cyan, alpha: a * k2, size: 34 });
     // perpendicular distance CR ↔ line of force (moment arm)
     x.save(); x.globalAlpha = a * k2 * 0.8; x.strokeStyle = COL.gold; x.lineWidth = 3; x.setLineDash([6, 8]);
     x.beginPath(); x.moveTo(pc[0], pc[1]); x.lineTo(pc[0], pf0[1]); x.stroke(); x.restore();
     // CR
     this.dot(x, pc, { r: 11, color: COL.accent, alpha: a * k1 });
-    this.tag(x, 'ЦС', pc[0] + 66, pc[1] - 8, { color: COL.accent, alpha: a * k1, size: 34 });
+    this.tag(x, 'ЦС', pc[0] + 66, pc[1] - 8, { color: COL.accent, alpha: a * k1 * dm, size: 34 });
     // tipping tendency (force occlusal to CR → crown lingual, root labial): red moment
-    this.arcArrow(x, pc, 120, Math.PI * 0.62, Math.PI * 1.18, { color: COL.red, width: 6, head: 22, alpha: a * k3, progress: easeOut((t - 46.1) / 0.6) });
+    this.arcArrow(x, pc, 120, Math.PI * 0.62, Math.PI * 1.18, { color: COL.red, width: 6, head: 22, alpha: a * k3, progress: easeOut((t - TM) / 0.5) });
     this.tag(x, 'M', pc[0] - 158, pc[1] - 96, { color: COL.red, alpha: a * k3, size: 34, fg: '#fff' });
     // counter-moment (torque control)
-    this.arcArrow(x, pc, 168, Math.PI * 1.22, Math.PI * 0.66, { color: COL.accent, width: 6, head: 22, alpha: a * k4, progress: easeOut((t - 47.0) / 0.6) });
+    this.arcArrow(x, pc, 168, Math.PI * 1.22, Math.PI * 0.66, { color: COL.accent, width: 6, head: 22, alpha: a * k4, progress: easeOut((t - TC) / 0.5) });
     this.text(x, 'контроль торка', pc[0] - 40, pc[1] - 256, { size: 36, weight: 700, alpha: a * k4, color: COL.accent, align: 'center' });
     // anchorage: the reciprocal force acts on the posterior teeth
     const p5 = this.at('14', M['14'].crown);
     const pa0 = this.proj([p5[0], fy, p5[2] - 2]), pa1 = this.proj([p5[0], fy, p5[2] + 6]);
-    this.arrow(x, [pa0[0], pa0[1] + 175], [pa1[0], pa1[1] + 175], { color: COL.gold, width: 5, head: 20, alpha: a * k3 * 0.9 });
-    this.text(x, 'опора', (pa0[0] + pa1[0]) / 2, pa0[1] + 226, { size: 34, weight: 700, alpha: a * k3, color: COL.gold });
+    const fa = focusLevel(t, 'anchor');
+    this.anchorPt = [(pa0[0] + pa1[0]) / 2, pa0[1] + 175];
+    this.arrow(x, [pa0[0], pa0[1] + 175], [pa1[0], pa1[1] + 175], { color: COL.gold, width: 5 + 4 * fa, head: 20 + 8 * fa, alpha: a * kA * 0.95, progress: easeOut((t - TA) / 0.45) });
   }
 
   drawSubtitle(x, t) {
@@ -706,7 +720,101 @@ export class Film {
     x.globalAlpha = a * 0.62; x.fillStyle = '#02060d';
     x.beginPath(); x.roundRect(W / 2 - wmax / 2 - 26, y0 - 14, wmax + 52, lines.length * lh + 24, 16); x.fill();
     x.restore();
-    lines.forEach((l, i) => this.text(x, l, W / 2, y0 + 12 + i * lh + lh / 2 - 12, { size: 42, weight: 600, alpha: a, shadow: false }));
+    const stem = activeStem(t);
+    lines.forEach((l, i) => {
+      const yy = y0 + 12 + i * lh + lh / 2 - 12;
+      if (!stem || !l.toLowerCase().includes(stem)) { this.text(x, l, W / 2, yy, { size: 42, weight: 600, alpha: a, shadow: false }); return; }
+      // word-by-word so the keyword can take the accent colour
+      x.save(); x.font = `600 42px ${F}`; const sp = x.measureText(' ').width; const ws = l.split(' ');
+      const widths = ws.map((w) => { x.font = `${w.toLowerCase().startsWith(stem) ? 800 : 600} 42px ${F}`; return x.measureText(w).width; }); x.restore();
+      let px = W / 2 - (widths.reduce((u, v) => u + v, 0) + sp * (ws.length - 1)) / 2;
+      ws.forEach((w, j) => {
+        const hit = w.toLowerCase().startsWith(stem);
+        this.text(x, w, px, yy, { size: 42, weight: hit ? 800 : 600, alpha: a, shadow: false, align: 'left', color: hit ? COL.cyan : '#ffffff' });
+        px += widths[j] + sp;
+      });
+    });
+  }
+
+  // ------------------------------------------------------------------ kinetic typography
+  kwColor(c) { return { cyan: COL.cyan, white: '#ffffff', gold: COL.gold, red: COL.red }[c]; }
+
+  /** layout slot → screen position of the keyword (kept inside the Reels safe area) */
+  kwPlace(k) {
+    const M = this.model.byFdi;
+    if (k.place === 'palate') {
+      // empty palatal area between the first molars in the occlusal view
+      const a = this.proj(this.at('16', M['16'].crown)), b = this.proj(this.at('26', M['26'].crown));
+      return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 40];
+    }
+    if (k.place === 'anchor' && this.anchorPt) return [this.anchorPt[0] + 30, Math.min(1405, this.anchorPt[1] + 98)];
+    if (k.place === 'low') return [W / 2, 1300];
+    return [W / 2, 330];
+  }
+
+  drawKeywords(x, t) {
+    for (const k of KEYWORDS) {
+      const s = keywordState(k, t);
+      if (!s || s.alpha <= 0.003) continue;
+      const [cx0, cy0] = this.kwPlace(k);
+      const cx = cx0 + k.dir[0] * s.drift, cy = cy0 + k.dir[1] * s.drift;
+      const col = this.kwColor(k.color);
+      // 3D-linked guides (one focal point: keyword ↔ the structure it names)
+      if (k.id === 'dist') this.distalGuides(x, s);
+      if (k.id === 'space') this.gapGuides(x, s, [cx, cy + k.size * 0.7]);
+      x.save();
+      x.font = `800 ${k.size}px ${F}`;
+      if ('letterSpacing' in x) x.letterSpacing = `${s.tracking.toFixed(1)}px`;
+      const w = x.measureText(k.text).width, h = k.size * 1.25;
+      x.translate(cx, cy); x.scale(s.scale, s.scale);
+      // directional reveal (wipe along the movement direction)
+      x.beginPath();
+      if (k.dir[0] < 0) x.rect(w / 2 + 20 - (w + 40) * s.reveal, -h, (w + 40) * s.reveal, h * 2);
+      else if (k.dir[0] > 0) x.rect(-w / 2 - 20, -h, (w + 40) * s.reveal, h * 2);
+      else if (k.dir[1] > 0) x.rect(-w, -h / 2 - 10, w * 2, (h + 20) * s.reveal);
+      else x.rect(-w, h / 2 + 10 - (h + 20) * s.reveal, w * 2, (h + 20) * s.reveal);
+      x.clip();
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      // short motion-blur trail opposite to the movement (entrance only)
+      for (let i = 3; i >= 1 && s.blur > 0.02; i--) {
+        x.globalAlpha = s.alpha * 0.16 * s.blur; x.fillStyle = col;
+        x.fillText(k.text, -k.dir[0] * i * 9 * s.blur, -k.dir[1] * i * 9 * s.blur);
+      }
+      x.globalAlpha = s.alpha;
+      x.shadowColor = 'rgba(0,6,18,0.9)'; x.shadowBlur = 16; x.fillStyle = col; x.fillText(k.text, 0, 0);
+      if (k.color !== 'white') { x.globalCompositeOperation = 'lighter'; x.shadowColor = col; x.shadowBlur = 22; x.globalAlpha = s.alpha * 0.28 * (0.5 + 0.5 * s.pulse); x.fillText(k.text, 0, 0); }
+      x.restore();
+      // thin scientific underline growing with the reveal
+      x.save(); x.globalAlpha = s.alpha * 0.85; x.strokeStyle = col; x.lineWidth = 3; x.lineCap = 'round';
+      const uw = w * 0.42 * s.reveal * s.scale, uy = cy + k.size * 0.62;
+      x.beginPath(); x.moveTo(cx - uw, uy); x.lineTo(cx + uw, uy); x.stroke(); x.restore();
+    }
+  }
+
+  guide(x, a, b, color, alpha) {
+    if (alpha <= 0.003) return;
+    x.save(); x.globalAlpha = alpha * 0.7; x.strokeStyle = color; x.lineWidth = 2; x.setLineDash([4, 7]);
+    x.beginPath(); x.moveTo(...a); x.lineTo(...b); x.stroke(); x.setLineDash([]);
+    x.globalAlpha = alpha; x.fillStyle = color; x.beginPath(); x.arc(b[0], b[1], 5, 0, Math.PI * 2); x.fill(); x.restore();
+  }
+
+  /** ДИСТАЛИЗАЦИЯ: one clear distal vector along each buccal segment (premolars → second molar) */
+  distalGuides(x, s) {
+    const M = this.model.byFdi;
+    for (const q of ['1', '2']) {
+      const a4 = M[q + '4'], a7 = M[q + '7'];
+      const p0 = this.proj(V.add(this.at(q + '4', a4.crown), V.mul(a4.f, 11)));
+      const p1 = this.proj(V.add(V.add(this.at(q + '7', a7.crown), V.mul(a7.f, 11)), V.mul(a7.md, -5)));
+      this.arrow(x, p0, p1, { color: COL.cyan, width: 7, head: 28, alpha: s.alpha * 0.95, progress: s.reveal });
+    }
+  }
+
+  /** ПРОСТРАНСТВО: thin guides from the word to the space that is opening */
+  gapGuides(x, s, from) {
+    for (const g of this.gaps) {
+      if (!g.m.visible || !g.center) continue;
+      this.guide(x, from, this.proj(g.center), COL.cyan, s.alpha * s.reveal * Math.min(1, g.mat.uniforms.uAlpha.value * 2));
+    }
   }
 
   grab(type = 'image/jpeg', q = 0.95) { return this.out.toDataURL(type, q); }

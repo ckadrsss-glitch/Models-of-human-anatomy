@@ -9,6 +9,7 @@
 import fs from 'fs';
 import { execFileSync } from 'child_process';
 import { VOICE, DURATION, SCHEDULE, OUTRO_T0 } from '../src/timeline.js';
+import { SYNC, KEYWORDS } from '../src/kinetic.js';
 const SR = 48000, DUR = DURATION, N = SR * DUR;
 const L = new Float32Array(N), R = new Float32Array(N);
 let seed = 2026; const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * 2 - 1;
@@ -58,11 +59,13 @@ function thud(t0, gain) {
 whoosh(0.0, 1.2, 0.9);                       // hook push-in
 [[5.7, 2.2, 0.45], [24.9, 2.4, 0.4], [30.1, 1.8, 0.4], [41.8, 2.2, 0.4], [48.0, 1.4, 0.35], [OUTRO_T0 - 0.2, 1.2, 0.35]].forEach((w) => whoosh(...w));
 tone(3.05, 392, 0.9, 0.05, 5);               // back arrow
-thud(9.78, 0.32); tone(10.0, 155.56, 1.2, 0.05, 3);   // arrows stop · NO SPACE
+thud(SYNC.noSpace - 0.05, 0.32); tone(SYNC.noSpace, 155.56, 1.2, 0.05, 3);   // arrows stop · NO SPACE (on «пространство»)
 for (const k of [7, 6, 5, 4]) { const [, b] = SCHEDULE.dist[k]; tone(b - 0.05, 880 + (7 - k) * 110, 0.6, 0.03, 9); }
-tone(26.5, 1318.5, 1.6, 0.04, 2.5); tone(26.53, 1760, 1.6, 0.03, 2.5); tone(26.56, 2093, 1.6, 0.02, 2.5); // SPACE CREATED
+tone(SYNC.place, 1318.5, 1.6, 0.04, 2.5); tone(SYNC.place + 0.03, 1760, 1.6, 0.03, 2.5); tone(SYNC.place + 0.06, 2093, 1.6, 0.02, 2.5); // SPACE CREATED
 tone(SCHEDULE.retr[1] - 0.1, 659.25, 1.0, 0.03, 4);
-[[44.5, 880], [45.2, 987.77], [46.1, 783.99], [47.0, 1046.5]].forEach(([t, f]) => tone(t, f, 0.5, 0.025, 10));
+[[SYNC.control2, 880], [SYNC.anchor + 0.8, 987.77], [SYNC.anchor + 1.2, 783.99], [SYNC.anchor + 1.75, 1046.5]].forEach(([t, f]) => tone(t, f, 0.5, 0.025, 10));
+// a very soft 'tick' under each keyword entrance (no new music)
+KEYWORDS.forEach((k) => tone(k.at - 0.04, 1567.98, 0.35, 0.012, 14));
 tone(OUTRO_T0 + 0.55, 440, 2.4, 0.05, 1.6); tone(OUTRO_T0 + 0.57, 659.25, 2.4, 0.04, 1.6); tone(OUTRO_T0 + 1.15, 880, 2, 0.035, 1.8);
 
 function wav(path, Lc, Rc) {

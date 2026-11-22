@@ -9,7 +9,8 @@ export const SCENES = [
   { id: '01', name: 'Intro', t0: 0, t1: 5 },
   { id: '02', name: 'Sagittal', t0: 5, t1: 13 },
   { id: '03', name: 'Vertical', t0: 13, t1: 21 },
-  { id: '04', name: '9 patterns', t0: 21, t1: 37 },
+  { id: '04', name: '9 patterns', t0: 21, t1: 34.8 },
+  { id: '04b', name: 'Next: Jarabak', t0: 34.8, t1: 37 },
   { id: '05', name: 'Outro', t0: 37, t1: 40 },
 ];
 
@@ -45,6 +46,7 @@ const S_KEYS = [[6.3, 0], [7.6, 0], [8.8, 1], [10.0, 1], [11.5, -1], [12.6, -1],
 const V_KEYS = [[13.5, 0], [14.7, -1], [16.0, -1], [17.1, 0], [18.3, 0], [19.5, 1]];
 
 export const T_GRID0 = 21.0, T_GRID1 = 24.6;
+export const T_TEASE = 34.0;   // matrix dissolves → teaser for the next film (Jarabak analysis) → brand outro at 37 s
 
 /** camera: k = px per mm, (cz, cy) = world point at the frame centre */
 function camera(t) {
@@ -78,7 +80,7 @@ export function stateAt(t) {
       const px = lerp(540, GRID.colX[c], u), py = lerp(960 - (0 - cam.cy) * cam.k, GRID.rowY[r], u);
       const z = (px - 540) / cam.k + cam.cz, y = -(py - 960) / cam.k + cam.cy;
       const s = lerp(0, COLS[c].s, m), v = lerp(1, ROWS[r].v, m);
-      skulls.push({ s, v, z, y, depth: isOrig ? 0 : 40 + 6 * n++, alpha: 1, cell: [c, r] });
+      skulls.push({ s, v, z, y, depth: isOrig ? 0 : 40 + 6 * n++, alpha: 1 - smooth((t - T_TEASE) / 0.8), cell: [c, r] });
     }
   }
   return { t, cam, skulls };
@@ -96,17 +98,21 @@ export const TEXT = {
   hypo: (t) => win(t, 13.9, 16.4, 0.5, 0.45),
   normo: (t) => win(t, 16.5, 18.75, 0.5, 0.45),
   hyper: (t) => win(t, 18.85, 21.0, 0.5, 0.45),
-  gridTitle: (t) => win(t, 23.6, 37.6, 0.9, 0.3),
-  colHead: (t) => win(t, 23.9, 37.6, 0.8, 0.3),
-  rowHead: (t) => win(t, 24.3, 37.6, 0.8, 0.3),
-  footnote: (t) => win(t, 25.0, 37.6, 1.0, 0.3),
-  attribution: (t) => win(t, 25.6, 37.6, 1.0, 0.3),
+  gridTitle: (t) => win(t, 23.6, 34.8, 0.9, 0.7),
+  colHead: (t) => win(t, 23.9, 34.8, 0.8, 0.7),
+  rowHead: (t) => win(t, 24.3, 34.8, 0.8, 0.7),
+  footnote: (t) => win(t, 25.0, 34.8, 1.0, 0.7),
+  attribution: (t) => win(t, 25.6, 34.8, 1.0, 0.7),
 };
 
 /** cephalometric line visibility */
 export const LINES = {
   sagittal: (t) => win(t, 6.6, 13.3, 0.8, 0.6),     // S–N, N–A, N–B + points
   vertical: (t) => win(t, 13.4, 21.1, 0.8, 0.5),    // S–N, Go–Me, lower face height
-  grid: (t) => win(t, 26.2, 37.6, 1.4, 0.3),        // S–N & Go–Me in every cell
+  grid: (t) => win(t, 26.2, 34.8, 1.4, 0.7),        // S–N & Go–Me in every cell
+};
+export const TEASER = {
+  small: (t) => win(t, 34.9, 37.6, 0.7, 0.3),
+  big: (t) => win(t, 35.2, 37.6, 0.8, 0.3),
 };
 export const OUTRO_T0 = DURATION - 3; // brand-kit outro: exactly the last 3 s, as in every CK BIOMECHANICS film

@@ -8,7 +8,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { loadSkullGeometry, createSkull } from './skull.js';
 import { landmarks, clearance } from './morph.js';
 import { BRAND, backgroundCanvas, drawOutro, drawCaption, loadBackground, CAPTION } from './brand.js';
-import { stateAt, TEXT, LINES, COLS, ROWS, GRID, OUTRO_T0, DURATION, FPS } from './timeline.js';
+import { stateAt, TEXT, LINES, COLS, ROWS, GRID, OUTRO_T0, DURATION, FPS, TEASER } from './timeline.js';
 
 const W = BRAND.width, H = BRAND.height;
 const C = BRAND.colors;
@@ -168,6 +168,10 @@ export class Film {
       this.text(x, r.label, 60, y, { size: 30, weight: 600, alpha: rh, spacing: 6, align: 'left' });
     });
     if (st.skulls.length === 9) this.drawGridCeph(x, t, st);
+    // ---- teaser: the series continues with the Jarabak analysis
+    const ts = TEASER.small(t), tb = TEASER.big(t);
+    this.text(x, 'CONTINUED IN THE NEXT VIDEO', W / 2, 870, { size: 30, weight: 600, color: C.accent, alpha: ts, spacing: 8 });
+    this.text(x, 'JARABAK ANALYSIS', W / 2, 960, { size: 84, weight: 700, alpha: tb, spacing: 3 });
     this.text(x, 'Schematic representation of skeletal relationships', W / 2, 1770, { size: 27, weight: 500, alpha: A(TEXT.footnote) * 0.85 });
     this.text(x, 'Skull: Z-Anatomy / BodyParts3D © DBCLS · CC BY-SA 4.0', W / 2, 1812, { size: 20, weight: 400, alpha: A(TEXT.attribution) * 0.5 });
   }

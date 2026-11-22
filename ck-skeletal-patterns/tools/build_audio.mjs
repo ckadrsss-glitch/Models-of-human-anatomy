@@ -60,7 +60,7 @@ buf.writeUInt16LE(1, 20); buf.writeUInt16LE(2, 22); buf.writeUInt32LE(SR, 24); b
 buf.write('data', 36); buf.writeUInt32LE(N * 4, 40);
 for (let i = 0; i < N; i++) { buf.writeInt16LE(Math.round(Math.max(-1, Math.min(1, L[i])) * 32000), 44 + i * 4); buf.writeInt16LE(Math.round(Math.max(-1, Math.min(1, R[i])) * 32000), 46 + i * 4); }
 fs.mkdirSync('build', { recursive: true }); fs.writeFileSync('build/ambient.wav', buf);
-// mix: ambience + voiced call to action at 0.3 s (ElevenLabs, voice Evgeniy Rybakov), ambience only lightly ducked, voice kept soft
+// mix: ambience + voiced call to action at 0.3 s (ElevenLabs, voice «Принц Нури»), ambience only lightly ducked, voice kept soft
 execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', 'build/ambient.wav', '-i', 'assets/voice/cta_subscribe.mp3', '-filter_complex',
   "[0:a]volume='if(lt(t,3.3),0.85,1)':eval=frame[bg];[1:a]aresample=48000,aformat=channel_layouts=stereo,adelay=300|300,volume=0.8[vo];" +
   "[bg][vo]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11",

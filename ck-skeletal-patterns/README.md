@@ -18,7 +18,7 @@ characteristics — sagittal skeletal relationship (Class I / II / III) and vert
 
 | Time | Scene | Content |
 |---|---|---|
-| 00:00–00:05 | 01 Intro | Skull on screen from the first frame, strict lateral view, static camera; voiced call to action «Подпишись, чтобы не пропустить продолжение» (ElevenLabs, voice Evgeniy Rybakov, `assets/voice/cta_subscribe.mp3`) with matching on-screen text; *9 SKELETAL FACIAL PATTERNS* / *SAGITTAL × VERTICAL* |
+| 00:00–00:05 | 01 Intro | Skull on screen from the first frame, strict lateral view, static camera; voiced call to action «Подпишись, чтобы не пропустить продолжение» (ElevenLabs, voice «Принц Нури», `assets/voice/cta_subscribe.mp3`) with matching on-screen text; *9 SKELETAL FACIAL PATTERNS* / *SAGITTAL × VERTICAL* |
 | 00:05–00:13 | 02 Sagittal | Skull centres; *SAGITTAL RELATIONSHIP*: Class I → II → III by anatomical morphing; S–N, N–A, N–B tracing |
 | 00:13–00:21 | 03 Vertical | *VERTICAL PATTERN*: hypo → normo → hyperdivergent; mandibular plane (Go–Me) against S–N, lower-face-height bracket |
 | 00:21–00:35 | 04 Matrix | Camera pulls back, one skull becomes nine; 3 × 3 matrix (columns Class I/II/III, rows hypo/normo/hyper), static ≈ 9 s, S–N and Go–Me in every cell |

@@ -589,7 +589,7 @@ export class Film {
     if (cp > 0) {
       this.tag(x, 'ДО', W / 2 - 120, 1330, { color: COL.red, alpha: cp, size: 32, fg: '#ffffff' });
       this.tag(x, 'ПОСЛЕ', W / 2 + 100, 1330, { color: '#f3efe6', alpha: cp, size: 32, fg: '#03101f' });
-      this.text(x, 'все зубы сохранены', W / 2, 1410, { size: 30, weight: 600, alpha: cp * smooth((t - 50.4) / 0.5), color: COL.dim, spacing: 1 });
+      this.text(x, 'все зубы сохранены', W / 2, 1410, { size: 30, weight: 600, alpha: cp * smooth((t - 49.6) / 0.5), color: COL.dim, spacing: 1 });
     }
   }
 

@@ -11,8 +11,8 @@ export const SCENES = [
   { id: '02', name: 'Где взять место?', t0: 5, t1: 13 },
   { id: '03', name: 'Дистализация', t0: 13, t1: 30 },
   { id: '04', name: 'Ретракция фронта', t0: 30, t1: 43 },
-  { id: '05', name: 'Биомеханика', t0: 43, t1: 49 },
-  { id: '06', name: 'Финал', t0: 49, t1: 55 },
+  { id: '05', name: 'Биомеханика', t0: 43, t1: 48.2 },
+  { id: '06', name: 'Финал', t0: 48.2, t1: 55 },
 ];
 
 // Voice-over: ElevenLabs, voice “Evgeniy Rybakov” (ws3YyKFd5whKb21yaXES), eleven_multilingual_v2.
@@ -23,7 +23,7 @@ export const VOICE = [
   { file: 'assets/voice/vo3.mp3', start: 13.6, dur: 7.55, text: 'Один из вариантов — дистализация. Мы последовательно перемещаем боковые зубы назад, освобождая пространство для передних.' },
   { file: 'assets/voice/vo4.mp3', start: 30.5, dur: 4.31, text: 'Теперь созданное пространство можно использовать для ретракции фронтальной группы.' },
   { file: 'assets/voice/vo5.mp3', start: 43.4, dur: 4.36, text: 'Но важно не просто переместить коронки, а контролировать корни и опору.' },
-  { file: 'assets/voice/vo6.mp3', start: 49.4, dur: 4.00, text: 'В ортодонтии главное — не просто двигать зубы, а понимать биомеханику.' },
+  { file: 'assets/voice/vo6.mp3', start: 48.2, dur: 4.00, text: 'В ортодонтии главное — не просто двигать зубы, а понимать биомеханику.' },
 ];
 
 // Subtitle chunks (short lines for a 9:16 frame), timed inside each voice clip
@@ -33,7 +33,7 @@ export const SUBS = [
   [13.6, 15.55, 'Один из вариантов — дистализация.'], [15.55, 18.6, 'Мы последовательно перемещаем боковые зубы назад,'], [18.6, 21.4, 'освобождая пространство для передних.'],
   [30.5, 32.45, 'Теперь созданное пространство'], [32.45, 35.0, 'можно использовать для ретракции фронтальной группы.'],
   [43.4, 45.6, 'Но важно не просто переместить коронки,'], [45.6, 47.95, 'а контролировать корни и опору.'],
-  [49.4, 51.3, 'В ортодонтии главное — не просто двигать зубы,'], [51.3, 53.5, 'а понимать биомеханику.'],
+  [48.2, 50.2, 'В ортодонтии главное — не просто двигать зубы,'], [50.2, 51.9, 'а понимать биомеханику.'],
 ];
 
 // ---------------------------------------------------------------- helpers
@@ -72,8 +72,8 @@ export const CAMERA = [
   K(32.0, -90, -3, 180, [-11, 7, 8]),                  // lateral projection, anterior segment
   K(41.5, -84, -5, 172, [-11, 7, 8], 30, 'lin'),
   K(44.2, -90, 0, 140, [-4, 3, 10]),                   // biomechanics (sagittal)
-  K(48.8, -90, 0, 134, [-4, 3, 10], 30, 'lin'),
-  K(50.2, -90, -4, 210, [-6, 0, 2]),                  // comparison: profile, start (red) vs end
+  K(48.0, -90, 0, 135, [-4, 3, 10], 30, 'lin'),
+  K(49.4, -90, -4, 210, [-6, 0, 2]),                  // comparison: profile, start (red) vs end
   K(55.0, -86, -5, 250, [-6, 0, 2], 30, 'lin'),
 ];
 const EASE = { io: easeInOut, out: easeOut, lin: (x) => clamp01(x) };
@@ -94,14 +94,14 @@ export function cameraAt(t) {
 export const VIS = {
   skin: (t) => 1 - ramp(t, 1.3, 3.2, smooth),                  // soft tissue becomes translucent, then disappears
   lower: (t) => 1 - ramp(t, 5.4, 6.8, smooth),                 // lower jaw (hook only)
-  gingiva: (t) => 0.62 * (1 - 0.55 * win(t, 42.8, 49.2, 0.8, 0.8)),
-  bone: (t) => 1 + 1.1 * win(t, 30.5, 49.2, 1.0, 0.8),         // bone emphasis in scenes 4–5
+  gingiva: (t) => 0.62 * (1 - 0.55 * win(t, 42.8, 48.6, 0.8, 0.8)),
+  bone: (t) => 1 + 1.1 * win(t, 30.5, 48.6, 1.0, 0.8),         // bone emphasis in scenes 4–5
   redFront: (t) => win(t, 2.4, 13.6, 0.7, 1.2),               // anterior teeth highlighted
   ghostPost: (t) => win(t, 14.0, 27.6, 0.8, 1.0),              // start positions of 4–7
   ghostAnt: (t) => win(t, 31.2, 43.2, 0.8, 0.8),               // start positions of 1–3
-  ghostAll: (t) => win(t, 49.6, OUTRO_T0 + 0.6, 0.8, 0.6),     // comparison
+  ghostAll: (t) => win(t, 48.8, OUTRO_T0 + 0.6, 0.8, 0.6),     // comparison
   gaps: (t) => win(t, 14.4, 42.0, 0.5, 0.8),
-  cr: (t) => win(t, 44.4, 49.0, 0.5, 0.5),
+  cr: (t) => win(t, 44.4, 48.4, 0.5, 0.5),
 };
 
 // ---------------------------------------------------------------- overlay text windows
@@ -114,6 +114,6 @@ export const TEXT = {
   distArrows: (t) => win(t, 14.0, 25.6, 0.3, 0.4),
   tuberosity: (t) => win(t, 15.0, 25.8, 0.8, 0.6),
   retrVec: (t) => win(t, 31.4, 41.6, 0.6, 0.8),
-  bio: (t) => win(t, 44.4, 49.1, 0.5, 0.5),
-  compare: (t) => win(t, 49.8, OUTRO_T0 + 0.4, 0.7, 0.5),
+  bio: (t) => win(t, 44.4, 48.4, 0.5, 0.5),
+  compare: (t) => win(t, 49.0, OUTRO_T0 + 0.4, 0.7, 0.5),
 };

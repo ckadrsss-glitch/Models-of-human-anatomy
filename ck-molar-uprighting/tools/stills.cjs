@@ -8,7 +8,7 @@ const fs = require('fs'), path = require('path');
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
   p.on('pageerror', (e) => console.log('pageerror', e.message));
   p.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('console:', m.text()); });
-  await p.goto(`http://localhost:${port}/index.html?render=1${process.env.SUBS ? "&subs=1" : ""}${process.env.LOOK ? "&look=" + process.env.LOOK : ""}`); await p.waitForFunction('window.ready===true', null, { timeout: 300000 });
+  await p.goto(`http://localhost:${port}/index.html?render=1${process.env.DC ? "&dc=1" : ""}${process.env.SUBS ? "&subs=1" : ""}${process.env.LOOK ? "&look=" + process.env.LOOK : ""}`); await p.waitForFunction('window.ready===true', null, { timeout: 300000 });
   for (const t of ts) {
     const t0 = Date.now();
     const data = await p.evaluate((t) => { CK.renderTime(+t); return CK.grab('image/jpeg', 0.92); }, t);

@@ -3,14 +3,18 @@
 // headless render API (window.CK) for tools/render.cjs.
 import { Film } from './film.js';
 import { SCENES, DURATION, FPS } from './timeline.js';
+import { DURATION_DC } from './dc.js';
 
 const q = new URLSearchParams(location.search);
 const RENDER = q.has('render');
 const film = new Film();
+film.dc = q.has('dc');                 // DOUBLE CANTILEVER edit (src/dc.js); without ?dc the original film
 film.subtitles = q.get('subs') !== '0';
 film.setLook((q.get('look') || 'B').toUpperCase());
 const $ = (id) => document.getElementById(id);
-const NAME = 'CK_BIOMECHANICS_Molar_Uprighting_FINAL';
+const NAME = film.dc ? 'CK_BIOMECHANICS_Molar_Uprighting_Double_Cantilever_FINAL' : 'CK_BIOMECHANICS_Molar_Uprighting_FINAL';
+const DUR = film.dc ? DURATION_DC : DURATION;
+if (film.dc) document.getElementById('audio')?.setAttribute('src', 'assets/audio/mix_dc.m4a');
 
 $('stage').appendChild(film.out);
 if (RENDER) document.body.classList.add('render');
@@ -22,7 +26,7 @@ try {
   const l = $('loading'); if (l) l.textContent = 'Не удалось загрузить 3D-сцену. Откройте проект через веб-сервер (см. README).';
   throw e;
 }
-window.CK = { duration: DURATION, fps: FPS, renderFrame: (i) => film.renderFrame(i), renderTime: (t) => film.renderTime(t), grab: (t, qq) => film.grab(t, qq), setSubtitles: (on) => { film.subtitles = on; } };
+window.CK = { duration: DUR, fps: FPS, renderFrame: (i) => film.renderFrame(i), renderTime: (t) => film.renderTime(t), grab: (t, qq) => film.grab(t, qq), setSubtitles: (on) => { film.subtitles = on; } };
 window.ready = true;
 $('loading')?.remove();
 
@@ -32,9 +36,9 @@ if (!RENDER) {
   const scrub = $('scrub'), time = $('time');
   const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${(s % 60).toFixed(1).padStart(4, '0')}`;
   function draw() {
-    film.renderTime(t); scrub.value = t / DURATION * 1000;
-    scrub.style.setProperty('--p', `${t / DURATION * 100}%`);
-    time.textContent = `${fmt(t)} / ${fmt(DURATION)}`;
+    film.renderTime(t); scrub.value = t / DUR * 1000;
+    scrub.style.setProperty('--p', `${t / DUR * 100}%`);
+    time.textContent = `${fmt(t)} / ${fmt(DUR)}`;
     document.querySelectorAll('#scenes button').forEach((b, i) => b.classList.toggle('on', t >= SCENES[i].t0 && t < SCENES[i].t1));
   }
   function syncAudio(force = false) {
@@ -53,16 +57,16 @@ if (!RENDER) {
       if (!audio.paused && !audio.muted && audio.readyState >= 2 && !audio.ended) t = audio.currentTime;
       else t += (now - last) / 1000;
       last = now;
-      if (t >= DURATION) { t = DURATION - 1e-3; setPlaying(false); if (recording) recording.stop(); }
+      if (t >= DUR) { t = DUR - 1e-3; setPlaying(false); if (recording) recording.stop(); }
       draw();
     }
     requestAnimationFrame(loop);
   }
-  const togglePlay = () => { if (t >= DURATION - 0.01) t = 0; setPlaying(!playing); };
+  const togglePlay = () => { if (t >= DUR - 0.01) t = 0; setPlaying(!playing); };
   $('play').onclick = togglePlay;
   film.out.addEventListener('click', togglePlay);
   $('restart').onclick = () => { t = 0; draw(); setPlaying(true); };
-  scrub.oninput = () => { t = scrub.value / 1000 * DURATION; draw(); syncAudio(true); };
+  scrub.oninput = () => { t = scrub.value / 1000 * DUR; draw(); syncAudio(true); };
 
   // fullscreen (iPhone Safari cannot fullscreen an element → CSS pseudo-fullscreen)
   const player = $('player');
@@ -81,7 +85,7 @@ if (!RENDER) {
   window.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
     if (e.code === 'Space' || e.key === 'k') { e.preventDefault(); togglePlay(); }
-    else if (e.code === 'ArrowRight') { e.preventDefault(); t = Math.min(DURATION - 1e-3, t + (e.shiftKey ? 1 : 1 / FPS)); draw(); syncAudio(true); }
+    else if (e.code === 'ArrowRight') { e.preventDefault(); t = Math.min(DUR - 1e-3, t + (e.shiftKey ? 1 : 1 / FPS)); draw(); syncAudio(true); }
     else if (e.code === 'ArrowLeft') { e.preventDefault(); t = Math.max(0, t - (e.shiftKey ? 1 : 1 / FPS)); draw(); syncAudio(true); }
     else if (e.key === 'f' || e.key === 'F' || e.key === 'а') toggleFs();
     else if (e.key === 'Escape') document.body.classList.remove('pseudo-fs');
@@ -140,7 +144,7 @@ if (!RENDER) {
     let pcm = null;
     try {
       const buf = await (await fetch(audio.currentSrc || audio.src)).arrayBuffer();
-      const oc = new OfflineAudioContext(2, 48000 * DURATION, 48000);
+      const oc = new OfflineAudioContext(2, 48000 * DUR, 48000);
       pcm = await oc.decodeAudioData(buf);
     } catch (e) { console.warn('audio decode failed', e); }
     const acfg = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: 2, bitrate: 160000 };
@@ -152,7 +156,7 @@ if (!RENDER) {
     if (withAudio) {
       const aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => console.warn(e) });
       aenc.configure(acfg);
-      const n = Math.min(pcm.length, 48000 * DURATION), L = pcm.getChannelData(0), R = pcm.numberOfChannels > 1 ? pcm.getChannelData(1) : L;
+      const n = Math.min(pcm.length, 48000 * DUR), L = pcm.getChannelData(0), R = pcm.numberOfChannels > 1 ? pcm.getChannelData(1) : L;
       for (let i = 0; i < n; i += 4800) {
         const len = Math.min(4800, n - i), data = new Float32Array(len * 2);
         data.set(L.subarray(i, i + len), 0); data.set(R.subarray(i, i + len), len);
@@ -161,7 +165,7 @@ if (!RENDER) {
       }
       await aenc.flush();
     }
-    const N = Math.round(DURATION * FPS);
+    const N = Math.round(DUR * FPS);
     for (let i = 0; i < N; i++) {
       film.renderFrame(i);
       const vf = new VideoFrame(film.out, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });

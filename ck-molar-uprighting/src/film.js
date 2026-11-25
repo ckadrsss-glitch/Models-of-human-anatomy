@@ -13,7 +13,10 @@ import { V, apply, applyDir, poseLerp, START, END_A, END_B, forceSystem } from '
 import { SCENE } from './scene.js';
 import { KEYWORDS, keywordState, kickerState, focusLevel } from './kinetic.js';
 import { solveDesign, centreLine } from './wire.js';
-import { bracketGeometry, tubeGeometry, sweepRect, resample, screwGeometry } from './geom.js';
+import { bracketGeometry, tubeGeometry, sweepRect, resample, screwGeometry, roundedBox } from './geom.js';
+import { EDIT, DURATION_DC, DS, W6, SUBS_DC, DELTA2, dcGeometry, forceSystemDC } from './dc.js';
+import { solve2, centreLine2, toLocal, toWorld } from './wire2.js';
+import { CAMERA } from './timeline.js';
 
 const W = BRAND.width, H = BRAND.height;
 const F = BRAND.font;
@@ -279,6 +282,8 @@ export class Film {
     this.chain = [];
     for (let i = 0; i < 9; i++) { const c = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.24, 10, 24), this.chainMat); c.renderOrder = 2; sc.add(c); this.chain.push(c); }
 
+    if (this.dc) this.initDC();
+
     // ---------------- occlusal contact points (closest pair at the closure stop), for the red highlight
     this.contactA = this.findContact(END_A, UPPER.stopA);
     this.contactB = this.findContact(END_B, UPPER.stopB);
@@ -318,8 +323,13 @@ export class Film {
   // ------------------------------------------------------------------ frame
   renderFrame(i) { return this.renderTime(i / FPS); }
 
-  renderTime(t) {
-    t = Math.min(Math.max(t, 0), DURATION - 1e-6);
+  renderTime(tIn) {
+    // DOUBLE CANTILEVER edit (src/dc.js): [EDIT.a, EDIT.join) = new scene; afterwards the original timeline shifted by EDIT.d
+    const dur = this.dc ? DURATION_DC : DURATION;
+    const tNew = Math.min(Math.max(tIn, 0), dur - 1e-6);
+    this.mode = !this.dc ? 'orig' : tNew >= EDIT.join ? 'remap' : tNew >= EDIT.a ? 'dc' : 'orig';
+    this.tNew = tNew;
+    const t = this.mode === 'remap' ? tNew - EDIT.d : tNew;
     this.t = t;
     this.applyCamera(t);
     this.updateScene(t);
@@ -328,9 +338,9 @@ export class Film {
     x.globalAlpha = 1;
     x.drawImage(this.renderer.domElement, 0, 0);
     x.drawImage(this.topShade ??= this.makeTopShade(), 0, 0);
-    this.drawOverlay(x, t);
-    this.drawKeywords(x, t);
-    if (this.subtitles) this.drawSubtitle(x, t);
+    if (this.mode === 'dc') { if (t < 40.6) this.drawOverlay(x, t); this.drawOverlayDC(x, t); this.drawKeywordsDC(x, t); }
+    else { this.drawOverlay(x, t); this.drawKeywords(x, t); }
+    if (this.subtitles) this.drawSubtitle(x, this.dc ? tNew : t);
     drawTopLabel(x, 1 - smooth((t - OUTRO_T0) / 0.6));
     if (t >= OUTRO_T0) outro(x, t - OUTRO_T0, this.bgCanvas);
     return this.out;
@@ -345,7 +355,7 @@ export class Film {
   }
 
   applyCamera(t) {
-    const c = { ...cameraAt(t) };
+    const c = { ...(this.mode === 'dc' ? this.cameraDC(t) : cameraAt(t)) };
     c.dist *= 1 - 0.018 * focusLevel(t);
     const az = c.az * DEG, el = c.el * DEG;
     const dir = [Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)];
@@ -358,7 +368,8 @@ export class Film {
 
   // ------------------------------------------------------------------ 3D state
   updateScene(t) {
-    const P = this.P = pose47At(t);
+    const O = this.mode === 'dc' ? this.dcState(t) : null;
+    const P = this.P = O ? O.P : pose47At(t);
     const pose = P.pose, L47 = this.L47;
     const lowA = VIS.lower(t), boneA = VIS.bone(t), clear = VIS.boneClear(t);
     // 47
@@ -366,10 +377,11 @@ export class Film {
     const crNow = V.add(L47.cr, pose.shift);
     t47.mesh.position.set(...crNow); t47.mesh.rotation.set(0, 0, pose.theta * DEG);
     // anchor segment (reciprocal intrusion, small)
-    const ai = anchorIntrusionAt(t);
+    // (double-cantilever edit: the vertical reactions on the anchor are balanced → no anchor intrusion)
+    const ai = this.aiNow = O ? O.ai : this.mode === 'remap' ? 0 : anchorIntrusionAt(t);
     this.anchorGroup.position.set(0, -ai, 0);
     // upper antagonists
-    const up = upperAt(t);
+    const up = O ? O.up : upperAt(t);
     this.upperGroup.position.set(0, up.dy, 0);
     // tooth visibility / emphasis
     for (const [n, o] of Object.entries(this.teeth)) {
@@ -381,7 +393,7 @@ export class Film {
     }
     // red interference highlight (scene 01 and 05), green-white normal contact (scene 06 end)
     const red = VIS.red47(t);
-    const okC = win(t, 50.6, 52.2, 0.15, 0.6);
+    const okC = O ? O.okC : win(t, 50.6, 52.2, 0.15, 0.6);
     for (const n of ['L47', 'U16', 'U17']) {
       const u = this.teeth[n].mat.userData.u;
       if (red > 0.002) { u.uSpot.value.set(...this.contactA); u.uSpotAmt.value = red; u.uSpotCol.value.set(COL.red); }
@@ -395,7 +407,7 @@ export class Film {
     const anchRed = 0.22 * Math.max(win(t, WT.intrusive - 0.05, WT.intrusive + 2.5, 0.25, 0.6), win(t, 34.0, 39.6, 0.6, 0.6) * 0.7);
     for (const n of ['L43', 'L44', 'L45']) this.teeth[n].mat.userData.u.uTintAmt.value = anchRed;
     // PDL
-    this.pdlMat.uniforms.uAlpha.value = VIS.pdl(t) * lowA;
+    this.pdlMat.uniforms.uAlpha.value = (O ? O.pdl : VIS.pdl(t)) * lowA;
     this.pdl.visible = this.pdlMat.uniforms.uAlpha.value > 0.003;
     // bone: normal translucency → see-through
     this.boneMat.uniforms.uAlpha.value = boneA;
@@ -403,17 +415,18 @@ export class Film {
     this.boneMat.uniforms.uRimA.value = lerp(0.42, 0.5, clear);
     this.bone.visible = boneA > 0.003;
     // ghosts
-    const gS = VIS.ghostStart(t) * lowA, gA = VIS.ghostA(t);
+    const gS = (O ? O.ghostS : VIS.ghostStart(t)) * lowA, gA = O ? 0 : VIS.ghostA(t);
     this.placeGhost(this.ghostS, START, gS * (P.s > 0.02 || t > 51 ? 1 : 0));
     this.placeGhost(this.ghostA, END_A, gA);
     // appliance
-    const apA = VIS.appliance(t);
+    const apA = VIS.appliance(O ? Math.min(t, 50.99) : t);
     for (const b of this.brackets) b.visible = apA > 0.004;
     this.anchorWire.visible = apA > 0.004; this.tube.visible = apA > 0.004;
     for (const m of this.metalMats) { m.transparent = true; }
     this.metal.opacity = apA;
     this.updateWire(t, pose);
     this.updateScrew(t, pose);
+    if (this.dc) this.updateDC(t, pose, apA);
   }
 
   placeGhost(mesh, pose, a) {
@@ -432,7 +445,7 @@ export class Film {
   }
 
   updateWire(t, pose) {
-    const a = VIS.cantilever(t);
+    const a = VIS.cantilever(this.mode === 'dc' ? Math.min(t, 50.99) : t);
     this.wire.visible = a > 0.004 && t >= 5.2;
     this.wireGhost.visible = false;
     if (!this.wire.visible) return;
@@ -442,7 +455,7 @@ export class Film {
     // Before the movement the passive design (δ0 gingival) is fixed; during the uprighting the cantilever
     // deactivates (residual activation δ falls to ~25 %) — the passive geometry is re-solved each frame so the
     // hook stays engaged on the anchor wire (periodic reactivation implied, as in the clinic).
-    const Ht = this.toTube(tf, V.add(this.hook, [0, -anchorIntrusionAt(t), 0]));
+    const Ht = this.toTube(tf, V.add(this.hook, [0, -this.aiNow, 0]));
     let design = this.design, defl;
     if (t < 26.2) {
       const cl0 = centreLine(this.design, { step: 1, helix: 1, tip: 1, hook: 1 });
@@ -484,7 +497,7 @@ export class Film {
   }
 
   updateScrew(t, pose) {
-    const a = VIS.screw(t);
+    const a = this.dc ? 0 : VIS.screw(t);
     this.screw.visible = a > 0.004;
     for (const c of this.chain) c.visible = false;
     if (!this.screw.visible) return;
@@ -517,6 +530,213 @@ export class Film {
     }
     this.chainA = A; this.chainB = hookW;
     this.chainMat.opacity = 0.95 * a;
+  }
+
+  // ================================================================== DOUBLE CANTILEVER edit (src/dc.js)
+  initDC() {
+    const hdr = this.hdr, L47 = this.L47, G = this.G = dcGeometry(hdr);
+    const metal = this.metal;
+    // vertical slot (auxiliary vertical tube) soldered to the distal end of the rigid anchor wire
+    const slot = new THREE.Group();
+    const body = new THREE.Mesh(roundedBox(1.25, 3.0, 1.25, 0.32), metal); body.position.set(...G.slotC); slot.add(body);
+    const lumen = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 3.02, 16), new THREE.MeshBasicMaterial({ color: 0x0b1420 }));
+    lumen.position.set(...V.add(G.slotC, [0, 0, 0])); lumen.visible = false; slot.add(lumen);
+    const sp = [G.wEnd, V.add(G.wEnd, [-0.2, 0.2, 1.2]), V.add(G.slotC, [0, -1.25, -0.55])];
+    const spur = new THREE.Mesh(sweepRect(resample(sp, 12), 0.7, 0.55, [0, 1, 0]), metal); slot.add(spur);
+    const solder = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 10), metal); solder.position.set(...G.wEnd); slot.add(solder);
+    this.slot = slot; this.anchorGroup.add(slot);
+    // distal extension of the wire bonded to 47 (child of 47: local = anatomical − CR), with a small occlusal stop at its end
+    const ext = [G.E0, V.lerp(G.E0, G.E1, 0.5), G.E1, V.add(G.E1, [0, 0.9, 0])].map((p) => V.sub(p, L47.cr));
+    this.extMat = steel(); this.metalMats.push(this.extMat);
+    this.ext = new THREE.Mesh(sweepRect(resample([ext[0], ext[1], ext[2]], 30), 0.62, 0.44, [0, 1, 0]), this.extMat);
+    const stop = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 10), this.extMat); stop.position.set(...ext[2]); this.ext.add(stop);
+    const barrel = new THREE.Mesh(roundedBox(2.6, 0.9, 0.9, 0.3), this.extMat);
+    barrel.position.set(...V.sub(V.add(G.E0, V.mul(G.de, 0.6)), L47.cr)); this.ext.add(barrel);
+    this.teeth.L47.mesh.add(this.ext);
+    // second cantilever (green) + its passive outline
+    this.base2 = solve2(V.add(toLocal(G.S0, apply(START, G.D, L47.cr)), [DELTA2, 0, 0]));
+    this.wire2Mat = steel(); this.metalMats.push(this.wire2Mat);
+    this.wire2Mat.emissive = new THREE.Color(COL.green);
+    const p0 = centreLine2(this.base2).pts.map((q) => toWorld(G.S0, q));
+    this.wire2 = new THREE.Mesh(sweepRect(resample(p0, 360), 0.62, 0.44, [1, 0, 0]), this.wire2Mat); this.wire2.renderOrder = 2; this.scene.add(this.wire2);
+    this.wire2GhostMat = ghostMaterial('#9df5c2');
+    this.wire2Ghost = new THREE.Mesh(sweepRect(resample(p0, 360), 0.62, 0.44, [1, 0, 0]), this.wire2GhostMat); this.wire2Ghost.renderOrder = 7; this.scene.add(this.wire2Ghost);
+    this.wireMat.emissive = new THREE.Color(COL.blue);
+  }
+
+  /** state overrides for the new scene (pose, anchor, antagonists, tissues) */
+  dcState(t) {
+    const d = EDIT.d;
+    let P;
+    if (t < DS.reset[1]) P = pose47At(t);
+    else if (t < DS.upright[0]) P = { pose: START, scen: 'B', s: 0 };
+    else { const s = ramp(t, ...DS.upright); P = { pose: poseLerp(START, END_B, s), scen: 'B', s }; }
+    const up = t < 41 ? upperAt(t) : t >= 48.6 + d ? upperAt(t - d) : { dy: UPPER.open, a: 0 };
+    return {
+      P, up,
+      ai: t < DS.reset[1] ? anchorIntrusionAt(t) : 0,
+      okC: t >= 48.6 + d ? win(t - d, 50.6, 52.2, 0.15, 0.6) : 0,
+      pdl: t < DS.reset[1] ? VIS.pdl(t) : 0.8 * win(t, DS.upright[0] - 0.6, 50.8 + d, 0.6, 0.6),
+      ghostS: t < DS.reset[1] ? VIS.ghostStart(t) : smooth((t - DS.upright[0] - 0.1) / 0.6),
+    };
+  }
+
+  /** camera of the new scene: starts on the original 39.8 s key, ends on the original 50.4 s key (shifted) */
+  cameraDC(t) {
+    const old = (tt) => cameraAt(tt), d = EDIT.d;
+    if (t < 39.8) return old(t);
+    if (t >= 50.4 + d) return old(t - d);
+    const K = (tt, az, el, dist, tgt) => ({ t: tt, az, el, dist, tgt });
+    const k39 = CAMERA.find((k) => k.t === 39.8), k50 = CAMERA.find((k) => k.t === 50.4);
+    const keys = [K(39.8, k39.az, k39.el, k39.dist, k39.tgt), K(41.2, -4, 4, 150, [15, 6, 2]), K(42.1, 14, 14, 104, [18, 9, 3]),
+      K(43.9, 9, 9, 128, [14, 8, 2]), K(46.4, 2, 4, 160, [16, 6, 1]), K(48.6, -2, 3, 140, [12, 6, 0]), K(50.4 + d, k50.az, k50.el, k50.dist, k50.tgt)];
+    for (let i = 1; i < keys.length; i++) if (t <= keys[i].t) {
+      const a = keys[i - 1], b = keys[i], u = easeInOut((t - a.t) / (b.t - a.t));
+      return { az: lerp(a.az, b.az, u), el: lerp(a.el, b.el, u), dist: Math.exp(lerp(Math.log(a.dist), Math.log(b.dist), u)), tgt: [0, 1, 2].map((k) => lerp(a.tgt[k], b.tgt[k], u)), fov: 30 };
+    }
+    return old(t - d);
+  }
+
+  /** slot, extension, second cantilever, colour coding of both cantilevers */
+  updateDC(t, pose, apA) {
+    const G = this.G, L47 = this.L47, tn = this.tNew, dc = this.mode === 'dc', remap = this.mode === 'remap';
+    // fade of the auxiliary parts: appear on «Второй кантилевер», leave with the cantilevers in scene 07
+    const auxA = dc ? smooth((t - DS.slotIn[0]) / (DS.slotIn[1] - DS.slotIn[0])) : remap ? VIS.cantilever(t) : 0;
+    this.slot.visible = auxA > 0.004; this.ext.visible = auxA > 0.004;
+    this.extMat.opacity = auxA;
+    if (this.slot.visible) this.slot.traverse((o) => { if (o.material && o.material !== this.metal) { o.material.transparent = true; o.material.opacity = auxA; } });
+    // the slot shares the bracket material (opacity apA); scale-in for the appearance
+    this.slot.scale.setScalar(1);
+    // colour coding: first cantilever blue, second green (soft emissive glow)
+    const glow = dc ? 0.85 * smooth((t - DS.v1Ext + 0.2) / 0.4) : remap ? 0.85 * (1 - smooth((t - 50.9) / 0.6)) : 0;
+    this.wireMat.emissiveIntensity = glow;
+    // second cantilever
+    const wa = dc ? smooth((t - DS.wire2In[0]) / (DS.wire2In[1] - DS.wire2In[0])) : remap ? VIS.cantilever(t) : 0;
+    this.wire2.visible = wa > 0.004; this.wire2Ghost.visible = false;
+    if (!this.wire2.visible) return;
+    this.wire2Mat.opacity = wa; this.wire2Mat.emissiveIntensity = 0.9 * wa;
+    const s = this.P.s, Dl = toLocal(G.S0, apply(pose, G.D, L47.cr));
+    const act = dc ? ramp(t, ...DS.activate2) : 1;
+    let design = this.base2, dDown;
+    if (dc && t < DS.upright[0]) dDown = DELTA2 * act;                    // passive → activated on the START pose
+    else { const d2 = DELTA2 * (1 - 0.75 * s); design = solve2(V.add(Dl, [d2, 0, 0]), this.base2); dDown = d2; }   // deactivates as the molar uprights
+    const ins = dc ? 1 - ramp(t, ...DS.insert2) : 0;                     // 1 = above the slot (before insertion)
+    const off = [0, 4.2 * ins, 1.6 * ins];
+    const pts = centreLine2(design, dDown).pts.map((q) => V.add(toWorld(G.S0, q), off));
+    sweepRect(resample(pts, 360), 0.62, 0.44, [1, 0, 0], this.wire2.geometry);
+    this.wire2World = pts; this.D_now = apply(pose, G.D, L47.cr);
+    const ga = dc ? win(t, DS.activate2[0] - 0.1, DS.balance[0], 0.3, 0.5) : 0;
+    if (ga > 0.004) {
+      const pp = centreLine2(this.base2).pts.map((q) => toWorld(G.S0, q));
+      sweepRect(resample(pp, 360), 0.62, 0.44, [1, 0, 0], this.wire2Ghost.geometry);
+      this.wire2GhostMat.uniforms.uAlpha.value = ga * 2.2; this.wire2Ghost.visible = true; this.passive2Tip = pp[pp.length - 1];
+    }
+  }
+
+  drawOverlayDC(x, t) {
+    const L47 = this.L47, G = this.G, P = this.P, pose = P.pose, d = EDIT.d;
+    const crNow = V.add(L47.cr, pose.shift), tf = this.tubeFrameAt(pose), tubeW = tf.c;
+    const hookW = V.add(this.hook, [0, -this.aiNow, 0]);
+    const Dw = apply(pose, G.D, L47.cr), slotW = G.slotC;
+    const f = forceSystemDC(L47, pose, hookW, G, 1);
+    const end = 50.9 + d;                                               // everything of this scene has left before the original continues
+    const sc = 7.2;
+    const bal = ramp(t, ...DS.balance, easeInOut);                     // compensation progress
+    const shrink = 1 - 0.78 * bal;                                     // opposite vertical vectors shrink together
+    const fadeUp = 1 - 0.55 * smooth((t - DS.upright[0]) / 0.8);       // vectors step back during the movement
+    // CR
+    const aCR = win(t, 41.0, end, 0.4, 0.5);
+    this.dot(x, this.proj(crNow), { alpha: aCR, r: 8 });
+    // 1–2: first cantilever (blue wire): extrusive on 47, intrusive on the anchor segment (red: side effects)
+    const a1 = win(t, DS.v1Ext, end, 0.3, 0.5) * fadeUp;
+    this.force3(x, V.add(tubeW, V.mul(tf.b, 2)), [0, 1, 0], sc * shrink, { color: COL.red, alpha: a1, width: 6, progress: easeOut((t - DS.v1Ext) / 0.45) });
+    const a1i = win(t, DS.v1Int, end, 0.3, 0.5) * fadeUp;
+    this.force3(x, V.add(hookW, [0, 0.8, 1.5]), [0, -1, 0], sc * shrink, { color: COL.red, alpha: a1i, width: 6, progress: easeOut((t - DS.v1Int) / 0.45) });
+    if (t < DS.slotIn[0] + 0.6) {
+      const al = win(t, DS.v1Ext + 0.2, DS.slotIn[0] + 0.6, 0.3, 0.3);
+      this.callout(x, V.add(tubeW, [0, 4, 2]), 'CANTILEVER 1', { dx: -60, dy: -150, color: COL.blue, alpha: al, size: 24, sub: 'extrusion on 47' });
+      this.callout(x, V.add(hookW, [0, -4, 1.5]), 'REACTIVE INTRUSION', { dx: 40, dy: 140, color: COL.red, alpha: al, size: 22, sub: 'anchor segment' });
+    }
+    // 3: installation of the second cantilever
+    const aS = win(t, DS.slotIn[0] + 0.1, DS.v2[1] + 0.4, 0.3, 0.4);
+    this.callout(x, V.add(slotW, [0, 1.6, 0.6]), 'VERTICAL SLOT', { dx: 70, dy: -170, alpha: aS, size: 24, sub: 'rigid with the anchor wire' });
+    this.callout(x, V.add(apply(pose, G.E1, L47.cr), [0, 0, 0.4]), 'DISTAL EXTENSION · 47', { dx: -40, dy: -190, alpha: win(t, DS.slotIn[0] + 0.3, DS.v2[1] + 0.4, 0.3, 0.4), size: 22 });
+    if (this.wire2World) {
+      const mid = this.wire2World[Math.floor(this.wire2World.length * 0.55)];
+      this.callout(x, mid, 'CANTILEVER 2', { dx: 40, dy: -120, color: COL.green, alpha: win(t, DS.wire2In[1], DS.v2[1] + 0.4, 0.3, 0.4), size: 24, sub: 'along cantilever 1' });
+    }
+    const aP = win(t, DS.insert2[1] - 0.1, DS.engage2 + 0.5, 0.2, 0.4);
+    if (aP > 0.01 && this.passive2Tip) {
+      const pt = this.proj(V.add(this.passive2Tip, [0, 0, 2])), ph = this.proj(V.add(Dw, [0, 1.2, 2]));
+      this.arrow(x, [pt[0] - 40, pt[1]], [ph[0] - 40, ph[1] - 10], { color: '#ffffff', width: 4, alpha: aP * 0.9, head: 18 });
+      this.text(x, 'PASSIVE → ACTIVATED', pt[0] - 60, (pt[1] + ph[1]) / 2, { size: 20, color: COL.dim, alpha: aP, align: 'right', spacing: 2 });
+    }
+    const ef = win(t, DS.engage2 - 0.02, DS.engage2 + 0.6, 0.05, 0.5);
+    if (ef > 0.01) { const p = this.proj(Dw); x.save(); x.globalAlpha = ef; x.strokeStyle = COL.green; x.lineWidth = 3; x.beginPath(); x.arc(p[0], p[1], 20 + 40 * (t - DS.engage2), 0, Math.PI * 2); x.stroke(); x.restore(); }
+    // 4: opposite vertical vectors of the second cantilever (green): intrusive on 47 distal to the CR, extrusive on the anchor slot
+    const a2 = win(t, DS.v2[0], end, 0.3, 0.5) * fadeUp;
+    this.force3(x, V.add(Dw, [0, 1.0, 1.2]), [0, -1, 0], sc * shrink, { color: COL.green, alpha: a2, width: 6, into: true, progress: easeOut((t - DS.v2[0]) / 0.45) });
+    this.force3(x, V.add(slotW, [0, -1.6, 1.2]), [0, 1, 0], sc * shrink, { color: COL.green, alpha: win(t, DS.v2[0] + 0.15, end, 0.3, 0.5) * fadeUp, width: 6, into: true, progress: easeOut((t - DS.v2[0] - 0.15) / 0.45) });
+    // 5: compensation → ΣFv ≈ 0 on the molar and on the anchor segment
+    const aB = win(t, DS.balance[0] + 0.6, end, 0.4, 0.5);
+    if (aB > 0.01) {
+      const pm = this.proj(V.add(tubeW, [-4, 10.5, 2])), pa = this.proj(V.add(hookW, [-7, 8.5, 1.5]));
+      this.text(x, 'ΣFv ≈ 0', pm[0], pm[1], { size: 32, weight: 800, color: COL.white, alpha: aB });
+      this.text(x, 'ΣFv ≈ 0', pa[0], pa[1], { size: 26, weight: 800, color: COL.white, alpha: aB * 0.9 });
+      this.text(x, 'with matched activation of both cantilevers', W / 2, 1240, { size: 21, weight: 600, color: COL.dim, alpha: win(t, DS.balance[0] + 0.6, DS.moments[1], 0.4, 0.4), spacing: 1 });
+    }
+    // 6: resulting moments — kept after the vertical compensation
+    const aM = win(t, DS.moments[0], end, 0.4, 0.5);
+    const pulse = 1 + 0.35 * win(t, W6.moment - 0.1, W6.moment + 0.9, 0.2, 0.5);
+    if (aM > 0.01) {
+      this.moment3(x, crNow, 8, 205, 335, { alpha: aM, progress: easeOut((t - DS.moments[0]) / 0.6), width: (8 + 2 * (pulse - 1) * 3) });
+      const lp = this.proj(V.add(crNow, [3, -10.5, 0]));
+      this.text(x, 'M = M₁ + F₂·d', lp[0], lp[1], { size: 26, weight: 800, color: COL.blue, alpha: aM, align: 'left' });
+      this.text(x, 'uprighting direction kept', lp[0], lp[1] + 28, { size: 18, weight: 600, color: COL.dim, alpha: aM, align: 'left', spacing: 1 });
+      // lever arm d of F2 about the CR (horizontal, sagittal)
+      const ad = win(t, DS.moments[0] + 0.4, DS.upright[0] + 1.2, 0.3, 0.5);
+      this.dashed(x, [this.proj(crNow), this.proj([Dw[0], crNow[1], crNow[2]])], { color: COL.gold, alpha: ad, width: 2.5, dash: [3, 5] });
+      this.dashed(x, [this.proj([Dw[0], crNow[1], crNow[2]]), this.proj(Dw)], { color: COL.gold, alpha: ad * 0.6, width: 2, dash: [3, 5] });
+      const mp = this.proj([(Dw[0] + crNow[0]) / 2, crNow[1] - 1.6, crNow[2]]);
+      this.text(x, 'd', mp[0], mp[1], { size: 26, weight: 800, color: COL.gold, alpha: ad });
+      // moment on the anchor segment from the vertical-slot fixation (clockwise in this view)
+      const ac = V.add(V.lerp(this.M.L45.cr, this.M.L44.cr, 0.4), [0, -this.aiNow, 0]);
+      this.moment3(x, ac, 6.5, 120, 20, { color: COL.red, alpha: aM * 0.9, width: 5, head: 18, progress: easeOut((t - DS.moments[0] - 0.4) / 0.6) });
+      const ap = this.proj(V.add(ac, [0, -9.5, 0]));
+      this.text(x, 'M ANCHOR', ap[0], ap[1], { size: 22, weight: 800, color: COL.red, alpha: aM * win(t, DS.moments[0] + 0.4, end, 0.3, 0.5), spacing: 2 });
+      this.text(x, 'rigid anchor segment', ap[0], ap[1] + 24, { size: 17, weight: 600, color: COL.dim, alpha: aM * win(t, DS.moments[0] + 0.4, end, 0.3, 0.5), spacing: 1 });
+    }
+    // 7: controlled trajectories (green, as in the original style)
+    const aT = win(t, DS.upright[0] + 0.1, end, 0.4, 0.5);
+    if (aT > 0.01 && P.s > 0.001) {
+      const traj = (pt) => { const pts = []; for (let i = 0; i <= 30; i++) pts.push(this.proj(apply(poseLerp(START, END_B, P.s * i / 30), pt, L47.cr))); return pts; };
+      this.dashed(x, traj(L47.tip), { color: COL.green, alpha: aT, width: 4, glow: true });
+      this.dashed(x, traj(L47.apexM), { color: COL.green, alpha: aT * 0.85, width: 3, glow: true });
+      this.dashed(x, traj(L47.apexD), { color: COL.green, alpha: aT * 0.85, width: 3, glow: true });
+      if (P.s > 0.25) {
+        this.callout(x, apply(pose, L47.tip, L47.cr), 'CROWN', { dx: -100, dy: -70, color: COL.green, alpha: aT * win(t, DS.upright[0] + 1.0, end - 0.6, 0.3, 0.4), size: 22 });
+        this.callout(x, apply(pose, L47.apexD, L47.cr), 'ROOTS', { dx: -100, dy: 60, color: COL.green, alpha: aT * win(t, DS.upright[0] + 1.3, end - 0.6, 0.3, 0.4), size: 22 });
+      }
+    }
+    const ok = win(t - d, 50.7, 52.2, 0.15, 0.6) * (t > 48.6 + d ? 1 : 0);
+    if (ok > 0.01) this.contactRing(x, this.contactB, t - d - 50.7, ok, COL.green);
+    // disclaimer (dips with the original at the scene change)
+    this.text(x, 'QUALITATIVE BIOMECHANICS · NOT A FINITE-ELEMENT SIMULATION', W / 2, 1560, { size: 17, weight: 600, color: COL.dim, alpha: win(t, 40.6, end + 0.1, 0.5, 0.5) * 0.75, spacing: 2 });
+  }
+
+  drawKeywordsDC(x, t) {
+    const KWS = [
+      { text: 'DOUBLE CANTILEVER', at: W6.second, hold: 1.7, color: 'green', dir: [1, 0], size: 76, kicker: 'ANOTHER WAY', kickerAt: W6.other },
+      { text: 'INTRUSIVE FORCE', at: DS.v2[0], hold: 1.0, color: 'green', dir: [0, 1], size: 76, kicker: 'CANTILEVER 2 · 47 DISTAL', kickerAt: DS.v2[0] },
+      { text: 'FORCE BALANCE', at: W6.compensate, hold: 2.4, color: 'white', dir: [0, -1], size: 84 },
+      { text: 'CONTROLLED UPRIGHTING', at: W6.control, hold: 2.1, color: 'green', dir: [-1, 0], size: 64 },
+    ];
+    for (const k of KWS) {
+      const kk = { ...k, place: 'top', id: k.text, kickerAt: k.kickerAt ?? k.at };
+      const sKw = keywordState(kk, t), sk = kickerState(kk, t);
+      if (!sKw && !sk) continue;
+      this.drawOneKeyword(x, kk, sKw, sk);
+    }
   }
 
   // ------------------------------------------------------------------ 2D helpers
@@ -627,7 +847,7 @@ export class Film {
     const crNow = V.add(L47.cr, pose.shift);
     const tf = this.tubeFrameAt(pose);
     const tubeW = tf.c;
-    const hookW = V.add(this.hook, [0, -anchorIntrusionAt(t), 0]);
+    const hookW = V.add(this.hook, [0, -this.aiNow, 0]);
     const cusp = (ps) => this.p47(ps, L47.tip);
     const apexM = (ps) => this.p47(ps, L47.apexM), apexD = (ps) => this.p47(ps, L47.apexD);
 
@@ -757,7 +977,8 @@ export class Film {
     }
 
     // ---------- 06: skeletal anchorage — compensation of the vertical component
-    if (t > 40.6 && t < 51.4) {
+    if (this.dc && this.mode === 'remap' && t < 52.2) { const ok = win(t, 50.7, 52.2, 0.15, 0.6); if (ok > 0.01) this.contactRing(x, this.contactB, t - 50.7, ok, COL.green); }
+    if (t > 40.6 && t < 51.4 && !this.dc) {
       const fsB = forceSystem(L47, pose, hookW, this.screwHead.toArray(), 1.08);
       const scrA = win(t, S.screw[0] + 0.3, 50.9, 0.3, 0.5);
       this.callout(x, this.screwHead.toArray(), 'MINISCREW', { dx: -70, dy: -150, alpha: scrA * win(t, 41.4, 46.0, 0.3, 0.5), size: 24, sub: 'buccal shelf · outside the roots' });
@@ -858,8 +1079,8 @@ export class Film {
   }
 
   drawSubtitle(x, t) {
-    const cue = SUBS.find((c) => t >= c[0] && t < c[1]);
-    if (!cue || t >= OUTRO_T0) return;
+    const cue = (this.dc ? SUBS_DC : SUBS).find((c) => t >= c[0] && t < c[1]);
+    if (!cue || t >= OUTRO_T0 + (this.dc ? EDIT.d : 0)) return;
     const a = Math.min(smooth((t - cue[0]) / 0.15), smooth((cue[1] - t) / 0.15));
     x.save(); x.font = `600 40px ${F}`;
     const words = cue[2].split(' '), lines = []; let cur = '';
@@ -879,10 +1100,15 @@ export class Film {
     for (const k of KEYWORDS) {
       const s = keywordState(k, t), sk = kickerState(k, t);
       if (!s && !sk) continue;
+      this.drawOneKeyword(x, k, s, sk);
+    }
+  }
+  drawOneKeyword(x, k, s, sk) {
+    {
       const cx0 = W / 2, cy0 = k.place === 'mid' ? 380 : (k.kicker ? 380 : 345);
       const col = this.kwColor(k.color);
       if (sk && sk.alpha > 0.003) this.text(x, k.kicker, cx0, cy0 - k.size * 0.98 - (1 - easeOut(sk.reveal)) * 14, { size: 26, weight: 800, alpha: sk.alpha, color: '#d7e6f3', spacing: 6 });
-      if (!s || s.alpha <= 0.003) continue;
+      if (!s || s.alpha <= 0.003) return;
       const cx = cx0 + k.dir[0] * s.drift, cy = cy0 + k.dir[1] * s.drift;
       const fill = k.from ? this.mixColor(this.kwColor(k.from), col, 1 - s.accent) : col;
       const lines = k.text2 ? [k.text, k.text2] : [k.text];

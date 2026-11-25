@@ -15,7 +15,7 @@ import { KEYWORDS, keywordState, kickerState, focusLevel } from './kinetic.js';
 import { solveDesign, centreLine } from './wire.js';
 import { bracketGeometry, tubeGeometry, sweepRect, resample, screwGeometry, roundedBox } from './geom.js';
 import { EDIT, DURATION_DC, DS, W6, SUBS_DC, DELTA2, dcGeometry, forceSystemDC } from './dc.js';
-import { solve2, centreLine2, toLocal, toWorld } from './wire2.js';
+import { solve3, centreLine3, toLocal3, toWorld3 } from './wire3.js';
 import { CAMERA } from './timeline.js';
 
 const W = BRAND.width, H = BRAND.height;
@@ -355,7 +355,7 @@ export class Film {
   }
 
   applyCamera(t) {
-    const c = { ...(this.mode === 'dc' ? this.cameraDC(t) : cameraAt(t)) };
+    const c = { ...(this.camOverride || (this.mode === 'dc' ? this.cameraDC(t) : cameraAt(t))) };
     c.dist *= 1 - 0.018 * focusLevel(t);
     const az = c.az * DEG, el = c.el * DEG;
     const dir = [Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)];
@@ -536,32 +536,24 @@ export class Film {
   initDC() {
     const hdr = this.hdr, L47 = this.L47, G = this.G = dcGeometry(hdr);
     const metal = this.metal;
-    // vertical slot (auxiliary vertical tube) soldered to the distal end of the rigid anchor wire
+    // vertical slot (auxiliary vertical tube) soldered to the distal end of the rigid anchor wire, hanging gingivally, buccal
     const slot = new THREE.Group();
     const body = new THREE.Mesh(roundedBox(1.25, 3.0, 1.25, 0.32), metal); body.position.set(...G.slotC); slot.add(body);
-    const lumen = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 3.02, 16), new THREE.MeshBasicMaterial({ color: 0x0b1420 }));
-    lumen.position.set(...V.add(G.slotC, [0, 0, 0])); lumen.visible = false; slot.add(lumen);
-    const sp = [G.wEnd, V.add(G.wEnd, [-0.2, 0.2, 1.2]), V.add(G.slotC, [0, -1.25, -0.55])];
-    const spur = new THREE.Mesh(sweepRect(resample(sp, 12), 0.7, 0.55, [0, 1, 0]), metal); slot.add(spur);
+    const sp = [G.wEnd, V.add(G.wEnd, [-0.15, 0.05, 1.6]), V.add(G.slotC, [0, 1.1, -0.6])];
+    const spur = new THREE.Mesh(sweepRect(resample(sp, 14), 0.7, 0.55, [0, 1, 0]), metal); slot.add(spur);
     const solder = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 10), metal); solder.position.set(...G.wEnd); slot.add(solder);
     this.slot = slot; this.anchorGroup.add(slot);
-    // distal extension of the wire bonded to 47 (child of 47: local = anatomical − CR), with a small occlusal stop at its end
-    const ext = [G.E0, V.lerp(G.E0, G.E1, 0.5), G.E1, V.add(G.E1, [0, 0.9, 0])].map((p) => V.sub(p, L47.cr));
-    this.extMat = steel(); this.metalMats.push(this.extMat);
-    this.ext = new THREE.Mesh(sweepRect(resample([ext[0], ext[1], ext[2]], 30), 0.62, 0.44, [0, 1, 0]), this.extMat);
-    const stop = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 10), this.extMat); stop.position.set(...ext[2]); this.ext.add(stop);
-    const barrel = new THREE.Mesh(roundedBox(2.6, 0.9, 0.9, 0.3), this.extMat);
-    barrel.position.set(...V.sub(V.add(G.E0, V.mul(G.de, 0.6)), L47.cr)); this.ext.add(barrel);
-    this.teeth.L47.mesh.add(this.ext);
-    // second cantilever (green) + its passive outline
-    this.base2 = solve2(V.add(toLocal(G.S0, apply(START, G.D, L47.cr)), [DELTA2, 0, 0]));
+    // second cantilever (green) + its passive outline — no extra wire or attachment on the molar
+    this.base2 = solve3(V.add(toLocal3(G.S0, apply(START, G.D, L47.cr)), [-DELTA2, 0, 0]));
     this.wire2Mat = steel(); this.metalMats.push(this.wire2Mat);
     this.wire2Mat.emissive = new THREE.Color(COL.green);
-    const p0 = centreLine2(this.base2).pts.map((q) => toWorld(G.S0, q));
-    this.wire2 = new THREE.Mesh(sweepRect(resample(p0, 360), 0.62, 0.44, [1, 0, 0]), this.wire2Mat); this.wire2.renderOrder = 2; this.scene.add(this.wire2);
+    const p0 = centreLine3(this.base2).pts.map((q) => toWorld3(G.S0, q));
+    this.wire2N = 380;
+    this.wire2 = new THREE.Mesh(sweepRect(resample(p0, this.wire2N), 0.62, 0.44, [1, 0, 0]), this.wire2Mat); this.wire2.renderOrder = 2; this.scene.add(this.wire2);
     this.wire2GhostMat = ghostMaterial('#9df5c2');
-    this.wire2Ghost = new THREE.Mesh(sweepRect(resample(p0, 360), 0.62, 0.44, [1, 0, 0]), this.wire2GhostMat); this.wire2Ghost.renderOrder = 7; this.scene.add(this.wire2Ghost);
+    this.wire2Ghost = new THREE.Mesh(sweepRect(resample(p0, this.wire2N), 0.62, 0.44, [1, 0, 0]), this.wire2GhostMat); this.wire2Ghost.renderOrder = 7; this.scene.add(this.wire2Ghost);
     this.wireMat.emissive = new THREE.Color(COL.blue);
+    this.wire2Mat.color.set(0xb4f2cc); this.wire2Mat.roughness = 0.32;
   }
 
   /** state overrides for the new scene (pose, anchor, antagonists, tissues) */
@@ -588,8 +580,9 @@ export class Film {
     if (t >= 50.4 + d) return old(t - d);
     const K = (tt, az, el, dist, tgt) => ({ t: tt, az, el, dist, tgt });
     const k39 = CAMERA.find((k) => k.t === 39.8), k50 = CAMERA.find((k) => k.t === 50.4);
-    const keys = [K(39.8, k39.az, k39.el, k39.dist, k39.tgt), K(41.2, -4, 4, 150, [15, 6, 2]), K(42.1, 14, 14, 104, [18, 9, 3]),
-      K(43.9, 9, 9, 128, [14, 8, 2]), K(46.4, 2, 4, 160, [16, 6, 1]), K(48.6, -2, 3, 140, [12, 6, 0]), K(50.4 + d, k50.az, k50.el, k50.dist, k50.tgt)];
+    const J = this.G ? V.add(apply(START, this.G.D, this.L47.cr), [0, -0.6, 0.6]) : [7, 7.5, 6];      // junction of the two cantilevers
+    const keys = [K(39.8, k39.az, k39.el, k39.dist, k39.tgt), K(41.2, -4, 4, 150, [15, 6, 2]), K(42.15, 10, 8, 112, [16, 7, 4]),
+      K(42.85, -22, 10, 62, J), K(43.75, -30, 14, 52, J), K(44.7, 6, 6, 140, [14, 7, 2]), K(46.4, 2, 4, 160, [16, 6, 1]), K(48.6, -2, 3, 140, [12, 6, 0]), K(50.4 + d, k50.az, k50.el, k50.dist, k50.tgt)];
     for (let i = 1; i < keys.length; i++) if (t <= keys[i].t) {
       const a = keys[i - 1], b = keys[i], u = easeInOut((t - a.t) / (b.t - a.t));
       return { az: lerp(a.az, b.az, u), el: lerp(a.el, b.el, u), dist: Math.exp(lerp(Math.log(a.dist), Math.log(b.dist), u)), tgt: [0, 1, 2].map((k) => lerp(a.tgt[k], b.tgt[k], u)), fov: 30 };
@@ -602,33 +595,33 @@ export class Film {
     const G = this.G, L47 = this.L47, tn = this.tNew, dc = this.mode === 'dc', remap = this.mode === 'remap';
     // fade of the auxiliary parts: appear on «Второй кантилевер», leave with the cantilevers in scene 07
     const auxA = dc ? smooth((t - DS.slotIn[0]) / (DS.slotIn[1] - DS.slotIn[0])) : remap ? VIS.cantilever(t) : 0;
-    this.slot.visible = auxA > 0.004; this.ext.visible = auxA > 0.004;
-    this.extMat.opacity = auxA;
+    this.slot.visible = auxA > 0.004;
     if (this.slot.visible) this.slot.traverse((o) => { if (o.material && o.material !== this.metal) { o.material.transparent = true; o.material.opacity = auxA; } });
     // the slot shares the bracket material (opacity apA); scale-in for the appearance
     this.slot.scale.setScalar(1);
     // colour coding: first cantilever blue, second green (soft emissive glow)
     const glow = dc ? 0.85 * smooth((t - DS.v1Ext + 0.2) / 0.4) : remap ? 0.85 * (1 - smooth((t - 50.9) / 0.6)) : 0;
     this.wireMat.emissiveIntensity = glow;
+    this.wireMat.color.set(glow > 0.01 ? 0xbfe2ff : 0xd9dee6);
     // second cantilever
     const wa = dc ? smooth((t - DS.wire2In[0]) / (DS.wire2In[1] - DS.wire2In[0])) : remap ? VIS.cantilever(t) : 0;
     this.wire2.visible = wa > 0.004; this.wire2Ghost.visible = false;
     if (!this.wire2.visible) return;
-    this.wire2Mat.opacity = wa; this.wire2Mat.emissiveIntensity = 0.9 * wa;
-    const s = this.P.s, Dl = toLocal(G.S0, apply(pose, G.D, L47.cr));
+    this.wire2Mat.opacity = wa; this.wire2Mat.emissiveIntensity = 1.25 * wa;
+    const s = this.P.s, Dl = toLocal3(G.S0, apply(pose, G.D, L47.cr));
     const act = dc ? ramp(t, ...DS.activate2) : 1;
     let design = this.base2, dDown;
     if (dc && t < DS.upright[0]) dDown = DELTA2 * act;                    // passive → activated on the START pose
-    else { const d2 = DELTA2 * (1 - 0.75 * s); design = solve2(V.add(Dl, [d2, 0, 0]), this.base2); dDown = d2; }   // deactivates as the molar uprights
+    else { const d2 = DELTA2 * (1 - 0.75 * s); design = solve3(V.add(Dl, [-d2, 0, 0]), this.base2); dDown = d2; }   // deactivates as the molar uprights
     const ins = dc ? 1 - ramp(t, ...DS.insert2) : 0;                     // 1 = above the slot (before insertion)
     const off = [0, 4.2 * ins, 1.6 * ins];
-    const pts = centreLine2(design, dDown).pts.map((q) => V.add(toWorld(G.S0, q), off));
-    sweepRect(resample(pts, 360), 0.62, 0.44, [1, 0, 0], this.wire2.geometry);
+    const pts = centreLine3(design, dDown).pts.map((q) => V.add(toWorld3(G.S0, q), off));
+    sweepRect(resample(pts, this.wire2N), 0.62, 0.44, [1, 0, 0], this.wire2.geometry);
     this.wire2World = pts; this.D_now = apply(pose, G.D, L47.cr);
     const ga = dc ? win(t, DS.activate2[0] - 0.1, DS.balance[0], 0.3, 0.5) : 0;
     if (ga > 0.004) {
-      const pp = centreLine2(this.base2).pts.map((q) => toWorld(G.S0, q));
-      sweepRect(resample(pp, 360), 0.62, 0.44, [1, 0, 0], this.wire2Ghost.geometry);
+      const pp = centreLine3(this.base2).pts.map((q) => toWorld3(G.S0, q));
+      sweepRect(resample(pp, this.wire2N), 0.62, 0.44, [1, 0, 0], this.wire2Ghost.geometry);
       this.wire2GhostMat.uniforms.uAlpha.value = ga * 2.2; this.wire2Ghost.visible = true; this.passive2Tip = pp[pp.length - 1];
     }
   }
@@ -660,7 +653,7 @@ export class Film {
     // 3: installation of the second cantilever
     const aS = win(t, DS.slotIn[0] + 0.1, DS.v2[1] + 0.4, 0.3, 0.4);
     this.callout(x, V.add(slotW, [0, 1.6, 0.6]), 'VERTICAL SLOT', { dx: 70, dy: -170, alpha: aS, size: 24, sub: 'rigid with the anchor wire' });
-    this.callout(x, V.add(apply(pose, G.E1, L47.cr), [0, 0, 0.4]), 'DISTAL EXTENSION · 47', { dx: -40, dy: -190, alpha: win(t, DS.slotIn[0] + 0.3, DS.v2[1] + 0.4, 0.3, 0.4), size: 22 });
+    this.callout(x, V.add(Dw, [0, 0, 0.4]), 'DISTAL END · CANTILEVER 1', { dx: -60, dy: -160, color: COL.blue, alpha: win(t, DS.slotIn[0] + 0.3, DS.v2[1] + 0.6, 0.3, 0.4), size: 22, sub: 'hook of cantilever 2 engages here' });
     if (this.wire2World) {
       const mid = this.wire2World[Math.floor(this.wire2World.length * 0.55)];
       this.callout(x, mid, 'CANTILEVER 2', { dx: 40, dy: -120, color: COL.green, alpha: win(t, DS.wire2In[1], DS.v2[1] + 0.4, 0.3, 0.4), size: 24, sub: 'along cantilever 1' });
@@ -675,7 +668,7 @@ export class Film {
     if (ef > 0.01) { const p = this.proj(Dw); x.save(); x.globalAlpha = ef; x.strokeStyle = COL.green; x.lineWidth = 3; x.beginPath(); x.arc(p[0], p[1], 20 + 40 * (t - DS.engage2), 0, Math.PI * 2); x.stroke(); x.restore(); }
     // 4: opposite vertical vectors of the second cantilever (green): intrusive on 47 distal to the CR, extrusive on the anchor slot
     const a2 = win(t, DS.v2[0], end, 0.3, 0.5) * fadeUp;
-    this.force3(x, V.add(Dw, [0, 1.0, 1.2]), [0, -1, 0], sc * shrink, { color: COL.green, alpha: a2, width: 6, into: true, progress: easeOut((t - DS.v2[0]) / 0.45) });
+    this.force3(x, V.add(Dw, [-0.6, 0.9, 1.6]), [0, -1, 0], sc * shrink, { color: COL.green, alpha: a2, width: 6, into: true, progress: easeOut((t - DS.v2[0]) / 0.45) });
     this.force3(x, V.add(slotW, [0, -1.6, 1.2]), [0, 1, 0], sc * shrink, { color: COL.green, alpha: win(t, DS.v2[0] + 0.15, end, 0.3, 0.5) * fadeUp, width: 6, into: true, progress: easeOut((t - DS.v2[0] - 0.15) / 0.45) });
     // 5: compensation → ΣFv ≈ 0 on the molar and on the anchor segment
     const aB = win(t, DS.balance[0] + 0.6, end, 0.4, 0.5);
@@ -691,14 +684,8 @@ export class Film {
     if (aM > 0.01) {
       this.moment3(x, crNow, 8, 205, 335, { alpha: aM, progress: easeOut((t - DS.moments[0]) / 0.6), width: (8 + 2 * (pulse - 1) * 3) });
       const lp = this.proj(V.add(crNow, [3, -10.5, 0]));
-      this.text(x, 'M = M₁ + F₂·d', lp[0], lp[1], { size: 26, weight: 800, color: COL.blue, alpha: aM, align: 'left' });
-      this.text(x, 'uprighting direction kept', lp[0], lp[1] + 28, { size: 18, weight: 600, color: COL.dim, alpha: aM, align: 'left', spacing: 1 });
-      // lever arm d of F2 about the CR (horizontal, sagittal)
-      const ad = win(t, DS.moments[0] + 0.4, DS.upright[0] + 1.2, 0.3, 0.5);
-      this.dashed(x, [this.proj(crNow), this.proj([Dw[0], crNow[1], crNow[2]])], { color: COL.gold, alpha: ad, width: 2.5, dash: [3, 5] });
-      this.dashed(x, [this.proj([Dw[0], crNow[1], crNow[2]]), this.proj(Dw)], { color: COL.gold, alpha: ad * 0.6, width: 2, dash: [3, 5] });
-      const mp = this.proj([(Dw[0] + crNow[0]) / 2, crNow[1] - 1.6, crNow[2]]);
-      this.text(x, 'd', mp[0], mp[1], { size: 26, weight: 800, color: COL.gold, alpha: ad });
+      this.text(x, 'M ≈ M₁ = F₁·L₁', lp[0], lp[1], { size: 26, weight: 800, color: COL.blue, alpha: aM, align: 'left' });
+      this.text(x, 'F₁ ↑ and F₂ ↓ act ~at the tube: uprighting couple kept', lp[0], lp[1] + 28, { size: 17, weight: 600, color: COL.dim, alpha: aM, align: 'left', spacing: 1 });
       // moment on the anchor segment from the vertical-slot fixation (clockwise in this view)
       const ac = V.add(V.lerp(this.M.L45.cr, this.M.L44.cr, 0.4), [0, -this.aiNow, 0]);
       this.moment3(x, ac, 6.5, 120, 20, { color: COL.red, alpha: aM * 0.9, width: 5, head: 18, progress: easeOut((t - DS.moments[0] - 0.4) / 0.6) });
@@ -727,7 +714,7 @@ export class Film {
   drawKeywordsDC(x, t) {
     const KWS = [
       { text: 'DOUBLE CANTILEVER', at: W6.second, hold: 1.7, color: 'green', dir: [1, 0], size: 76, kicker: 'ANOTHER WAY', kickerAt: W6.other },
-      { text: 'INTRUSIVE FORCE', at: DS.v2[0], hold: 1.0, color: 'green', dir: [0, 1], size: 76, kicker: 'CANTILEVER 2 · 47 DISTAL', kickerAt: DS.v2[0] },
+      { text: 'INTRUSIVE FORCE', at: DS.v2[0], hold: 1.0, color: 'green', dir: [0, 1], size: 76, kicker: 'CANTILEVER 2 → CANTILEVER 1 → 47', kickerAt: DS.v2[0] },
       { text: 'FORCE BALANCE', at: W6.compensate, hold: 2.4, color: 'white', dir: [0, -1], size: 84 },
       { text: 'CONTROLLED UPRIGHTING', at: W6.control, hold: 2.1, color: 'green', dir: [-1, 0], size: 64 },
     ];

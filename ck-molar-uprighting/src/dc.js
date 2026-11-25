@@ -1,6 +1,8 @@
 // ============================================================================
 //  EDIT: DOUBLE CANTILEVER MECHANICS (replaces the miniscrew demonstration of scene 06).
 //
+//  Second cantilever: fixed in a vertical slot of the anchor segment, vestibular below the occlusal plane,
+//  hooked directly onto the distal free end of the first cantilever (src/wire3.js).
 //  The original film (src/timeline.js, 60 s) is untouched. This module describes the local edit:
 //   • frames before EDIT.a are the original renders (re-used, not re-rendered);
 //   • [EDIT.a, EDIT.join) is the new scene (own schedule, camera, overlays);
@@ -50,24 +52,21 @@ export const DS = {
   moments: [46.8, 48.4],               // 6: resulting moments (re-emphasised on «момент»)
   upright: [48.6, 50.2 + EDIT.d],      // 7: controlled uprighting (ends where the original did, shifted)
 };
-export const DELTA2 = 5.0;             // passive offset of the 2nd cantilever's hook (illustrative, never shown)
+export const DELTA2 = 3.6;             // passive offset of the 2nd cantilever's hook above the 1st cantilever's end (illustrative, never shown)
 
 // ---------------------------------------------------------------- appliance geometry of the 2nd cantilever
 export function dcGeometry(hdr) {
   const L47 = hdr.meshes.find((m) => m.name === 'L47');
   const wEnd = SCENE.anchorWire(hdr)[0];                        // distal end of the rigid anchor wire (2.2 mm distal of the 45 slot)
-  const slotC = V.add(wEnd, [-0.35, 1.35, 2.6]);                 // vertical slot: buccal of the wire end, its lower end soldered to the wire
-  const S0 = V.add(slotC, [0, -1.9, 0]);                         // bottom of the wire inside the slot (local origin)
-  // distal extension of the wire bonded to 47: from the occlusal barrel of the molar tube, distally along the tube axis
+  // vertical slot: buccal to the wire end, hanging gingivally from it (its upper end soldered to the wire)
+  const slotC = V.add(wEnd, [-0.3, 0.2, 3.5]);
+  const S0 = V.add(slotC, [0, 1.8, 0]);                          // fixed end of the 2nd cantilever (above the slot) = local origin
+  // hook point: the distal free end of the FIRST cantilever, 0.55 mm distal of the molar tube
+  // (tube frame m = −2.75; the wire runs −3.2 … +3.2 through the tube, whose body spans ±2.2) — anatomical coords of 47
   const fz = V.norm(L47.faN), fx = V.norm(V.sub([1, 0, 0], V.mul(fz, fz[0]))), fo = V.cross(fz, fx);
   const tubeC = V.add(L47.fa, V.mul(L47.faN, SCENE.tubeOff));
-  const E0 = V.add(tubeC, V.add(V.mul(fo, 2.1), V.mul(fz, 1.9)));   // occlusal-buccal barrel: keeps the 2nd cantilever buccal of the 1st
-  // direction chosen so the extension stays near-horizontal between the tipped start and the upright end
-  // (anatomical frame: 7° gingival of distal) and the hook point D lies DISTAL to the CR in every pose (tools/qa_dc.mjs)
-  const de = V.norm([-Math.cos(7 * Math.PI / 180), -Math.sin(7 * Math.PI / 180), 0]);
-  const E1 = V.add(E0, V.mul(de, 13.4));
-  const D = V.add(E0, V.mul(de, 12.3));                         // hook point of the 2nd cantilever (anatomical coordinates of 47)
-  return { wEnd, slotC, S0, E0, E1, D, de, fx, fo, fz };
+  const D = V.add(tubeC, V.mul(fx, -2.75));
+  return { wEnd, slotC, S0, D, tubeC, fx, fo, fz };
 }
 
 /**
@@ -81,7 +80,7 @@ export function forceSystemDC(L47, pose, hook1, G, k = 1) {
   const L1 = hook1[0] - tube[0];
   const M1c = F1 * L1;                                            // couple of cantilever 1 at the tube (crown distal)
   const M1F = (tube[0] - cr[0]) * F1;                             // moment of its extrusive force about the CR
-  const M2F = (D[0] - cr[0]) * -F2;                               // intrusive F2 at D (distal of the CR) → +z (uprighting)
+  const M2F = (D[0] - cr[0]) * -F2;                               // intrusive F2 at D (sign depends on D relative to the CR)
   const L2 = G.slotC[0] - D[0];
   const Manchor2 = -F2 * L2;                                      // couple of cantilever 2 on the anchor (clockwise in the buccal view)
   return { cr, tube, D, F1, F2, L1, M1c, M1F, M2F, Mmolar: M1c + M1F + M2F, Mmolar1: M1c + M1F, Fv_molar: F1 - F2, Fv_anchor: -F1 + F2, Manchor2, L2, dCR: cr[0] - D[0] };

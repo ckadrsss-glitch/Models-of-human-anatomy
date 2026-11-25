@@ -29,7 +29,7 @@ export const KEYWORDS = [
   { id: 'skel', text: 'SKELETAL ANCHORAGE', at: W.skeletal, hold: 1.35, color: 'blue', place: 'top', dir: [0, -1], size: 68, kicker: 'MINISCREW', kickerAt: W.additional + 0.2 },
   { id: 'comp', text: 'FORCE COMPENSATION', at: W.compensate, hold: 1.65, color: 'blue', place: 'top', dir: [1, 0], size: 68 },
   { id: 'ctrl', text: 'CONTROLLED UPRIGHTING', at: W.control, hold: 3.1, color: 'green', place: 'top', dir: [-1, 0], size: 64 },
-  { id: 'q', text: 'WHAT IF EXTRUSION', text2: 'IS DESIRABLE?', at: W.question, hold: 1.95, out: 0.5, color: 'white', place: 'mid', dir: [0, -1], size: 74 },
+  { id: 'q', text: 'WHAT IF EXTRUSION', text2: 'IS DESIRABLE?', at: W.question, hold: 2.55, out: 0.7, color: 'white', place: 'mid', dir: [0, -1], size: 74 },
 ];
 export const KW = Object.fromEntries(KEYWORDS.map((k) => [k.id, k]));
 

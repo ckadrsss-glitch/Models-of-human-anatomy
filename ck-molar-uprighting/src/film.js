@@ -831,6 +831,14 @@ export class Film {
         this.text(x, s, 160, y, { size: 22, weight: 700, color: c === '#dff4ff' ? COL.white : c, alpha: al, align: 'left', spacing: 3 });
       });
     }
+    // invitation to discuss under the question (lands after the last word, holds into the outro dissolve)
+    {
+      const a = win(t, WT.question + 1.35, 57.6, 0.45, 0.6);
+      if (a > 0.003) {
+        this.text(x, 'SHARE YOUR CLINICAL VIEW', W / 2, 560 + (1 - easeOut((t - WT.question - 1.35) / 0.5)) * 12, { size: 30, weight: 800, color: COL.green, alpha: a, spacing: 6 });
+        this.text(x, 'IN THE COMMENTS', W / 2, 600 + (1 - easeOut((t - WT.question - 1.5) / 0.5)) * 12, { size: 24, weight: 700, color: '#d7e6f3', alpha: a * smooth((t - WT.question - 1.5) / 0.4), spacing: 6 });
+      }
+    }
     // qualitative disclaimer & anatomy attribution
     const dA = Math.max(win(t, 22.6, 51.0, 0.5, 0.5), win(t, 51.4, 57.2, 0.5, 0.4));
     this.text(x, 'QUALITATIVE BIOMECHANICS · NOT A FINITE-ELEMENT SIMULATION', W / 2, 1560, { size: 17, weight: 600, color: COL.dim, alpha: dA * 0.75, spacing: 2 });

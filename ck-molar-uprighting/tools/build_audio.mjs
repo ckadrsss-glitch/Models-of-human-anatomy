@@ -144,7 +144,7 @@ function tension(t0, d, gain) {                 // activation: a soft rising sin
 }
 
 whoosh(0.0, 0.9, 0.5);
-[[4.85, 0.9, 0.4], [13.7, 1.0, 0.35], [21.9, 1.1, 0.35], [32.0, 1.0, 0.3], [39.8, 1.1, 0.4], [50.9, 1.0, 0.3], [OUTRO_T0 - 0.2, 1.2, 0.3]].forEach((w) => whoosh(...w));
+[[4.85, 0.9, 0.4], [13.7, 1.0, 0.35], [21.9, 1.1, 0.35], [32.0, 1.0, 0.3], [39.8, 1.1, 0.4], [50.9, 1.0, 0.3], [OUTRO_T0 - 0.1, 1.4, 0.14]].forEach((w) => whoosh(...w));
 // 01: quick uprighting, antagonist closes → premature contact
 creak(S.hookUpright[0], S.hookUpright[1] - S.hookUpright[0], 0.02, 600);
 thud(3.28, 0.22); ping(3.3, 1480, 0.04, 14); tone(3.31, 311.1, 0.6, 0.02, 7);
@@ -174,7 +174,13 @@ thud(S.screw[1] - 0.02, 0.08);
 creak(S.elastic[0], S.elastic[1] - S.elastic[0], 0.025, 900); click(S.elastic[1], 0.07, 1400);
 tone(50.72, 880, 1.0, 0.03, 4); tone(50.76, 1318.5, 1.0, 0.02, 4);
 // 07: result, question
-tone(51.4, 659.25, 1.2, 0.02, 3); tone(W.question, 987.77, 1.4, 0.018, 2.5);
+tone(51.4, 659.25, 1.2, 0.02, 3);
+// the question: a soft suspended sting, then a gentle swell that resolves into the logo chime (no hard cut)
+tone(W.question - 0.02, 587.33, 2.6, 0.022, 1.2); tone(W.question, 880, 2.6, 0.018, 1.2); tone(W.question + 0.03, 1318.5, 2.2, 0.012, 1.5);
+for (let i = Math.floor(56.0 * SR); i < Math.floor((OUTRO_T0 + 0.6) * SR); i++) {
+  const t = i / SR, u = (t - 56.0) / (OUTRO_T0 + 0.6 - 56.0), e = Math.sin(Math.PI * u) * 0.018;
+  add(XL, XR, i, (Math.sin(2 * Math.PI * 146.83 * t) + 0.5 * Math.sin(2 * Math.PI * 220 * t) + 0.3 * Math.sin(2 * Math.PI * 293.66 * t)) * e);
+}
 KEYWORDS.forEach((k) => tone(Math.max(0.02, k.at - 0.04), 1975.5, 0.25, 0.006, 16));   // very soft tick under each keyword
 // outro (logo): chime on the circle, second on BIOMECHANICS
 tone(OUTRO_T0 + 0.55, 440, 2.4, 0.05, 1.6); tone(OUTRO_T0 + 0.57, 659.25, 2.4, 0.04, 1.6); tone(OUTRO_T0 + 1.15, 880, 1.8, 0.035, 1.8);

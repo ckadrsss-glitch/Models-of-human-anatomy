@@ -1,0 +1,29 @@
+{
+ "start": {
+  "theta": -23,
+  "shift": [
+   0,
+   0,
+   0
+  ],
+  "note": "mesially tipped 47 (rotation of the anatomical position about its CR)"
+ },
+ "endA": {
+  "theta": 9,
+  "shift": [
+   0,
+   1.5,
+   0
+  ],
+  "note": "cantilever only: uprighting + extrusion"
+ },
+ "endB": {
+  "theta": 9,
+  "shift": [
+   0,
+   -0.35,
+   0
+  ],
+  "note": "cantilever + skeletal intrusive force: uprighting with vertical control"
+ }
+}

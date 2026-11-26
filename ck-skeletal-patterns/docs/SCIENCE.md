@@ -11,6 +11,9 @@ The nine cells are combinations, not nine separate diagnoses. No numeric values 
 SN–GoGn, …) or thresholds appear on screen; the footnote reads *"Schematic representation of
 skeletal relationships"*.
 
+On screen the vertical patterns are labelled with the facial-type terms **brachyfacial / mesofacial /
+dolichofacial** (short / average / long face; hypo- / normo- / hyperdivergent in this document).
+
 ## What stays identical in all nine skulls
 
 Cranial vault and base, orbits, nasal bones, zygomatic arches, glenoid fossae and the **condyles in

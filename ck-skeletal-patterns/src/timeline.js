@@ -32,7 +32,7 @@ export function keys(t, k, ease = easeInOut) {
 
 // ---------------------------------------------------------------- the 3 × 3 matrix
 export const COLS = [{ label: 'CLASS I', s: 0 }, { label: 'CLASS II', s: 1 }, { label: 'CLASS III', s: -1 }];
-export const ROWS = [{ label: 'HYPODIVERGENT', v: -1 }, { label: 'NORMODIVERGENT', v: 0 }, { label: 'HYPERDIVERGENT', v: 1 }];
+export const ROWS = [{ label: 'BRACHYFACIAL', v: -1 }, { label: 'MESOFACIAL', v: 0 }, { label: 'DOLICHOFACIAL', v: 1 }];
 export const GRID = {
   k: 1.56,                         // px per mm in the matrix
   colX: [192, 540, 888],           // cell centres (px)

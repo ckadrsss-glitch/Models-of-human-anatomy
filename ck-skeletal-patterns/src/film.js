@@ -146,9 +146,9 @@ export class Film {
     }
     // ---- scene 3: vertical
     this.text(x, 'VERTICAL PATTERN', W / 2, 300, { size: 30, weight: 600, color: C.accent, alpha: A(TEXT.vertHeader), spacing: 8 });
-    const ver = [['HYPODIVERGENT', 'Flat mandibular plane · shorter lower face', TEXT.hypo],
-      ['NORMODIVERGENT', 'Average mandibular plane inclination', TEXT.normo],
-      ['HYPERDIVERGENT', 'Steep mandibular plane · longer lower face', TEXT.hyper]];
+    const ver = [['BRACHYFACIAL', 'Flat mandibular plane · shorter lower face', TEXT.hypo],
+      ['MESOFACIAL', 'Average mandibular plane inclination', TEXT.normo],
+      ['DOLICHOFACIAL', 'Steep mandibular plane · longer lower face', TEXT.hyper]];
     for (const [name, desc, f] of ver) {
       const a = f(t);
       this.text(x, name, W / 2, 392, { size: 72, weight: 700, alpha: a, spacing: 3 });

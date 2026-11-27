@@ -5,7 +5,10 @@
 //  04 second hook: the cantilevers are untied and moved distally → 05 position B (pure intrusion,
 //  idealised) → 06 position C (retroclination) → 07 reciprocal effects on the anchor segments →
 //  08 final comparison (three horizontal zones) → 09 brand outro.
-//  ONE FORCE · THREE POINTS · THREE OUTCOMES. All events are placed on the spoken words (src/words.js).
+//  V4: new narration («А вы знаете, как интрузировать нижние резцы, не изменяя их наклон?» …). The animation is
+//  authored on the ANIMATION timeline (a = V3 seconds); the film plays it through WARP, a monotone piecewise-linear
+//  map output time → animation time, so the spoken words land on their visual events. Word-synchronised events are
+//  stored in animation time: W.x = toAnim(output time of the word).
 // ============================================================================
 import { VOICE } from './voice.js';
 import { wordTime } from './words.js';
@@ -13,27 +16,51 @@ export { VOICE };
 
 export const DURATION = 60;
 export const FPS = 30;
-export const OUTRO_T0 = 57.0;
+export const OUTRO_T0 = 57.0;          // animation time (output 57.5 s)
 
-export const SCENES = [
+// ---------------------------------------------------------------- output → animation time map (knots [out, anim])
+export const WARP = [
+  [0, 0], [9.5, 9.5],          // 01 hook + 02 appliance build (1:1)
+  [12.5, 13.0],                // 02 macro / activation / tie (slightly faster)
+  [13.4, 14.0],                // 03 frontal: both cantilevers tied at A
+  [15.2, 16.5],                // 03 close-ups: free end at A, up-turned tip of the extension
+  [21.3, 22.6], [21.6, 23.0],  // 03 sagittal: variant 1 (1:1)
+  [25.2, 29.0],                // 04 re-tie A → B (faster)
+  [32.6, 36.4], [33.0, 37.0],  // 05 variant 2 (1:1)
+  [42.3, 46.0],                // 06 re-tie B → C + variant 3
+  [45.8, 53.0],                // 07 reactive load on the anchor segments (faster)
+  [57.5, 57.0],                // 08 comparison of all three (slow, under the last two lines)
+  [60, 60],                    // 09 brand outro
+];
+const pw = (k0, k1) => (x) => {
+  if (x <= WARP[0][k0]) return WARP[0][k1];
+  for (let i = 1; i < WARP.length; i++) if (x <= WARP[i][k0]) {
+    const a = WARP[i - 1], b = WARP[i]; return a[k1] + (b[k1] - a[k1]) * (x - a[k0]) / (b[k0] - a[k0]);
+  }
+  return WARP[WARP.length - 1][k1];
+};
+export const toAnim = pw(0, 1);        // output (film / audio) time → animation time
+export const toOut = pw(1, 0);         // animation time → output time
+
+export const SCENES = [            // output time
   { id: '01', name: 'Hook', t0: 0, t1: 4 },
-  { id: '02', name: 'Appliance', t0: 4, t1: 13 },
-  { id: '03', name: 'Position A', t0: 13, t1: 23 },
-  { id: '04', name: 'Re-tie', t0: 23, t1: 27 },
-  { id: '05', name: 'Position B', t0: 27, t1: 37 },
-  { id: '06', name: 'Position C', t0: 37, t1: 46 },
-  { id: '07', name: 'Reactions', t0: 46, t1: 53 },
-  { id: '08', name: 'Comparison', t0: 53, t1: 57 },
-  { id: '09', name: 'Outro', t0: 57, t1: 60 },
+  { id: '02', name: 'Appliance', t0: 4, t1: 12.5 },
+  { id: '03', name: 'Variant 1 (A)', t0: 12.5, t1: 21.6 },
+  { id: '04', name: 'Re-tie', t0: 21.6, t1: 24.3 },
+  { id: '05', name: 'Variant 2 (B)', t0: 24.3, t1: 33.0 },
+  { id: '06', name: 'Variant 3 (C)', t0: 33.0, t1: 42.3 },
+  { id: '07', name: 'Reactions', t0: 42.3, t1: 45.8 },
+  { id: '08', name: 'Comparison', t0: 45.8, t1: 57.5 },
+  { id: '09', name: 'Outro', t0: 57.5, t1: 60 },
 ];
 
-// Subtitle chunks [start, end, text]: each voice line split by character share, held 0.3 s after the speech
+// Subtitle chunks [start, end, text] in ANIMATION time: each voice line split by character share, held 0.3 s after the speech
 export const SUBS = VOICE.flatMap((v) => {
   const total = v.chunks.reduce((n, c) => n + c.length, 0);
   let t = v.start;
   return v.chunks.map((c, i) => {
     const d = v.speech * c.length / total;
-    const cue = [t, i === v.chunks.length - 1 ? v.start + v.speech + 0.3 : t + d, c];
+    const cue = [toAnim(t), toAnim(i === v.chunks.length - 1 ? v.start + v.speech + 0.3 : t + d), c];
     t += d; return cue;
   });
 });
@@ -49,20 +76,29 @@ export const ramp = (t, a, b, ease = easeInOut) => ease((t - a) / (b - a));
 export const win = (t, a, b, fi = 0.5, fo = 0.5) => Math.min(smooth((t - a) / fi), 1 - smooth((t - (b - fo)) / fo));
 
 // ---------------------------------------------------------------- word-synchronised events (absolute s)
+const wa = (line, stem, nth = 0) => toAnim(wordTime(line, stem, nth)[0]);   // word onset in animation time
 export const W = {
-  tilt1: wordTime(0, 'наклоняются')[0], fwd1: wordTime(0, 'вперёд')[0], down1: wordTime(0, 'вниз')[0],
-  four2: wordTime(1, 'четыре')[0], unite2: wordTime(1, 'объединяем')[0], seg2: wordTime(1, 'сегмент')[0],
-  intr2: wordTime(1, 'интрузивную')[0], cant2: wordTime(1, 'кантилеверами')[0],
-  line3: wordTime(2, 'линия')[0], ahead3: wordTime(2, 'впереди')[0], cr3: wordTime(2, 'центра')[0],
-  moment3: wordTime(2, 'момент')[0], tilt3: wordTime(2, 'наклоняющий')[0], vest3: wordTime(2, 'вестибулярно')[0],
-  what4: wordTime(3, 'что')[0], point4: wordTime(3, 'точку')[0],
-  result5: wordTime(4, 'результирующая')[0], through5: wordTime(4, 'через')[0], centre5: wordTime(4, 'центр')[0],
-  cond5: wordTime(4, 'создаются')[0], pure5: wordTime(4, 'чистой')[0],
-  shift6: wordTime(5, 'смещаем')[0], further6: wordTime(5, 'дальше')[0], opp6: wordTime(5, 'противоположный')[0],
-  intr6: wordTime(5, 'интрузия')[0], retro6: wordTime(5, 'ретроклинацией')[0],
-  control7: wordTime(6, 'контролировать')[0], reactive7: wordTime(6, 'реактивные')[0], moments7: wordTime(6, 'моменты')[0],
-  anchor7: wordTime(6, 'опорных')[0],
-  one8: wordTime(7, 'одна')[0], three8: wordTime(7, 'три')[0], point8: wordTime(7, 'точка')[0],
+  // 01 hook / 02 appliance build: the V3 animation beats are kept as they are (animation time)
+  tilt1: 0.905, fwd1: 1.462, down1: 3.261,
+  four2: 4.4, unite2: 5.457, seg2: 6.397, intr2: 7.07, cant2: 8.591,
+  intr1: wa(0, 'интрузировать'), tiltQ1: wa(0, 'наклон'),
+  line2: wa(1, 'линия'), where2: wa(1, 'где'), cr2: wa(1, 'центра'),
+  // 03 variant 1 — anterior to the CR
+  line3: wa(2, 'сила'), ahead3: wa(2, 'впереди'), cr3: wa(2, 'него'), moment3: wa(2, 'возникает'), tilt3: wa(2, 'тенденция'),
+  vest3: wa(2, 'вестибулярному'),
+  // 04 re-tie (silent action, V3 beats)
+  what4: 23.921, point4: 25.116,
+  // 05 variant 2 — through the CR
+  result5: wa(3, 'линия'), through5: wa(3, 'через'), centre5: wa(3, 'центр'), cond5: wa(3, 'получаем'),
+  pred5: wa(3, 'преимущественно'), pure5: wa(3, 'корпусную'),
+  // 06 variant 3 — posterior to the CR
+  what6: wa(4, 'что'), shift6: wa(4, 'сместить'), further6: wa(4, 'позади'), opp6: wa(5, 'противоположный'),
+  intr6: wa(5, 'возникает'), retro6: wa(5, 'лингвальному'),
+  // 07 reactions (silent action, V3 beats)
+  control7: 48.504, reactive7: 49.131, moments7: 49.979, anchor7: 50.547,
+  // 08 comparison
+  one8: wa(6, 'один'), three8: wa(6, 'три'), effects8: wa(6, 'биомеханических'),
+  control9: wa(7, 'контролировать'), magn9: wa(7, 'величину'), point9: wa(7, 'точку'), dir9: wa(7, 'направление'),
 };
 
 // ---------------------------------------------------------------- schedule
@@ -101,7 +137,7 @@ export const S = {
   slideC: [W.shift6 + 0.05, W.further6 + 0.1],
   reactC: [W.further6 + 0.15, W.further6 + 0.65],
   tieC: W.further6 + 0.72,
-  moveC: [W.opp6 + 0.7, 45.0],
+  moveC: [W.opp6 + 0.7, 45.4],
   // 07 reactions (configuration B, start pose)
   cut7: 46.0,
   buccalTip: [W.moments7, 52.8],

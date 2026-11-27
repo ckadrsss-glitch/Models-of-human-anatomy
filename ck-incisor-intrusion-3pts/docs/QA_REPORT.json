@@ -5,7 +5,7 @@
   {
    "name": "extension L clear of canine/premolar enamel",
    "ok": true,
-   "value": "1.01"
+   "value": "1.05"
   },
   {
    "name": "extension L not engaged in / clear of the canine bracket",
@@ -13,14 +13,44 @@
    "value": "0.53"
   },
   {
+   "name": "extension L: short up-turned occlusal tip (0.5–1.2 mm)",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension L: distal run straight in the vertical (< 0.02 mm)",
+   "ok": true,
+   "value": "0.000"
+  },
+  {
+   "name": "extension L: no excess length (tip 0.5–1.2 mm distal to tie C)",
+   "ok": true,
+   "value": "0.98"
+  },
+  {
    "name": "extension R clear of canine/premolar enamel",
    "ok": true,
-   "value": "1.03"
+   "value": "1.07"
   },
   {
    "name": "extension R not engaged in / clear of the canine bracket",
    "ok": true,
    "value": "0.53"
+  },
+  {
+   "name": "extension R: short up-turned occlusal tip (0.5–1.2 mm)",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension R: distal run straight in the vertical (< 0.02 mm)",
+   "ok": true,
+   "value": "0.000"
+  },
+  {
+   "name": "extension R: no excess length (tip 0.5–1.2 mm distal to tie C)",
+   "ok": true,
+   "value": "0.98"
   },
   {
    "name": "incisor slots level (one height, rigid sectional wire straight in the vestibular view)",
@@ -45,7 +75,7 @@
   {
    "name": "re-tie path u=0.00 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 8.73"
+   "value": "2.69 / 9.05"
   },
   {
    "name": "re-tie path u=0.00 R: passive arm clear of teeth and outside the gingiva",
@@ -55,7 +85,7 @@
   {
    "name": "re-tie path u=0.25 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 8.60"
+   "value": "2.69 / 8.90"
   },
   {
    "name": "re-tie path u=0.25 R: passive arm clear of teeth and outside the gingiva",
@@ -65,7 +95,7 @@
   {
    "name": "re-tie path u=0.50 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 6.98"
+   "value": "2.69 / 6.94"
   },
   {
    "name": "re-tie path u=0.50 R: passive arm clear of teeth and outside the gingiva",
@@ -75,7 +105,7 @@
   {
    "name": "re-tie path u=0.75 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 5.98"
+   "value": "2.69 / 5.94"
   },
   {
    "name": "re-tie path u=0.75 R: passive arm clear of teeth and outside the gingiva",
@@ -95,7 +125,7 @@
   {
    "name": "re-tie path u=1.25 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 5.98"
+   "value": "2.69 / 6.02"
   },
   {
    "name": "re-tie path u=1.25 R: passive arm clear of teeth and outside the gingiva",
@@ -105,7 +135,7 @@
   {
    "name": "re-tie path u=1.50 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 5.74"
+   "value": "2.69 / 5.85"
   },
   {
    "name": "re-tie path u=1.50 R: passive arm clear of teeth and outside the gingiva",
@@ -115,7 +145,7 @@
   {
    "name": "re-tie path u=1.75 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 5.32"
+   "value": "2.69 / 5.54"
   },
   {
    "name": "re-tie path u=1.75 R: passive arm clear of teeth and outside the gingiva",
@@ -125,7 +155,7 @@
   {
    "name": "re-tie path u=2.00 L: passive arm clear of teeth and outside the gingiva",
    "ok": true,
-   "value": "2.69 / 4.54"
+   "value": "2.69 / 4.99"
   },
   {
    "name": "re-tie path u=2.00 R: passive arm clear of teeth and outside the gingiva",
@@ -140,12 +170,12 @@
   {
    "name": "cantilever pA passive L clear of brackets/tubes",
    "ok": true,
-   "value": "1.39"
+   "value": "1.49"
   },
   {
    "name": "cantilever pA passive L outside bone/gingiva",
    "ok": true,
-   "value": "8.73"
+   "value": "9.04"
   },
   {
    "name": "cantilever pA passive L below the occlusal plane",
@@ -153,14 +183,9 @@
    "value": "13.79 < 16.29"
   },
   {
-   "name": "cantilever pA passive L: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pA passive L: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pA passive L: terminal bend clear of brackets",
-   "ok": true,
-   "value": "3.66"
+   "value": "0.000"
   },
   {
    "name": "cantilever pA passive R clear of teeth",
@@ -170,7 +195,7 @@
   {
    "name": "cantilever pA passive R clear of brackets/tubes",
    "ok": true,
-   "value": "1.48"
+   "value": "1.42"
   },
   {
    "name": "cantilever pA passive R outside bone/gingiva",
@@ -183,24 +208,19 @@
    "value": "10.29 < 16.29"
   },
   {
-   "name": "cantilever pA passive R: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pA passive R: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pA passive R: terminal bend clear of brackets",
-   "ok": true,
-   "value": "3.66"
+   "value": "0.000"
   },
   {
    "name": "cantilever pA active L clear of teeth",
    "ok": true,
-   "value": "2.49"
+   "value": "2.23"
   },
   {
    "name": "cantilever pA active L clear of brackets/tubes",
    "ok": true,
-   "value": "0.49"
+   "value": "0.13"
   },
   {
    "name": "cantilever pA active L outside bone/gingiva",
@@ -210,17 +230,12 @@
   {
    "name": "cantilever pA active L below the occlusal plane",
    "ok": true,
-   "value": "14.22 < 16.29"
+   "value": "13.79 < 16.29"
   },
   {
-   "name": "cantilever pA active L: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pA active L: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pA active L: terminal bend clear of brackets",
-   "ok": true,
-   "value": "0.37"
+   "value": "0.000"
   },
   {
    "name": "cantilever pA active L: free end lies labially beside the anterior wire (no overlap of the sections)",
@@ -235,7 +250,7 @@
   {
    "name": "cantilever pA active R clear of brackets/tubes",
    "ok": true,
-   "value": "0.68"
+   "value": "0.25"
   },
   {
    "name": "cantilever pA active R outside bone/gingiva",
@@ -245,17 +260,12 @@
   {
    "name": "cantilever pA active R below the occlusal plane",
    "ok": true,
-   "value": "14.22 < 16.29"
+   "value": "13.50 < 16.29"
   },
   {
-   "name": "cantilever pA active R: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pA active R: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pA active R: terminal bend clear of brackets",
-   "ok": true,
-   "value": "0.37"
+   "value": "0.000"
   },
   {
    "name": "cantilever pA active R: free end lies labially beside the anterior wire (no overlap of the sections)",
@@ -319,7 +329,7 @@
   {
    "name": "cantilever pB passive L clear of brackets/tubes",
    "ok": true,
-   "value": "1.15"
+   "value": "1.14"
   },
   {
    "name": "cantilever pB passive L outside bone/gingiva",
@@ -332,14 +342,9 @@
    "value": "13.79 < 16.29"
   },
   {
-   "name": "cantilever pB passive L: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pB passive L: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pB passive L: terminal bend clear of brackets",
-   "ok": true,
-   "value": "1.37"
+   "value": "0.000"
   },
   {
    "name": "cantilever pB passive R clear of teeth",
@@ -349,7 +354,7 @@
   {
    "name": "cantilever pB passive R clear of brackets/tubes",
    "ok": true,
-   "value": "1.17"
+   "value": "1.15"
   },
   {
    "name": "cantilever pB passive R outside bone/gingiva",
@@ -362,24 +367,19 @@
    "value": "10.29 < 16.29"
   },
   {
-   "name": "cantilever pB passive R: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pB passive R: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pB passive R: terminal bend clear of brackets",
-   "ok": true,
-   "value": "1.36"
+   "value": "0.000"
   },
   {
    "name": "cantilever pB active L clear of teeth",
    "ok": true,
-   "value": "2.59"
+   "value": "2.22"
   },
   {
    "name": "cantilever pB active L clear of brackets/tubes",
    "ok": true,
-   "value": "0.85"
+   "value": "0.61"
   },
   {
    "name": "cantilever pB active L outside bone/gingiva",
@@ -392,14 +392,9 @@
    "value": "13.79 < 16.29"
   },
   {
-   "name": "cantilever pB active L: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pB active L: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pB active L: terminal bend clear of brackets",
-   "ok": true,
-   "value": "0.66"
+   "value": "0.000"
   },
   {
    "name": "cantilever pB active L: free end lies labially beside the anterior wire (no overlap of the sections)",
@@ -414,7 +409,7 @@
   {
    "name": "cantilever pB active R clear of brackets/tubes",
    "ok": true,
-   "value": "1.02"
+   "value": "0.78"
   },
   {
    "name": "cantilever pB active R outside bone/gingiva",
@@ -427,14 +422,9 @@
    "value": "10.29 < 16.29"
   },
   {
-   "name": "cantilever pB active R: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pB active R: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pB active R: terminal bend clear of brackets",
-   "ok": true,
-   "value": "0.64"
+   "value": "0.000"
   },
   {
    "name": "cantilever pB active R: free end lies labially beside the anterior wire (no overlap of the sections)",
@@ -498,12 +488,12 @@
   {
    "name": "cantilever pC passive L clear of brackets/tubes",
    "ok": true,
-   "value": "1.04"
+   "value": "1.03"
   },
   {
    "name": "cantilever pC passive L outside bone/gingiva",
    "ok": true,
-   "value": "4.17"
+   "value": "4.77"
   },
   {
    "name": "cantilever pC passive L below the occlusal plane",
@@ -511,14 +501,9 @@
    "value": "13.79 < 16.29"
   },
   {
-   "name": "cantilever pC passive L: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pC passive L: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pC passive L: terminal bend clear of brackets",
-   "ok": true,
-   "value": "1.73"
+   "value": "0.000"
   },
   {
    "name": "cantilever pC passive R clear of teeth",
@@ -528,7 +513,7 @@
   {
    "name": "cantilever pC passive R clear of brackets/tubes",
    "ok": true,
-   "value": "1.06"
+   "value": "1.05"
   },
   {
    "name": "cantilever pC passive R outside bone/gingiva",
@@ -541,14 +526,9 @@
    "value": "10.29 < 16.29"
   },
   {
-   "name": "cantilever pC passive R: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pC passive R: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pC passive R: terminal bend clear of brackets",
-   "ok": true,
-   "value": "1.76"
+   "value": "0.000"
   },
   {
    "name": "cantilever pC active L clear of teeth",
@@ -558,12 +538,12 @@
   {
    "name": "cantilever pC active L clear of brackets/tubes",
    "ok": true,
-   "value": "1.04"
+   "value": "1.03"
   },
   {
    "name": "cantilever pC active L outside bone/gingiva",
    "ok": true,
-   "value": "4.26"
+   "value": "4.80"
   },
   {
    "name": "cantilever pC active L below the occlusal plane",
@@ -571,19 +551,14 @@
    "value": "13.79 < 16.29"
   },
   {
-   "name": "cantilever pC active L: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pC active L: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pC active L: terminal bend clear of brackets",
-   "ok": true,
-   "value": "1.61"
+   "value": "0.000"
   },
   {
    "name": "cantilever pC active L: free end lies labially beside the anterior wire (no overlap of the sections)",
    "ok": true,
-   "value": "0.70"
+   "value": "0.69"
   },
   {
    "name": "cantilever pC active R clear of teeth",
@@ -593,7 +568,7 @@
   {
    "name": "cantilever pC active R clear of brackets/tubes",
    "ok": true,
-   "value": "1.06"
+   "value": "1.05"
   },
   {
    "name": "cantilever pC active R outside bone/gingiva",
@@ -606,19 +581,14 @@
    "value": "10.29 < 16.29"
   },
   {
-   "name": "cantilever pC active R: small terminal occlusal bend (0.5–1.2 mm, no hook)",
+   "name": "cantilever pC active R: straight free end (no terminal bend / hook)",
    "ok": true,
-   "value": "0.80"
-  },
-  {
-   "name": "cantilever pC active R: terminal bend clear of brackets",
-   "ok": true,
-   "value": "1.63"
+   "value": "0.000"
   },
   {
    "name": "cantilever pC active R: free end lies labially beside the anterior wire (no overlap of the sections)",
    "ok": true,
-   "value": "0.70"
+   "value": "0.69"
   },
   {
    "name": "pC: intrusive resultant is apical (−y)",
@@ -637,7 +607,7 @@
   {
    "name": "pC: moment sign matches the shown rotation (d>0 → proclination, d<0 → retroclination, d≈0 → none)",
    "ok": true,
-   "value": "d=-4.50 Mx=-4.50 θ=-3.465"
+   "value": "d=-4.00 Mx=-4.00 θ=-3.08"
   },
   {
    "name": "pC: symmetric → no transverse moments",
@@ -665,8 +635,8 @@
    "name": "pC: molar reaction extrusive and tip-back (crown distal)",
    "ok": true,
    "value": [
-    "-7.86",
-    "-7.85"
+    "-8.11",
+    "-8.10"
    ]
   },
   {
@@ -682,7 +652,7 @@
   {
    "name": "d_C < 0 (C behind the CR)",
    "ok": true,
-   "value": -4.5
+   "value": -4
   },
   {
    "name": "tie points move distally A → B → C along the wire",
@@ -690,7 +660,7 @@
    "value": [
     10.38026569686595,
     0,
-    -4.5
+    -4
    ]
   },
   {
@@ -723,14 +693,14 @@
     ],
     "C": [
      [
-      22.60291074978737,
+      22.99608677916826,
       8.81376397947147,
-      -4.5
+      -4
      ],
      [
-      -22.60291074978737,
+      -22.99608677916826,
       8.81376397947147,
-      -4.5
+      -4
      ]
     ]
    }
@@ -773,13 +743,13 @@
    "value": {
     "tip": [
      0,
-     -1.48,
-     -1.1
+     -1.53,
+     -0.97
     ],
     "apex": [
      0,
-     -2.23,
-     0.56
+     -2.21,
+     0.5
     ]
    }
   },
@@ -795,7 +765,7 @@
     [
      0,
      0,
-     33.07115700610812
+     37.20505163187164
     ]
    ]
   },
@@ -805,7 +775,7 @@
    "value": [
     7.993,
     0,
-    -3.465
+    -3.08
    ]
   },
   {
@@ -834,7 +804,7 @@
     "start": 1.87,
     "pA": 1.13,
     "pB": 1.98,
-    "pC": 2.38
+    "pC": 2.33
    }
   },
   {
@@ -844,7 +814,7 @@
     "start": 0.06,
     "pA": 0.4,
     "pB": 0.04,
-    "pC": 0.02
+    "pC": 0.03
    }
   }
  ],
@@ -852,49 +822,45 @@
   "A": {
    "passive_L": {
     "toTeeth": 2.69,
-    "toBrackets": 1.39,
-    "toBone": 8.73,
+    "toBrackets": 1.49,
+    "toBone": 9.04,
     "yMax": 13.79,
-    "length": 43.6,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 3.66,
+    "length": 43.3,
+    "freeEnd": {
+     "verticalDeviation": 0,
      "labialToWire": 3.54
     }
    },
    "passive_R": {
     "toTeeth": 2.13,
-    "toBrackets": 1.48,
+    "toBrackets": 1.42,
     "toBone": 3.53,
     "yMax": 10.29,
-    "length": 43.6,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 3.66,
+    "length": 43.3,
+    "freeEnd": {
+     "verticalDeviation": 0,
      "labialToWire": 3.54
     }
    },
    "active_L": {
-    "toTeeth": 2.49,
-    "toBrackets": 0.49,
+    "toTeeth": 2.23,
+    "toBrackets": 0.13,
     "toBone": 1000000000,
-    "yMax": 14.22,
-    "length": 43.6,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 0.37,
+    "yMax": 13.79,
+    "length": 43.3,
+    "freeEnd": {
+     "verticalDeviation": 0,
      "labialToWire": 0.7
     }
    },
    "active_R": {
     "toTeeth": 2.13,
-    "toBrackets": 0.68,
+    "toBrackets": 0.25,
     "toBone": 3.53,
-    "yMax": 14.22,
-    "length": 43.6,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 0.37,
+    "yMax": 13.5,
+    "length": 43.3,
+    "freeEnd": {
+     "verticalDeviation": 0,
      "labialToWire": 0.7
     }
    }
@@ -902,49 +868,45 @@
   "B": {
    "passive_L": {
     "toTeeth": 2.69,
-    "toBrackets": 1.15,
+    "toBrackets": 1.14,
     "toBone": 5.79,
     "yMax": 13.79,
-    "length": 25.8,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 1.37,
-     "labialToWire": 1.29
+    "length": 24.8,
+    "freeEnd": {
+     "verticalDeviation": 0,
+     "labialToWire": 1.23
     }
    },
    "passive_R": {
     "toTeeth": 2.13,
-    "toBrackets": 1.17,
+    "toBrackets": 1.15,
     "toBone": 3.53,
     "yMax": 10.29,
-    "length": 25.7,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 1.36,
-     "labialToWire": 1.29
+    "length": 24.8,
+    "freeEnd": {
+     "verticalDeviation": 0,
+     "labialToWire": 1.23
     }
    },
    "active_L": {
-    "toTeeth": 2.59,
-    "toBrackets": 0.85,
+    "toTeeth": 2.22,
+    "toBrackets": 0.61,
     "toBone": 5.79,
     "yMax": 13.79,
-    "length": 25.8,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 0.66,
+    "length": 24.8,
+    "freeEnd": {
+     "verticalDeviation": 0,
      "labialToWire": 0.7
     }
    },
    "active_R": {
     "toTeeth": 2.13,
-    "toBrackets": 1.02,
+    "toBrackets": 0.78,
     "toBone": 3.53,
     "yMax": 10.29,
-    "length": 25.7,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 0.64,
+    "length": 24.8,
+    "freeEnd": {
+     "verticalDeviation": 0,
      "labialToWire": 0.7
     }
    }
@@ -952,50 +914,46 @@
   "C": {
    "passive_L": {
     "toTeeth": 2.69,
-    "toBrackets": 1.04,
-    "toBone": 4.17,
+    "toBrackets": 1.03,
+    "toBone": 4.77,
     "yMax": 13.79,
-    "length": 22.4,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 1.73,
-     "labialToWire": 0.81
+    "length": 20.4,
+    "freeEnd": {
+     "verticalDeviation": 0,
+     "labialToWire": 0.83
     }
    },
    "passive_R": {
     "toTeeth": 2.13,
-    "toBrackets": 1.06,
+    "toBrackets": 1.05,
     "toBone": 3.53,
     "yMax": 10.29,
-    "length": 22.2,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 1.76,
-     "labialToWire": 0.81
+    "length": 20.4,
+    "freeEnd": {
+     "verticalDeviation": 0,
+     "labialToWire": 0.83
     }
    },
    "active_L": {
     "toTeeth": 2.69,
-    "toBrackets": 1.04,
-    "toBone": 4.26,
+    "toBrackets": 1.03,
+    "toBone": 4.8,
     "yMax": 13.79,
-    "length": 22.4,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 1.61,
-     "labialToWire": 0.7
+    "length": 20.4,
+    "freeEnd": {
+     "verticalDeviation": 0,
+     "labialToWire": 0.69
     }
    },
    "active_R": {
     "toTeeth": 2.13,
-    "toBrackets": 1.06,
+    "toBrackets": 1.05,
     "toBone": 3.53,
     "yMax": 10.29,
-    "length": 22.2,
-    "terminalBend": {
-     "rise": 0.8,
-     "toBrackets": 1.63,
-     "labialToWire": 0.7
+    "length": 20.4,
+    "freeEnd": {
+     "verticalDeviation": 0,
+     "labialToWire": 0.69
     }
    }
   }
@@ -1060,11 +1018,11 @@
    ]
   },
   "pC": {
-   "d": -4.5,
-   "Mx": -4.5,
+   "d": -4,
+   "Mx": -4,
    "My": 0,
    "Mz": 0,
-   "theta": -3.465,
+   "theta": -3.08,
    "molarL": {
     "force": [
      0,
@@ -1072,9 +1030,9 @@
      0
     ],
     "couple": [
-     -7.86,
+     -8.11,
      0,
-     -3.17
+     -2.97
     ]
    },
    "equilibrium": [
@@ -1091,14 +1049,26 @@
  },
  "anteriorWire": {
   "left": {
-   "extensionToTeeth": 1.01,
+   "extensionToTeeth": 1.05,
    "extensionToCanineBrackets": 0.53,
-   "extensionToBoneSurface": 3
+   "extensionToBoneSurface": 3.71,
+   "tip": {
+    "rise": 1,
+    "distalRunFlatness": 0,
+    "distalRunLength": 19.5,
+    "pastTieC": 0.98
+   }
   },
   "right": {
-   "extensionToTeeth": 1.03,
+   "extensionToTeeth": 1.07,
    "extensionToCanineBrackets": 0.53,
-   "extensionToBoneSurface": 2.98
+   "extensionToBoneSurface": 3.68,
+   "tip": {
+    "rise": 1,
+    "distalRunFlatness": 0,
+    "distalRunLength": 19.5,
+    "pastTieC": 0.98
+   }
   }
  },
  "levelling": {
@@ -1126,14 +1096,14 @@
  },
  "activation": {
   "armLength": [
-   43.7,
-   25.8,
-   22.7
+   43.4,
+   24.8,
+   20.9
   ],
   "passiveDeflection": [
    4.6,
-   0.95,
-   0.65
+   0.86,
+   0.51
   ],
   "note": "illustrative: same F for A/B/C with δ ∝ L³ (cantilever beam), not measured"
  },
@@ -1165,13 +1135,13 @@
   "pC": {
    "tip": [
     0,
-    -1.48,
-    -1.1
+    -1.53,
+    -0.97
    ],
    "apex": [
     0,
-    -2.23,
-    0.56
+    -2.21,
+    0.5
    ]
   }
  },
@@ -1186,7 +1156,7 @@
    "start": 0.06,
    "pA": 0.4,
    "pB": 0.04,
-   "pC": 0.02
+   "pC": 0.03
   },
   "rootsInMandibleRest": {
    "33": -0.63,
@@ -1207,11 +1177,11 @@
    "start": 1.87,
    "pA": 1.13,
    "pB": 1.98,
-   "pC": 2.38
+   "pC": 2.33
   },
   "rootsInBoneRest": 0.79,
   "note": "rootsInMandible: depth in the source mandible only (thin, low-poly); rootsInBone: depth in the film bone volume (mandible ∪ alveolar walls around every root in every pose)"
  },
- "passed": 136,
+ "passed": 130,
  "failed": 0
 }

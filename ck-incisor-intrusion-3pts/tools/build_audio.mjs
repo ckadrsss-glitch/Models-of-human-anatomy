@@ -11,7 +11,12 @@
 import fs from 'fs';
 import { execFileSync } from 'child_process';
 import { VOICE } from '../src/voice.js';
-import { DURATION, OUTRO_T0, S, W } from '../src/timeline.js';
+import { DURATION, OUTRO_T0 as OUTRO_A, S as S_A, W as W_A, toOut } from '../src/timeline.js';
+// V4: the animation is authored in animation time and played through WARP — every sound event is placed in OUTPUT time
+const mapT = (v) => (Array.isArray(v) ? v.map(mapT) : typeof v === 'number' ? toOut(v) : v);
+const S = Object.fromEntries(Object.entries(S_A).map(([k, v]) => [k, mapT(v)]));
+const W = Object.fromEntries(Object.entries(W_A).map(([k, v]) => [k, mapT(v)]));
+const OUTRO_T0 = toOut(OUTRO_A);
 import { KEYWORDS } from '../src/kinetic.js';
 
 const SR = 48000, N = SR * DURATION;
@@ -26,13 +31,13 @@ const add = (L, R, i, l, r = l) => { if (i >= 0 && i < N) { L[i] += l; R[i] += r
 const BPM = 100, beat = 60 / BPM;
 const chords = [   // [t, root Hz, voicing ratios]
   [0, 73.42, [1, 1.5, 2, 2.4, 3.0, 4.5]],        // Dm9   hook: intrusion or proclination?
-  [4.0, 58.27, [1, 1.5, 2, 2.52, 3.0, 3.78]],    // B♭maj7 appliance design
-  [13.0, 49.0, [1, 1.5, 2, 2.4, 3.0, 4.5]],      // Gm9   position A
-  [19.5, 55.0, [1, 1.5, 2, 2.67, 3.0, 3.56]],    // A7sus proclination
-  [23.0, 73.42, [1, 1.5, 2, 2.4, 3.0, 4.5]],     // Dm9   second hook → position B
-  [37.0, 55.0, [1, 1.5, 2, 2.67, 3.0, 3.56]],    // A7sus position C
-  [46.0, 49.0, [1, 1.5, 2, 2.4, 3.0, 4.5]],      // Gm9   reactions
-  [53.0, 58.27, [1, 1.5, 2, 2.52, 3.0, 4.5]],    // B♭maj9 comparison
+  [toOut(4.0), 58.27, [1, 1.5, 2, 2.52, 3.0, 3.78]],    // B♭maj7 appliance design
+  [toOut(13.0), 49.0, [1, 1.5, 2, 2.4, 3.0, 4.5]],      // Gm9   position A
+  [toOut(19.5), 55.0, [1, 1.5, 2, 2.67, 3.0, 3.56]],    // A7sus proclination
+  [toOut(23.0), 73.42, [1, 1.5, 2, 2.4, 3.0, 4.5]],     // Dm9   second hook → position B
+  [toOut(37.0), 55.0, [1, 1.5, 2, 2.67, 3.0, 3.56]],    // A7sus position C
+  [toOut(46.0), 49.0, [1, 1.5, 2, 2.4, 3.0, 4.5]],      // Gm9   reactions
+  [toOut(53.0), 58.27, [1, 1.5, 2, 2.52, 3.0, 4.5]],    // B♭maj9 comparison
   [OUTRO_T0, 73.42, [1, 1.5, 2, 2.25, 3.0, 4.0]],  // D (add9) resolve
 ];
 const chordAt = (t) => { let i = 0; while (i < chords.length - 1 && t >= chords[i + 1][0]) i++; return i; };
@@ -65,7 +70,7 @@ function pluck(t0, f, d, gain, pan = 0) {
   }
 }
 const arp = [0, 2, 1, 3, 2, 4, 1, 3];
-for (let t = 0.3; t < 56.8; t += beat / 2) {
+for (let t = 0.3; t < toOut(56.8); t += beat / 2) {
   if (t > HOLD[0] && t < HOLD[1]) continue;              // the question: silence of the pulse
   if (t > 4.0 && t < 9.5 && Math.round((t - 0.3) / (beat / 2)) % 2) continue;
   const k = Math.round((t - 0.3) / (beat / 2));
@@ -79,7 +84,7 @@ function sub(t0, f, gain) {
     add(ML, MR, i, Math.sin(2 * Math.PI * f * u) * e * gain);
   }
 }
-for (let t = 16.5; t < 53.0; t += beat * 2) { if (t > HOLD[0] - 0.3 && t < HOLD[1]) continue; sub(t, chords[chordAt(t)][1], 0.085); }
+for (let t = toOut(16.5); t < toOut(53.0); t += beat * 2) { if (t > HOLD[0] - 0.3 && t < HOLD[1]) continue; sub(t, chords[chordAt(t)][1], 0.085); }
 function riser(t1, d, gain) {
   let y = 0;
   for (let i = Math.floor((t1 - d) * SR); i < Math.min(N, t1 * SR); i++) {
@@ -88,7 +93,7 @@ function riser(t1, d, gain) {
     add(ML, MR, i, y * gain * u * u, y * gain * u * u * 0.9);
   }
 }
-riser(HOLD[0], 1.6, 0.12); riser(W.through5, 1.8, 0.1); riser(53.0, 1.2, 0.08);
+riser(HOLD[0], 1.6, 0.12); riser(W.through5, 1.8, 0.1); riser(toOut(53.0), 1.2, 0.08);
 
 // ------------------------------------------------------------------ sound design
 function whoosh(t0, d, gain) {
@@ -145,7 +150,7 @@ function tension(t0, d, gain) {                 // activation: a soft rising sin
 
 whoosh(0.0, 0.7, 0.45);
 [[3.85, 0.9, 0.38], [9.4, 1.0, 0.3], [12.3, 0.9, 0.25], [13.9, 0.9, 0.25], [14.9, 0.8, 0.22], [16.6, 1.2, 0.3], [23.7, 1.1, 0.25], [26.2, 1.2, 0.25],
- [37.2, 0.9, 0.25], [38.3, 0.9, 0.22], [39.6, 0.8, 0.22], [45.85, 0.9, 0.36], [52.85, 0.9, 0.35], [OUTRO_T0 - 0.1, 1.4, 0.14]].forEach((w) => whoosh(...w));
+ [37.2, 0.9, 0.25], [38.3, 0.9, 0.22], [39.6, 0.8, 0.22], [45.85, 0.9, 0.36], [52.85, 0.9, 0.35], [OUTRO_T0 - 0.1, 1.4, 0.14]].forEach((w, i, arr) => whoosh(i === arr.length - 1 ? w[0] : toOut(w[0]), w[1], w[2]));   // V4: animation → output time
 // 01: the hook — force down, crowns tip forward (low tension)
 thud(0.02, 0.12); tone(0.04, 293.66, 1.2, 0.016, 2.5); tone(W.tilt1, 220, 1.2, 0.016, 3); tone(W.tilt1 + 0.02, 233.08, 1.2, 0.01, 3);
 // 02: segments installed (gold sectional wire, extensions, anchor segments)
@@ -178,9 +183,9 @@ tone(W.opp6, 220, 1.3, 0.02, 3); tone(W.opp6 + 0.02, 233.08, 1.3, 0.012, 3);
 // 07: reactive loads (soft thuds) and possible tipping
 thud(W.reactive7 + 0.02, 0.16); thud(W.moments7 + 0.02, 0.12); creak(S.buccalTip[0] + 0.1, 1.0, 0.012, 700);
 // 08: comparison
-tone(53.02, 659.25, 1.4, 0.02, 2.6); tone(W.three8, 880, 1.0, 0.012, 3);
-tone(W.point8 - 0.02, 587.33, 2.6, 0.02, 1.2); tone(W.point8, 880, 2.6, 0.016, 1.2); tone(W.point8 + 0.03, 1318.5, 2.2, 0.011, 1.5);
-KEYWORDS.forEach((k) => tone(Math.max(0.02, k.at - 0.04), 1975.5, 0.25, 0.006, 16));
+tone(toOut(53.02), 659.25, 1.4, 0.02, 2.6); tone(W.three8, 880, 1.0, 0.012, 3);
+tone(W.point9 - 0.02, 587.33, 2.6, 0.02, 1.2); tone(W.point9, 880, 2.6, 0.016, 1.2); tone(W.point9 + 0.03, 1318.5, 2.2, 0.011, 1.5);
+KEYWORDS.forEach((k) => tone(Math.max(0.02, toOut(k.at) - 0.04), 1975.5, 0.25, 0.006, 16));
 // outro (logo): chime on the circle, second on BIOMECHANICS
 tone(OUTRO_T0 + 0.55, 440, 2.4, 0.05, 1.6); tone(OUTRO_T0 + 0.57, 659.25, 2.4, 0.04, 1.6); tone(OUTRO_T0 + 1.15, 880, 1.8, 0.035, 1.8);
 

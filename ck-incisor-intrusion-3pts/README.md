@@ -6,6 +6,8 @@
 C — дальше дистально) и три результата: интрузия с вестибулярным наклоном, чистая интрузия (идеализированно) и интрузия
 с ретроклинацией. Показана реальная переподвязка: снять лигатуру → деактивировать → сместить свободный конец → реактивировать → подвязать.
 
+**Версия V4** — см. [docs/V4_CHANGES.md](docs/V4_CHANGES.md): прямой цельный кантилевер без загибов, короткие загнутые вверх кончики на дополнительной (секционной) дуге резцов, новая озвучка, ЦС ≈ всего сегмента, сравнение трёх вариантов в конце.
+
 **Версия V3 (FINAL GEOMETRY CORRECTION)** — см. [docs/V3_GEOMETRY_CORRECTION.md](docs/V3_GEOMETRY_CORRECTION.md): исходная модель
 соответствует этапу после нивелирования и выравнивания внутри сегментов (без скученности и ротаций, пазы сегментов на одном
 уровне, одна анатомическая форма дуги; фронтальный сегмент по-прежнему экструдирован, глубокое перекрытие не устранено),
@@ -18,12 +20,13 @@ C — дальше дистально) и три результата: интр�
 
 | | |
 |---|---|
-| Итоговое видео (V3) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V3_FINAL.mp4` |
+| Итоговое видео (V4) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V4_FINAL.mp4` |
+| Предыдущие версии | `export/…_V3_FINAL.mp4`, `export/…_FINAL.mp4` (не изменялись) |
 | Предыдущая версия (V2) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_FINAL.mp4` (не изменена) |
 | Научные источники и система сил | [SCIENTIFIC_REFERENCES.md](SCIENTIFIC_REFERENCES.md) |
 | Сценарий по таймкодам | [docs/SCRIPT.md](docs/SCRIPT.md) |
 | Озвучка, тайминги, SRT | [docs/VOICEOVER_RU.md](docs/VOICEOVER_RU.md), [docs/voiceover_ru.srt](docs/voiceover_ru.srt), [docs/subtitles_ru.srt](docs/subtitles_ru.srt) |
-| Проверка геометрии и механики | [docs/QA_REPORT.json](docs/QA_REPORT.json) (136 проверок), контрольные изображения `docs/qa/` (24 кадра, §10 брифа V3) |
+| Проверка геометрии и механики | [docs/QA_REPORT.json](docs/QA_REPORT.json) (130 проверок), контрольные изображения `docs/qa/` (28 кадров, вкл. `V4_construction_A/B/C`) |
 | 3D-модели и лицензии | [docs/ASSETS.md](docs/ASSETS.md) |
 | Плеер | `index.html` (нужен веб-сервер) |
 
@@ -45,11 +48,11 @@ node tools/serve.cjs 8123        # → http://localhost:8123/   (или python3 
 ```bash
 pip install numpy scipy scikit-image trimesh
 python3 -I tools/build_assets.py      # дентиция Z-Anatomy → нивелирование/выравнивание, система дуги, ЦС сегмента, кость, точки A/B/C, позы, QA
-node tools/qa.mjs                     # 136 проверок: нивелирование, зазоры (вкл. путь переподвязки и терминальный загиб), окклюзионная плоскость, знаки моментов, равновесие
+node tools/qa.mjs                     # 130 проверок: нивелирование, зазоры (вкл. путь переподвязки), прямой свободный конец кантилевера, загнутые кончики дуги, окклюзионная плоскость, знаки моментов, равновесие
 node tools/qa_stills.cjs docs/qa      # контрольные изображения: конструкция, подвязка A/B/C, системы сил, траектории, реакции
 node tools/build_audio.mjs            # музыка + саунд-дизайн + озвучка → микс −15 LUFS (assets/audio/mix.m4a)
 node tools/render.cjs build/frames 4  # headless Chromium (SwiftShader) → 1800 JPEG-кадров (докачивает недостающие)
-bash tools/encode.sh build/frames     # 2-проходный H.264 + AAC → export/…V3_FINAL.mp4 (проверка ≤ 25 МБ)
+bash tools/encode.sh build/frames     # 2-проходный H.264 + AAC → export/…V4_FINAL.mp4 (проверка ≤ 25 МБ)
 node tools/make_srt.mjs               # SRT из таймингов
 ```
 

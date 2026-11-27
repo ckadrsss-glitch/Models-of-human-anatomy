@@ -293,8 +293,10 @@ def hdir(a, b):
     d = np.asarray(b) - np.asarray(a); d[1] = 0; return d / np.linalg.norm(d)
 RUN0 = 2.0            # straight run distal to the lateral slot before the step
 EXT_OFF = 1.45        # labial clearance of the extension from the enamel (centre line)
-Z_END = -5.6          # distal end of the extension (CR at z = 0)
-Z_C = -4.5            # tie configuration C (distal, on the extension)
+Z_END = -4.8          # distal end of the extension (CR at z = 0) — V4: only ≈0.8 mm past tie C (no excess length)
+Z_C = -4.0            # tie configuration C (distal, on the extension)
+TIP_R = 0.4           # V4: radius of the small occlusal up-bend at the distal tip of each extension
+TIP_RISE = 0.6       # V4: short straight rise after the quarter circle (total tip height ≈ 1.0 mm)
 BR_HALF = 1.6         # occluso-gingival half-height of the canine / premolar bracket body + tie wings (geom.js)
 def side_wire(sg):
     """one half of the rigid anterior SS sectional wire, midline → distal end:
@@ -326,6 +328,15 @@ def side_wire(sg):
         p = np.array([ARCH_C[0] + r * math.sin(a), B[1], ARCH_C[2] + r * math.cos(a)])
         if k % 8 == 0: pts.append(p)
         if p[2] < Z_END: pts.append(p); break
+    # V4: the distal tip of the extension is turned up (occlusally) — a short, smooth bend of the extension itself that
+    # keeps the cantilever ligature from slipping off distally (cf. Machado-type designs). Main run stays straight.
+    e, f = pts[-1], pts[-2]
+    d = np.array([e[0] - f[0], 0.0, e[2] - f[2]]); d /= np.linalg.norm(d)
+    for k in range(1, 9):
+        a = (math.pi / 2) * k / 8
+        pts.append(e + d * TIP_R * math.sin(a) + np.array([0, TIP_R * (1 - math.cos(a)), 0]))
+    top = pts[-1]
+    pts.append(top + np.array([0, TIP_RISE, 0]))
     return pts, iB
 (wL, iBL), (wR, iBR) = side_wire(+1), side_wire(-1)
 MIR = np.array([-1.0, 1.0, 1.0])
@@ -485,7 +496,7 @@ hdr = {'units': 'mm', 'frame': 'arch frame: origin = CR of the 4-incisor segment
        'skull_to_arch': {'origin': O.tolist(), 'R_rows': R.tolist()}, 'archCentre': ARCH_C.tolist(),
        'source': 'Z-Anatomy (CC BY-SA 4.0), derived from BodyParts3D (c) DBCLS (CC BY-SA 2.1 JP); bone procedural from it',
        'extrusionStart': EXTR, 'intrusion': INTR, 'cRot': C_ROT, 'poses': POSES, 'qa': qa,
-       'wire': {'anterior': anterior, 'left': [p.tolist() for p in wL], 'right': [p.tolist() for p in wR], 'stepH': STEP_H, 'iLat': iBL - 2, 'iRun': iBL - 1},
+       'wire': {'anterior': anterior, 'left': [p.tolist() for p in wL], 'right': [p.tolist() for p in wR], 'stepH': STEP_H, 'iLat': iBL - 2, 'iRun': iBL - 1, 'iTip': len(wL) - 10},
        'points': {k: [p.tolist() for p in v] for k, v in POINTS.items()}, 'd': dk,
        'slots': {f: slot(f).tolist() for f in LOWER}, 'auxTube': {f: slot(f, TUBE_OFF).tolist() for f in ['36', '46']},
        'meshes': []}

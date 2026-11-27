@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { BRAND, backgroundCanvas, drawLogo } from './brand.js';
-import { DURATION, FPS, OUTRO_T0, SUBS, S, W as WT, VIS, BUCCAL_TIP, cameraAt, ZONE, ZONE_CAM, split, clamp01, smooth, lerp, ramp, win, easeOut, easeInOut } from './timeline.js';
+import { DURATION, FPS, OUTRO_T0, SUBS, S, W as WT, toAnim, VIS, BUCCAL_TIP, cameraAt, ZONE, ZONE_CAM, split, clamp01, smooth, lerp, ramp, win, easeOut, easeInOut } from './timeline.js';
 import { V, IDENT, apply, applyDir, poseLerp, crAt, forceSystem, centreOfRotation } from './model.js';
 import { WIRE, END, toothFrame, mesialDir, resample, sideWire, pointParams, tieLocal, tieDirLocal, buccalWire, auxTube, buildEnvelope, cantilever, TIE_KEYS } from './appliance.js';
 import { bracketGeometry, sweepRect, doubleTubeGeometry, singleTubeGeometry } from './geom.js';
@@ -32,9 +32,9 @@ const LOOK = { rim: 3.9, rim2: 2.2, rimColor: 0x8fe4ff, exposure: 1.1, edge: 0.2
 const INC = ['L31', 'L32', 'L41', 'L42'];
 const BUC = { '3': ['L33', 'L34', 'L35', 'L36', 'L37'], '4': ['L43', 'L44', 'L45', 'L46', 'L47'] };
 const ZONES = [
-  { pose: 'pA', u: 0, key: 'A', cap: 'INTRUSION + PROCLINATION' },
-  { pose: 'pB', u: 1, key: 'B', cap: 'PURE INTRUSION' },
-  { pose: 'pC', u: 2, key: 'C', cap: 'INTRUSION + RETROCLINATION' },
+  { pose: 'pA', u: 0, key: 'A', cap: 'INTRUSION + LABIAL TIPPING' },
+  { pose: 'pB', u: 1, key: 'B', cap: 'BODILY INTRUSION' },
+  { pose: 'pC', u: 2, key: 'C', cap: 'INTRUSION + LINGUAL TIPPING' },
 ];
 const DELTA_A = 4.6;          // passive drop of the free end at configuration A (mm, illustrative)
 
@@ -149,6 +149,13 @@ const OUTLINE = '#cfeaff';
 const outlineMat = () => new THREE.MeshBasicMaterial({ color: new THREE.Color(OUTLINE), transparent: true, opacity: 0, side: THREE.BackSide,
   depthWrite: false, blending: THREE.AdditiveBlending });
 const OUT_PAD = 0.42;          // outline shell: wire section + 2 × 0.21 mm
+/** V4: smooth arc-length resampling (centripetal Catmull-Rom) — a polyline resample leaves tiny kinks at every source
+ *  vertex that show up as bright bands in the metal reflections of the arm */
+function smoothResample(pts, n) {
+  const P = []; for (const p of pts) { const v = new THREE.Vector3(...p); if (!P.length || v.distanceTo(P[P.length - 1]) > 1e-4) P.push(v); }
+  if (P.length < 3) return resample(pts, n);
+  return new THREE.CatmullRomCurve3(P, false, 'centripetal').getSpacedPoints(n - 1).map((v) => [v.x, v.y, v.z]);
+}
 
 // ---------------------------------------------------------------------------- loader
 async function loadDentition(url = 'assets/dentition') {
@@ -378,7 +385,7 @@ export class Film {
   renderFrame(i) { return this.renderTime(i / FPS); }
 
   renderTime(tIn) {
-    const t = Math.min(Math.max(tIn, 0), DURATION - 1e-6);
+    const t = toAnim(Math.min(Math.max(tIn, 0), DURATION - 1e-6));   // V4: output time → animation time (WARP)
     this.t = t;
     const x = this.ctx;
     x.globalAlpha = 1;
@@ -467,7 +474,12 @@ export class Film {
     x.save(); x.globalAlpha = 0.32 * fade; x.strokeStyle = '#7fa6c8'; x.lineWidth = 1.5;
     for (const i of [1, 2]) { const yy = ZONE.y0 + i * ZONE.h; x.beginPath(); x.moveTo(60, yy); x.lineTo(W - 60, yy); x.stroke(); }
     x.restore();
-    this.text(x, 'ONE FORCE · THREE POINTS · THREE OUTCOMES', W / 2, 256, { size: 24, weight: 800, color: '#ffffff', alpha: fade, spacing: 4 });
+    // header and closing line, word-synchronised to the last two narration lines
+    const hw = [['ONE CANTILEVER', WT.one8], ['THREE LINES OF ACTION', WT.three8], ['THREE EFFECTS', WT.effects8]];
+    hw.forEach(([str, t0], i) => this.text(x, str, W / 2 + (i - 1) * 330, 256, { size: 22, weight: 800, color: '#ffffff', alpha: fade * smooth((t - t0 + 0.06) / 0.3), spacing: 2 }));
+    const cw = [['MAGNITUDE', WT.magn9], ['POINT OF APPLICATION', WT.point9], ['DIRECTION', WT.dir9]];
+    this.text(x, 'CONTROL NOT ONLY THE', W / 2, 1468, { size: 20, weight: 700, color: '#d7e6f3', alpha: fade * smooth((t - WT.control9 + 0.06) / 0.3), spacing: 4 });
+    cw.forEach(([str, t0], i) => this.text(x, str, W / 2 + (i - 1) * 330, 1506, { size: 26, weight: 800, color: i === 1 ? COL.blue : '#ffffff', alpha: fade * smooth((t - t0 + 0.06) / 0.3), spacing: 2 }));
   }
   drawZone(x, t, sh, s, fade) {
     const { z, pose, rect } = sh;
@@ -483,7 +495,7 @@ export class Film {
       this.text(x, words[0] + ' +', lx, cy + 18, { size: 24, weight: 700, color: '#d7e6f3', alpha: fade, align: 'left', spacing: 2 });
       this.text(x, words[1], lx, cy + 52, { size: 30, weight: 800, color: '#ffffff', alpha: fade, align: 'left', spacing: 1 });
     } else this.text(x, z.cap, lx, cy + 34, { size: 30, weight: 800, color: COL.green, alpha: fade, align: 'left', spacing: 1 });
-    const sub = { A: 'tie mesial · d > 0', B: 'tie at CR level · d ≈ 0 (idealised)', C: 'tie distal · d < 0' }[z.key];
+    const sub = { A: 'line of action anterior to CR · d > 0', B: 'through the CR · d ≈ 0 (idealised)', C: 'posterior to CR · d < 0 (tendency)' }[z.key];
     this.text(x, sub, lx, cy + 92, { size: 19, weight: 600, color: COL.dim, alpha: fade, align: 'left', spacing: 1 });
   }
 
@@ -584,7 +596,7 @@ export class Film {
       const tie = ties[i];
       const tieDir = applyDir(pose, tieDirLocal(this.pp, u)[i]);
       const res = cantilever(tube, tie, this.env, { act: cs.act, delta0, offset: cs.offset, side: cs.side, tieDir });
-      const rp = resample(res.pts, this.cantN);
+      const rp = smoothResample(res.pts, this.cantN);
       sweepRect(rp, WIRE.tma.w, WIRE.tma.h, [0, 1, 0], mesh.geometry);
       this.cantMat[i].opacity = cs.a;
       // temporary contour highlight: insertion → activation → tie, and while the tie point is changed
@@ -597,7 +609,7 @@ export class Film {
       const pr = cantilever(tube, tie, this.env, { act: 0, delta0, side: cs.side, tieDir });
       this.passiveEnd[i] = pr.pts[pr.iEnd];
       if (ga > 0.004) {
-        sweepRect(resample(pr.pts, this.cantN), WIRE.tma.w, WIRE.tma.h, [0, 1, 0], this.cantGhost[i].geometry);
+        sweepRect(smoothResample(pr.pts, this.cantN), WIRE.tma.w, WIRE.tma.h, [0, 1, 0], this.cantGhost[i].geometry);
         this.cantGhost[i].visible = true; this.passiveMat.uniforms.uAlpha.value = ga * 2.0;
       }
       // ligature at the tie point
@@ -795,7 +807,9 @@ export class Film {
     if (o.showCR) {
       const ca = alpha * (o.crAlpha ?? 1);
       this.dot(x, this.proj(cr), { alpha: ca, r: compact ? 6 : 9 });
-      this.text(x, 'CR', ...this.proj(V.add(cr, [0, compact ? -2.6 : -2.6, compact ? 1.4 : 1.2])).slice(0, 2), { size: compact ? 18 : 24, weight: 800, color: COL.gold, alpha: ca, align: 'left', pill: !compact });
+      const crp = this.proj(V.add(cr, [0, -2.6, compact ? 1.4 : 1.2]));
+      this.text(x, compact ? 'CR' : 'CR ≈', crp[0], crp[1], { size: compact ? 18 : 24, weight: 800, color: COL.gold, alpha: ca, align: 'left', pill: !compact });
+      if (!compact) this.text(x, 'approx. · whole 4-incisor segment', crp[0], crp[1] + 30, { size: 16, weight: 600, color: COL.gold, alpha: ca * 0.9, align: 'left', pill: true });
     }
     // resultant F and its line of action
     if (o.showLine || o.showF) {
@@ -863,7 +877,7 @@ export class Film {
       this.callout(x, apply(pose, mid), 'ACTIVE SEGMENT', { dx: 40, dy: 260, alpha: win(t, S2.incGlow[0], WT.unite2 + 0.1, 0.25, 0.3), size: 24, sub: '32 · 31 · 41 · 42 only' });
       this.callout(x, M.L43.tip, 'CANINES 33 / 43', { dx: -30, dy: -230, alpha: win(t, 4.9, WT.unite2 + 0.6, 0.25, 0.3), size: 22, sub: 'not in the active segment' });
       this.callout(x, apply(pose, hdr.slots['32']), 'SECTIONAL WIRE', { dx: 50, dy: 250, color: '#ffffff', alpha: win(t, S2.antWire[0] + 0.2, S2.extension[0] + 0.05, 0.25, 0.3), size: 22, sub: 'SS .019 × .025 · rigid' });
-      this.callout(x, hdr.wire.left[hdr.wire.left.length - 3], 'STEPPED EXTENSION', { dx: 40, dy: 240, color: '#ffffff', alpha: win(t, S2.extension[0] + 0.2, S2.bucR[0] + 0.1, 0.25, 0.3), size: 22, sub: 'not engaged in the canine bracket' });
+      this.callout(x, hdr.wire.left[hdr.wire.iTip - 3], 'STEPPED EXTENSION', { dx: 40, dy: 240, color: '#ffffff', alpha: win(t, S2.extension[0] + 0.2, S2.bucR[0] + 0.1, 0.25, 0.3), size: 22, sub: 'not engaged in the canine bracket' });
       this.callout(x, hdr.slots['45'], 'RIGHT ANCHOR SEGMENT', { dx: 30, dy: 330, alpha: win(t, S2.bucR[0], S2.bucR[1] + 0.6, 0.2, 0.3), size: 22, sub: '43–47 · SS .019 × .025' });
       this.callout(x, hdr.slots['35'], 'LEFT ANCHOR SEGMENT', { dx: -30, dy: 330, alpha: win(t, S2.bucL[0], S2.bucL[1] + 0.6, 0.2, 0.3), size: 22, sub: '33–37 · SS .019 × .025' });
       const aT = win(t, S2.insert[0], S2.macro[0] + 0.1, 0.25, 0.3);
@@ -874,7 +888,8 @@ export class Film {
       if (aM > 0.01) {
         const wl = hdr.wire.left;
         this.callout(x, apply(pose, V.lerp(wl[hdr.wire.iLat], wl[hdr.wire.iRun], 0.5)), 'APICAL STEP', { dx: 70, dy: -170, color: '#ffffff', alpha: aM, size: 22, sub: 'out of the lateral bracket' });
-        this.callout(x, apply(pose, wl[Math.max(hdr.wire.iRun + 2, wl.length - 4)]), 'DISTAL RUN · TIE ZONE', { dx: 60, dy: 190, color: '#ffffff', alpha: aM, size: 22, sub: 'labial to 33, gingival to its bracket' });
+        this.callout(x, apply(pose, wl[Math.max(hdr.wire.iRun + 2, hdr.wire.iTip - 6)]), 'DISTAL RUN · TIE ZONE', { dx: 60, dy: 190, color: '#ffffff', alpha: aM, size: 22, sub: 'straight · gingival to the canine bracket' });
+        this.callout(x, apply(pose, wl[wl.length - 1]), 'UP-TURNED TIP', { dx: -30, dy: -260, color: '#ffffff', alpha: aM, size: 22, sub: 'short occlusal bend · keeps the ligature' });
         this.step(x, 'STEPPED EXTENSION OF THE SECTIONAL WIRE', aM);
       }
       // activation and tie
@@ -917,15 +932,16 @@ export class Film {
         this.flash(x, this.proj(p), clamp01((t - S.badgeA) / 0.7), aB * (1 - clamp01((t - S.badgeA) / 0.7)), COL.blue);
       }
       this.step(x, 'BOTH CANTILEVERS TIED AT A', win(t, S.badgeA + 0.2, S.closeOcc[0] + 0.2, 0.3, 0.3));
-      // close-ups of the free end: occlusal, then vestibular — small terminal occlusal bend + steel ligature
+      // close-ups: occlusal (straight free end of the cantilever + ligature), vestibular (up-turned tip of the extension)
       const cw = this.cantWorld[0];
       if (cw) {
         const tipEnd = cw.pts[cw.pts.length - 1];
         const aO = win(t, S.closeOcc[0] + 0.35, S.closeOcc[1] + 0.1, 0.25, 0.25);
-        this.callout(x, tipEnd, 'TERMINAL OCCLUSAL BEND', { dx: 30, dy: 300, color: '#ffffff', alpha: aO, size: 22, sub: 'occlusal view · keeps the ligature on the arm' });
+        this.callout(x, tipEnd, 'STRAIGHT FREE END', { dx: 30, dy: 300, color: '#ffffff', alpha: aO, size: 22, sub: 'cantilever: no bends, no hooks' });
         this.callout(x, this.tiesNow[0], 'STEEL LIGATURE', { dx: -70, dy: 420, color: '#ffffff', alpha: aO, size: 22, sub: 'arm tied to the sectional wire · not a rigid joint' });
         const aV2 = win(t, S.closeVes[0] + 0.05, S.sagIn[0] + 0.5, 0.25, 0.3);
-        this.callout(x, tipEnd, 'TERMINAL OCCLUSAL BEND', { dx: 40, dy: -330, color: '#ffffff', alpha: aV2, size: 22, sub: 'small bend of the wire itself · no extra hook' });
+        const wl = hdr.wire.left;
+        this.callout(x, apply(pose, wl[wl.length - 1]), 'UP-TURNED TIP OF THE SECTIONAL WIRE', { dx: 40, dy: -330, color: '#ffffff', alpha: aV2, size: 22, sub: 'short occlusal bend · the tie cannot slip off' });
         this.callout(x, cw.pts[Math.max(0, cw.iEnd - 30)], 'ARM BELOW THE OCCLUSAL PLANE', { dx: -60, dy: 400, color: COL.dim, alpha: aV2, size: 20, sub: 'vestibular · ligated at A' });
       }
       if (t < S.sagIn[0]) return;
@@ -1028,6 +1044,11 @@ export class Film {
       this.text(x, 'line of action through the CR', 60, 672, { size: 19, weight: 600, color: '#d7e6f3', alpha: ia, align: 'left', spacing: 1 });
       this.text(x, 'of THIS model — not a guaranteed', 60, 700, { size: 19, weight: 600, color: '#d7e6f3', alpha: ia, align: 'left', spacing: 1 });
       this.text(x, 'result of an anatomical tie point', 60, 728, { size: 19, weight: 600, color: '#d7e6f3', alpha: ia, align: 'left', spacing: 1 }); }
+    const ic = win(t, WT.retro6 + 0.3, 45.95, 0.3, 0.3);
+    if (ic > 0.01) { this.text(x, 'TENDENCY ONLY', 60, 640, { size: 21, weight: 800, color: '#ffffff', alpha: ic, align: 'left', spacing: 2 });
+      this.text(x, 'lingual crown tipping / retrusion', 60, 672, { size: 19, weight: 600, color: '#d7e6f3', alpha: ic, align: 'left', spacing: 1 });
+      this.text(x, 'by the opposite moment —', 60, 700, { size: 19, weight: 600, color: '#d7e6f3', alpha: ic, align: 'left', spacing: 1 });
+      this.text(x, 'not a guaranteed bodily retraction', 60, 728, { size: 19, weight: 600, color: '#d7e6f3', alpha: ic, align: 'left', spacing: 1 }); }
   }
   retie(x, t) {
     const seq = (untie, deact, slide, react, tieT, from, to) => {
@@ -1071,7 +1092,7 @@ export class Film {
     const words = cue[2].split(' '), lines = []; let cur = '';
     for (const w of words) { const s = cur ? cur + ' ' + w : w; if (x.measureText(s).width > 820 && cur) { lines.push(cur); cur = w; } else cur = s; }
     lines.push(cur);
-    const lh = 54, y0 = 1520 - lines.length * lh;
+    const lh = 54, y0 = (split(t) ? 1712 : 1520) - lines.length * lh;   // V4: below the closing line in the comparison
     const wmax = Math.max(...lines.map((l) => x.measureText(l).width));
     x.globalAlpha = a * 0.6; x.fillStyle = '#02060d';
     x.beginPath(); x.roundRect(W / 2 - wmax / 2 - 26, y0 - 12, wmax + 52, lines.length * lh + 20, 16); x.fill();

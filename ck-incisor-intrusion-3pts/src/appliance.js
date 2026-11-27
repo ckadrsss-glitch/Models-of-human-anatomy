@@ -160,12 +160,15 @@ export function buildEnvelope(meshes, brackets, C, y0 = 3, y1 = 13.5) {
   }
   return { C, a0, da, n, r: cur };
 }
-export function envAt(env, a) { const i = Math.floor((a - env.a0) / env.da); return env.r[((i % env.n) + env.n) % env.n]; }
+export function envAt(env, a) {          // V4: linear interpolation (no stair-steps → no banding on the arm)
+  const f = (a - env.a0) / env.da, i = Math.floor(f), w = f - i, n = env.n;
+  return env.r[((i % n) + n) % n] * (1 - w) + env.r[(((i + 1) % n) + n) % n] * w;
+}
 
 const beam = (x) => x * x * (3 - x) / 2;                         // cantilever beam deflection shape (free end)
 /** free-end geometry: labial stand-off of the arm centre line from the anterior-wire centre line at the tie (wire
- *  half-widths 0.32 + 0.32 + clearance), run past the tie, radius and height of the small terminal occlusal bend */
-export const END = { lab: 0.7, run: 0.45, r: 0.45, rise: 0.35 };
+ *  half-widths 0.32 + 0.32 + clearance) and the straight run past the tie (V4: no terminal bend on the cantilever) */
+export const END = { lab: 0.7, run: 0.6, r: 0, rise: 0 };   // V4: straight free end (no terminal bend)
 
 /**
  * Cantilever centre line (world).
@@ -193,12 +196,18 @@ export function cantilever(tube, tie, env, opts = {}) {
   const nA = 120, plan = [[T[0], T[2]]];
   const tubeExit = V.add(T, V.mul(mT, 1.4));
   plan.push([tubeExit[0], tubeExit[2]], [Tb[0], Tb[2]]);
+  // V4: the raw clearance radius is jagged (peaks of individual crowns) → a wire drawn through it zigzags in plan
+  //      (±20° heading jumps, visible as bright bands). Take an upper envelope: max-filter, then Gaussian smoothing.
+  const rRaw = [];
+  for (let i = 1; i <= nA; i++) { const u = i / nA, a = aB + (aE - aB) * u; rRaw.push(Math.max(envAt(env, a) + clear, rB + (rE - rB) * u)); }
+  const mf = rRaw.map((_, i) => { let m = -Infinity; for (let k = -6; k <= 6; k++) m = Math.max(m, rRaw[Math.min(nA - 1, Math.max(0, i + k))]); return m; });
+  let rs = mf;
+  for (let pass = 0; pass < 3; pass++) rs = rs.map((_, i) => { let sum = 0, wsum = 0; for (let k = -8; k <= 8; k++) { const g = Math.exp(-(k * k) / 24); sum += rs[Math.min(nA - 1, Math.max(0, i + k))] * g; wsum += g; } return sum / wsum; });
   for (let i = 1; i <= nA; i++) {
     const u = i / nA, a = aB + (aE - aB) * u;
-    const wB = Math.min(1, u / 0.12), wE = Math.min(1, (1 - u) / 0.085);
+    const wB = Math.min(1, u / 0.22), wE = Math.min(1, (1 - u) / 0.18);      // V4: gentle blends (no S-bends)
     const sB = wB * wB * (3 - 2 * wB), sE = wE * wE * (3 - 2 * wE);
-    const rEnv = envAt(env, a) + clear;
-    let r = Math.max(rEnv, rB + (rE - rB) * u);
+    let r = rs[i - 1];
     r = rB * (1 - sB) + r * sB;
     r = rE * (1 - sE) + r * sE;
     plan.push([C[0] + r * Math.sin(a), C[2] + r * Math.cos(a)]);
@@ -237,26 +246,18 @@ export function cantilever(tube, tie, env, opts = {}) {
     pts.push([P2[i][0] + rd[0] * ro, y, P2[i][1] + rd[2] * ro]);
     tags.push(i <= 1 ? 'tube' : s <= sBend + 1.5 ? 'bend' : 'arm');
   }
-  // ---- free end: short run mesially past the tie (the ligature sits around wire + arm at the tie), then a small smooth
-  //      bend of the wire itself towards occlusal (quarter circle + short straight): it stops the ligature from slipping
-  //      off the free end. Its size is fixed (wire bending), it is not an additional hook.
+  // ---- free end (V4): the arm ends straight — a short run past the tie along the anterior wire, no bend, no hook.
+  //      The ligature is retained by the anterior sectional wire itself: bracket wings at A, the up-turned distal tip
+  //      and the vertical step of the extension at B / C. Tagged 'hook' only for compatibility (= free tip).
   const iEnd = pts.length - 1;
   const hk = form ? form.hook : 1;
   if (hk > 0.001) {
     const last = pts[iEnd], prv = pts[Math.max(0, iEnd - 3)];
-    // run along the anterior wire (mesially) so the free end stays beside it, not across it
     const dir = tieDir ? V.norm([tieDir[0], 0, tieDir[2]]) : V.norm([last[0] - prv[0], 0, last[2] - prv[2]]);
-    const run = END.run * hk, R = END.r, sweep = (Math.PI / 2) * Math.min(1, hk * 1.4), n = 10;
-    const p0 = V.add(last, V.mul(dir, run));
-    for (let k = 1; k <= 3; k++) { pts.push(V.add(last, V.mul(dir, run * k / 3))); tags.push('hook'); }
-    for (let k = 1; k <= n; k++) {
-      const a = sweep * k / n;
-      pts.push(V.add(p0, V.add(V.mul(dir, R * Math.sin(a)), [0, R * (1 - Math.cos(a)), 0]))); tags.push('hook');
-    }
-    if (hk > 0.7) {
-      const top = pts[pts.length - 1], rise = END.rise * (hk - 0.7) / 0.3;
-      for (let k = 1; k <= 3; k++) { pts.push(V.add(top, [0, rise * k / 3, 0])); tags.push('hook'); }
-    }
+    const run = END.run * hk;
+    // continue the arm straight past the tie: same vertical slope as the arm end (a straight beam end, no kink)
+    const hz = Math.hypot(last[0] - prv[0], last[2] - prv[2]), slope = hz > 1e-6 ? (last[1] - prv[1]) / hz : 0;
+    for (let k = 1; k <= 3; k++) { const d = run * k / 3; pts.push(V.add(last, [dir[0] * d, slope * d, dir[2] * d])); tags.push('hook'); }
   }
   // draw-on (straight wire appearing) and pre-insertion offset
   let res = pts;

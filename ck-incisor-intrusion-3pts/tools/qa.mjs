@@ -58,6 +58,19 @@ for (const side of [1, -1]) {
   report.anteriorWire[side > 0 ? 'left' : 'right'] = { extensionToTeeth: +dT.toFixed(2), extensionToCanineBrackets: +dB.toFixed(2), extensionToBoneSurface: +dBone.toFixed(2) };
   check(`extension ${side > 0 ? 'L' : 'R'} clear of canine/premolar enamel`, dT > 0.1, dT.toFixed(2));
   check(`extension ${side > 0 ? 'L' : 'R'} not engaged in / clear of the canine bracket`, dB > 0.2, dB.toFixed(2));
+  // V4: short up-turned (occlusal) tip at the distal end of the extension: present, short, main run straight
+  {
+    const wl = side > 0 ? hdr.wire.left : hdr.wire.right, iT = hdr.wire.iTip, tip = wl.slice(iT);
+    const rise = Math.max(...tip.map((p) => p[1])) - wl[iT][1];
+    const run = wl.slice(hdr.wire.iRun + 1, iT + 1), yDev = Math.max(...run.map((p) => Math.abs(p[1] - run[0][1])));
+    const runLen = run.slice(1).reduce((n, p, j) => n + Math.hypot(p[0] - run[j][0], p[2] - run[j][2]), 0);
+    report.anteriorWire[side > 0 ? 'left' : 'right'].tip = { rise: +rise.toFixed(2), distalRunFlatness: +yDev.toFixed(3), distalRunLength: +runLen.toFixed(1) };
+    check(`extension ${side > 0 ? 'L' : 'R'}: short up-turned occlusal tip (0.5–1.2 mm)`, rise > 0.5 && rise < 1.2, rise.toFixed(2));
+    check(`extension ${side > 0 ? 'L' : 'R'}: distal run straight in the vertical (< 0.02 mm)`, yDev < 0.02, yDev.toFixed(3));
+    const past = (side > 0 ? hdr.points.C[0] : hdr.points.C[1])[2] - wl[iT][2];
+    report.anteriorWire[side > 0 ? 'left' : 'right'].tip.pastTieC = +past.toFixed(2);
+    check(`extension ${side > 0 ? 'L' : 'R'}: no excess length (tip 0.5–1.2 mm distal to tie C)`, past > 0.5 && past < 1.2, past.toFixed(2));
+  }
 }
 // ---- V3: levelling and alignment completed inside the segments (slots of each segment level / collinear, one smooth
 //      arch form, no rotations of the brackets against the wire, contacts without crowding)
@@ -117,15 +130,14 @@ for (const [ui, k] of TIE_KEYS.entries()) {
       check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'} clear of brackets/tubes`, dBr > 0.1, dBr.toFixed(2));
       check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'} outside bone/gingiva`, dBone > 0.4, dBone.toFixed(2));
       check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'} below the occlusal plane`, yMax < occlusalY - 1.0, `${yMax.toFixed(2)} < ${occlusalY.toFixed(2)}`);
-      // V3: small terminal occlusal bend of the free end (no hook): present, small, clear of brackets and of the anterior wire
+      // V4: the cantilever free end is straight (no terminal bend, no hook) and lies labially beside the anterior wire
       const term = res.pts.filter((_, j) => res.tags[j] === 'hook'), e = res.pts[res.iEnd];
-      const rise = Math.max(...term.map((p) => p[1])) - e[1];
+      const pv = res.pts[Math.max(0, res.iEnd - 3)], hz0 = Math.hypot(e[0] - pv[0], e[2] - pv[2]), sl = hz0 > 1e-6 ? (e[1] - pv[1]) / hz0 : 0;
+      const rise = Math.max(...term.map((p) => Math.abs(p[1] - (e[1] + sl * Math.hypot(p[0] - e[0], p[2] - e[2])))));   // deviation from the straight continuation
       const wireC = resample(sideWire(hdr, i ? -1 : 1), 400);
-      const dWire = Math.min(...term.map((p) => Math.min(...wireC.map((w) => Math.hypot(p[0] - w[0], p[2] - w[2]) + 0 * (p[1] - w[1])))));
-      const dBrT = Math.min(...term.map((p) => brAll(p, 4))) - WIRE.tma.w / 2;
-      rec[`${act ? 'active' : 'passive'}_${i ? 'R' : 'L'}`].terminalBend = { rise: +rise.toFixed(2), toBrackets: +dBrT.toFixed(2), labialToWire: +dWire.toFixed(2) };
-      check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'}: small terminal occlusal bend (0.5–1.2 mm, no hook)`, term.length > 0 && rise > 0.5 && rise < 1.2, rise.toFixed(2));
-      check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'}: terminal bend clear of brackets`, dBrT > 0.05, dBrT.toFixed(2));
+      const dWire = Math.min(...term.map((p) => Math.min(...wireC.map((w) => Math.hypot(p[0] - w[0], p[2] - w[2])))));
+      rec[`${act ? 'active' : 'passive'}_${i ? 'R' : 'L'}`].freeEnd = { verticalDeviation: +rise.toFixed(3), labialToWire: +dWire.toFixed(2) };
+      check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'}: straight free end (no terminal bend / hook)`, term.length > 0 && rise < 0.02, rise.toFixed(3));
       if (act) check(`cantilever p${k} active ${i ? 'R' : 'L'}: free end lies labially beside the anterior wire (no overlap of the sections)`, dWire >= (WIRE.tma.w + WIRE.ss.w) / 2 - 0.02, dWire.toFixed(2));
     }
   }

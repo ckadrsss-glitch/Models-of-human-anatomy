@@ -10,8 +10,10 @@
 //                 distal run, labial to the canine and the mesial half of the first premolar, gingival to
 //                 their brackets (NOT engaged in the canine brackets).
 //  Component C — two TMA .017 × .025 cantilevers: fixed end in the auxiliary tube of 36 / 46, tip-back bend,
-//                 arm vestibular and below the occlusal plane following the arch, hook over the anterior segment
-//                 at the chosen tie point (point contact → one force; one-couple system).
+//                 arm vestibular and below the occlusal plane following the arch; the free end lies labially against
+//                 the anterior wire at the chosen tie point and is LIGATED to it (point contact → one force; one-couple
+//                 system). A small, smooth terminal bend of the wire itself towards occlusal, just mesial to the tie,
+//                 keeps the ligature from slipping off the free end (no separate hook, no loop, no rigid fixation).
 //  Wire sections are parameters of the demonstrated construction, not a universal protocol.
 // ============================================================================
 import { V, apply } from './model.js';
@@ -95,7 +97,8 @@ export function anteriorWire(hdr) { return fillet(hdr.wire.anterior, 0.7, 6); }
 export function sideWire(hdr, side) {
   const w = side > 0 ? hdr.wire.left : hdr.wire.right;
   const mid = [0, (hdr.wire.left[0][1] + hdr.wire.right[0][1]) / 2, (hdr.wire.left[0][2] + hdr.wire.right[0][2]) / 2];
-  return fillet([mid, ...w], 0.7, 6);
+  const same = Math.abs(w[0][0]) < 1e-6;                    // V3: the halves start exactly at the midline point
+  return fillet(same ? w : [mid, ...w], 0.7, 6);
 }
 /** arc-length position of each application point on each side (point 1: the midline, s = 0) */
 export const TIE_KEYS = ['A', 'B', 'C'];
@@ -148,11 +151,21 @@ export function buildEnvelope(meshes, brackets, C, y0 = 3, y1 = 13.5) {
   for (let i = 0; i < n; i++) { let m = 0; for (let k = -10; k <= 10; k++) m = Math.max(m, r[(i + k + n) % n]); out[i] = m; }
   const sm = new Float32Array(n);
   for (let i = 0; i < n; i++) { let s = 0, w = 0; for (let k = -8; k <= 8; k++) { const g = Math.exp(-(k * k) / 18); s += out[(i + k + n) % n] * g; w += g; } sm[i] = Math.max(s / w, out[i]); }
-  return { C, a0, da, n, r: sm };
+  // V3: a wire does not follow every bump — drape it over the peaks (iterated smoothing that never goes below them)
+  let cur = sm;
+  for (let it = 0; it < 80; it++) {
+    const nx = new Float32Array(n);
+    for (let i = 0; i < n; i++) { let s = 0, w = 0; for (let k = -24; k <= 24; k += 2) { const g = Math.exp(-(k * k) / 200); s += cur[(i + k + n) % n] * g; w += g; } nx[i] = Math.max(s / w, sm[i]); }
+    cur = nx;
+  }
+  return { C, a0, da, n, r: cur };
 }
 export function envAt(env, a) { const i = Math.floor((a - env.a0) / env.da); return env.r[((i % env.n) + env.n) % env.n]; }
 
 const beam = (x) => x * x * (3 - x) / 2;                         // cantilever beam deflection shape (free end)
+/** free-end geometry: labial stand-off of the arm centre line from the anterior-wire centre line at the tie (wire
+ *  half-widths 0.32 + 0.32 + clearance), run past the tie, radius and height of the small terminal occlusal bend */
+export const END = { lab: 0.7, run: 0.45, r: 0.45, rise: 0.35 };
 
 /**
  * Cantilever centre line (world).
@@ -164,15 +177,16 @@ const beam = (x) => x * x * (3 - x) / 2;                         // cantilever b
  * Returns { pts, tags } — tags: 'tube' | 'bend' | 'arm' | 'hook'.
  */
 export function cantilever(tube, tie, env, opts = {}) {
-  const { act = 1, delta0 = 4.6, clear = 1.05, form = null, grow = 1, offset = [0, 0, 0], side = 1 } = opts;
+  const { act = 1, delta0 = 4.6, clear = 1.05, form = null, grow = 1, offset = [0, 0, 0], side = 1, tieDir = null } = opts;
   const C = env.C;
   const ang = (p) => Math.atan2(p[0] - C[0], p[2] - C[2]);
   const rad = (p) => Math.hypot(p[0] - C[0], p[2] - C[2]);
   const T = tube.c, mT = V.norm([tube.m[0], 0, tube.m[2]]);
   const STRAIGHT = 3.2;                                           // straight part from the tube exit to the tip-back bend
-  const out = V.norm([tie[0] - C[0], 0, tie[2] - C[2]]);          // radial outward at the tie point
-  const HOOK_R = 0.9;
-  const end = V.add(tie, V.mul(out, HOOK_R));                     // the arm ends labial to the anterior wire; the hook curls over it
+  let out = V.norm([tie[0] - C[0], 0, tie[2] - C[2]]);            // radial outward at the tie point
+  if (tieDir) { const nw = V.norm(V.cross([0, 1, 0], [tieDir[0], 0, tieDir[2]])); out = V.dot(nw, out) >= 0 ? nw : V.mul(nw, -1); }   // labial normal of the wire
+  const LAB = END.lab;
+  const end = V.add(tie, V.mul(out, LAB));                        // the free end lies labially against the anterior wire (tied there)
   // ---- planform: straight run along the tube axis, then the envelope radius (+ clearance), blended into the end radius
   const Tb = V.add(T, V.mul(mT, STRAIGHT));
   const aB = ang(Tb), aE = ang(end), rB = rad(Tb), rE = rad(end);
@@ -223,16 +237,25 @@ export function cantilever(tube, tie, env, opts = {}) {
     pts.push([P2[i][0] + rd[0] * ro, y, P2[i][1] + rd[2] * ro]);
     tags.push(i <= 1 ? 'tube' : s <= sBend + 1.5 ? 'bend' : 'arm');
   }
-  // ---- hook: arc in the plane (outward, up) around the anterior wire, from the labial side over the top
+  // ---- free end: short run mesially past the tie (the ligature sits around wire + arm at the tie), then a small smooth
+  //      bend of the wire itself towards occlusal (quarter circle + short straight): it stops the ligature from slipping
+  //      off the free end. Its size is fixed (wire bending), it is not an additional hook.
+  const iEnd = pts.length - 1;
   const hk = form ? form.hook : 1;
   if (hk > 0.001) {
-    const last = pts[pts.length - 1];
-    const cen = V.sub(last, V.mul(out, HOOK_R));                    // = tie (current activation height)
-    const sweep = 200 * hk, n = 16;
+    const last = pts[iEnd], prv = pts[Math.max(0, iEnd - 3)];
+    // run along the anterior wire (mesially) so the free end stays beside it, not across it
+    const dir = tieDir ? V.norm([tieDir[0], 0, tieDir[2]]) : V.norm([last[0] - prv[0], 0, last[2] - prv[2]]);
+    const run = END.run * hk, R = END.r, sweep = (Math.PI / 2) * Math.min(1, hk * 1.4), n = 10;
+    const p0 = V.add(last, V.mul(dir, run));
+    for (let k = 1; k <= 3; k++) { pts.push(V.add(last, V.mul(dir, run * k / 3))); tags.push('hook'); }
     for (let k = 1; k <= n; k++) {
-      const a = (k / n) * sweep * Math.PI / 180;
-      pts.push(V.add(cen, V.add(V.mul(out, HOOK_R * Math.cos(a)), [0, HOOK_R * Math.sin(a), 0])));
-      tags.push('hook');
+      const a = sweep * k / n;
+      pts.push(V.add(p0, V.add(V.mul(dir, R * Math.sin(a)), [0, R * (1 - Math.cos(a)), 0]))); tags.push('hook');
+    }
+    if (hk > 0.7) {
+      const top = pts[pts.length - 1], rise = END.rise * (hk - 0.7) / 0.3;
+      for (let k = 1; k <= 3; k++) { pts.push(V.add(top, [0, rise * k / 3, 0])); tags.push('hook'); }
     }
   }
   // draw-on (straight wire appearing) and pre-insertion offset
@@ -241,9 +264,16 @@ export function cantilever(tube, tie, env, opts = {}) {
     for (let i = 1; i < pts.length; i++) { const l = V.len(V.sub(pts[i], pts[i - 1])); if (acc + l > L) { cut.push(V.lerp(pts[i - 1], pts[i], (L - acc) / l)); break; } acc += l; cut.push(pts[i]); }
     res = cut; }
   if (offset[0] || offset[1] || offset[2]) res = res.map((p) => V.add(p, offset));
-  return { pts: res, tags: tags.slice(0, res.length), end, Ltot };
+  return { pts: res, tags: tags.slice(0, res.length), end, Ltot, iEnd: Math.min(iEnd, res.length - 1) };
 }
 
+/** mesial direction along the anterior wire at the tie points (local, horizontal, towards the midline) */
+export function tieDirLocal(pp, u) {
+  const k0 = Math.max(0, Math.min(1, Math.floor(u))), f = Math.min(1, Math.max(0, u - k0));
+  const a = pp.s[TIE_KEYS[k0]], b = pp.s[TIE_KEYS[k0 + 1]];
+  return [0, 1].map((i) => { const W = i ? pp.R : pp.L, sl = a[i] + (b[i] - a[i]) * f;
+    const d = V.sub(atLen(W, Math.max(0, sl - 0.6)), atLen(W, sl + 0.6)); d[1] = 0; return V.norm(d); });
+}
 /** convenience: both tie points (world) for configuration index u and an incisor pose */
 export function tiesWorld(pp, u, pose) {
   const [L, R] = tieLocal(pp, u);

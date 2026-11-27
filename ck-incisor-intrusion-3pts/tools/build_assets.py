@@ -128,6 +128,131 @@ def smooth_normals(v, t):
     for k in range(3): np.add.at(n, t[:, k], fn)
     return n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-9)
 
+# ---------------------------------------------------------------- V3: LEVELLING & ALIGNMENT COMPLETED (treatment stage)
+# The mechanics is shown after levelling and alignment inside the segments: every lower tooth is moved rigidly so that
+#   * its rotation about the long axis is corrected (bracket normal = outward normal of the arch form),
+#   * its bracket slot lies on ONE smooth anatomical arch form (polar fit r(θ), even in θ: symmetric, curved, not flat),
+#   * the slots of each segment are level: the 4 incisors at one common height (= their START height, still
+#     over-erupted by EXTR → the intrusion is still needed; the deep bite is NOT corrected), the buccal segments on one
+#     straight line from the canine to the second molar (symmetric left/right),
+#   * the crowns contact without crowding or spacing (sequential contacts from the midline, gap GAP).
+# The bracket point (FA) and its normal are carried with the tooth (material point), so the slots stay exactly on the arch.
+GAP = 0.06
+H_BR = {'1': 4.0, '2': 4.0, '3': 4.6, '4': 4.6, '5': 4.6, '6': 4.6, '7': 4.6}   # bracket slot height below the (buccal) cusp tip / incisal edge
+def rodrigues(k, a):
+    k = k / np.linalg.norm(k); K = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
+    return np.eye(3) + math.sin(a) * K + (1 - math.cos(a)) * K @ K
+LEVEL = {}
+if os.environ.get('NO_LEVEL') != '1':
+    C0 = np.array([0.0, 0.0, 0.5 * (landmarks('36')['tip'][2] + landmarks('46')['tip'][2]) - 6.0])
+    ang = lambda p: math.atan2(p[0] - C0[0], p[2] - C0[2])
+    TUBE_OFF0, BR_OFF0 = 1.75, 1.55
+    off = lambda f: TUBE_OFF0 if f[1] in '67' else BR_OFF0
+    V0 = {f: T[f]['v'].copy() for f in LOWER}
+    def crown_of(v, f): return v[T[f]['en'] > 0.5]
+    def tip_and_fa(v, f, N):
+        """buccal cusp tip / incisal edge height and the bracket point (FA) at H_BR below it, on the labial surface,
+        centred mesio-distally, with its outward normal turned square to the arch form (bracket bonded on the arch)"""
+        cv = crown_of(v, f); cc = cv.mean(0); tg = np.cross([0, 1, 0], N)
+        buc = cv[((cv - cc) @ N) > 0]
+        ytip = float(buc[:, 1].max())
+        yfa = ytip - H_BR[f[1]]
+        band = cv[(np.abs(cv[:, 1] - yfa) < 0.35) & (np.abs((cv - cc) @ tg) < 1.2)]
+        fa = band[np.argmax(band @ N)].copy()
+        # local surface inclination (torque look) from the labial band around the FA point
+        up = cv[(np.abs(cv[:, 1] - (yfa + 1.2)) < 0.3) & (np.abs((cv - cc) @ tg) < 1.2)]; dn = cv[(np.abs(cv[:, 1] - (yfa - 1.2)) < 0.3) & (np.abs((cv - cc) @ tg) < 1.2)]
+        s = ((up @ N).max() - (dn @ N).max()) / 2.4                  # outward lean of the labial surface per mm of height
+        fn = N - s * np.array([0, 1.0, 0]) * 0 + np.array([0, -s, 0]); fn = fn / np.linalg.norm(fn)
+        return ytip, fa, fn
+    def md_axis(v, f, ax):
+        tp = (v - v.mean(0)) @ ax; top = v[tp > tp.max() - (1.2 if f[1] in '123' else 3.0)]
+        X = top[:, [0, 2]] - top[:, [0, 2]].mean(0); _, _, vt = np.linalg.svd(X, full_matrices=False)
+        return np.array([vt[0][0], 0, vt[0][1]])
+    # arch form from the initial (unlevelled) slots, with radial N as provisional normal
+    P0 = {}
+    for f in LOWER:
+        cc = crown_of(V0[f], f).mean(0); Nr = cc - C0; Nr[1] = 0; Nr /= np.linalg.norm(Nr)
+        ytip, fa, fn = tip_and_fa(V0[f], f, Nr); P0[f] = dict(ytip=ytip, slot=fa + fn * off(f), cr=landmarks(f)['cr'])
+    th0 = np.array([ang(P0[f]['slot']) for f in LOWER]); r0 = np.array([math.hypot(P0[f]['slot'][0] - C0[0], P0[f]['slot'][2] - C0[2]) for f in LOWER])
+    A_ = np.stack([np.ones_like(th0), th0 ** 2, th0 ** 4], 1); rc = np.linalg.lstsq(A_, r0, rcond=None)[0]
+    rfit = lambda th: rc[0] + rc[1] * th ** 2 + rc[2] * th ** 4
+    drfit = lambda th: 2 * rc[1] * th + 4 * rc[2] * th ** 3
+    def curve(th):
+        r, dr = rfit(th), drfit(th); er = np.array([math.sin(th), 0, math.cos(th)]); et = np.array([math.cos(th), 0, -math.sin(th)])
+        nrm = r * er - dr * et; return C0 + r * er, nrm / np.linalg.norm(nrm)
+    print('arch form r(θ) =', np.round(rc, 3).tolist(), ' in/out irregularity before (mm):', {f: round(float(r0[i] - rfit(th0[i])), 2) for i, f in enumerate(LOWER)})
+    # vertical targets: incisal edges of the 4 incisors level at their mean START height (over-erupted: intrusion still
+    # needed, deep bite kept); buccal cusp tips 33–37 on one symmetric straight line in |θ| (levelled curve of Spee)
+    yI = float(np.mean([P0[f]['ytip'] for f in INC]))
+    bu = [f for f in LOWER if f not in INC]
+    lc = np.polyfit([abs(ang(P0[f]['slot'])) for f in bu], [P0[f]['ytip'] for f in bu], 1)
+    tb = np.array([abs(ang(P0[f]['slot'])) for f in bu]); lc = np.array([0.35 * lc[0], np.polyval(lc, tb.mean()) - 0.35 * lc[0] * tb.mean()])
+    ytipT = lambda f, th: yI if f in INC else float(np.polyval(lc, abs(th)))
+    print('cusp-tip / incisal-edge heights before (mm):', {f: round(P0[f]['ytip'], 2) for f in LOWER})
+    # derotation about the long axis: incisal edge / crown mesio-distal axis parallel to the arch tangent (incisors,
+    # canines, molars). Premolars (round crowns, no reliable mesio-distal axis) only follow the arch-form heading.
+    heading = lambda th: math.atan2(*curve(th)[1][[0, 2]])
+    ROT0 = {}
+    for f in LOWER:
+        th = ang(P0[f]['slot']); N = curve(th)[1]; tg = np.cross([0, 1, 0], N)
+        if f[1] in '45': ROT0[f] = 0.0
+        else:
+            md = md_axis(V0[f], f, T[f]['ax']); a = math.degrees(math.atan2(np.cross(md, tg)[1], md @ tg)); ROT0[f] = math.radians((a + 90) % 180 - 90)
+        ROT0[f] = (ROT0[f], th)
+    def place(f, th):
+        a0, thA = ROT0[f]; ax = T[f]['ax']; c = P0[f]['cr']
+        rot = a0 + (heading(th) - heading(thA)) * (1 if ax[1] > 0 else -1)
+        Rm = rodrigues(ax, rot); v = (V0[f] - c) @ Rm.T + c
+        pt, N = curve(th)
+        ytip, fa, fn = tip_and_fa(v, f, N)
+        d = pt - (fa + fn * off(f)); d[1] = (ytipT(f, th) - H_BR[f[1]]) - (fa + fn * off(f))[1]    # slots exactly level / collinear
+        return Rm, c, d, rot, fa + d, fn
+    def apply_place(f, th):
+        Rm, c, d, rot, fa, fn = place(f, th)
+        T[f]['v'] = (V0[f] - c) @ Rm.T + c + d
+        LEVEL[f] = dict(fa=fa, faN=fn, th=th, rot=math.degrees(rot), shift=d)
+    for f in LOWER: apply_place(f, ang(P0[f]['slot']))
+    # sequential contacts from the midline outwards (both sides): march each tooth along the arch form towards the
+    # midline until its crown is GAP from the crown of its mesial neighbour (dense surface samples → point-to-surface)
+    def crown_samples(f, step=0.12):
+        v, t, en = T[f]['v'], T[f]['t'], T[f]['en']; tt = t[(en[t] > 0.5).all(1)]
+        a, b, c = v[tt[:, 0]], v[tt[:, 1]], v[tt[:, 2]]
+        area = 0.5 * np.linalg.norm(np.cross(b - a, c - a), axis=1); cnt = np.maximum(1, (area / (step * step)).astype(int))
+        rep = np.repeat(np.arange(len(tt)), cnt); r1, r2 = np.random.default_rng(5).random((2, len(rep))); sq = np.sqrt(r1)
+        return (1 - sq)[:, None] * a[rep] + (sq * (1 - r2))[:, None] * b[rep] + (sq * r2)[:, None] * c[rep]
+    for q, sg in (('3', 1), ('4', -1)):
+        prev = None
+        for k in '1234567':
+            f = q + k
+            if prev is None: dist = lambda: 2 * float(crown_samples(f)[:, 0].min() if sg > 0 else -crown_samples(f)[:, 0].max())
+            else:
+                tree = cKDTree(crown_samples(prev)); dist = lambda: float(tree.query(crown_samples(f, 0.2))[0].min())
+            th = LEVEL[f]['th'] + sg * 0.10
+            apply_place(f, th)
+            while dist() < GAP + 0.6: th += sg * 0.02; apply_place(f, th)
+            stp = 0.004
+            while True:
+                apply_place(f, th - sg * stp)
+                if dist() < GAP: break
+                th -= sg * stp
+            for _ in range(10):
+                stp /= 2; apply_place(f, th - sg * stp)
+                if dist() >= GAP: th -= sg * stp
+            apply_place(f, th); LEVEL[f]['gap'] = round(dist(), 3); prev = f
+    for f in LOWER:
+        Lv = LEVEL[f]
+        print(f'  {f}: derotation {Lv["rot"]:+.1f}°, shift {np.round(Lv["shift"], 2).tolist()}, θ {math.degrees(Lv["th"]):.1f}°')
+    # re-centre: the arch-frame origin stays the CR of the (levelled) 4-incisor segment
+    O2 = np.mean([landmarks(f)['cr'] for f in INC], 0); O2[0] = 0.0
+    for TT in T.values(): TT['v'] = TT['v'] - O2
+    for f in LEVEL: LEVEL[f]['fa'] = LEVEL[f]['fa'] - O2
+    O = O + O2 @ R
+    cr_ind = {f: landmarks(f)['cr'] for f in INC}
+    print('re-centred by', np.round(O2, 2).tolist())
+    ARC_C = C0 - O2
+    def arch_pt(th, y): p_, n_ = curve(th); p_ = p_ - O2; p_[1] = y; return p_, n_
+    def arch_th(p_): return math.atan2(p_[0] - ARC_C[0], p_[2] - ARC_C[2])
+
 # ---------------------------------------------------------------- per-tooth landmarks, FA point (outward = away from the arch centre)
 lower_tips = np.array([landmarks(f)['tip'] for f in LOWER])
 ARCH_C = np.array([0.0, 0.0, 0.5 * (landmarks('36')['tip'][2] + landmarks('46')['tip'][2]) - 6.0])
@@ -147,10 +272,17 @@ for fdi, TT in T.items():
     i = np.argmax(np.where(sl, v @ out, -1e9))
     near = np.linalg.norm(v - v[i], axis=1) < 1.5
     fa_n = n[near].mean(0); fa_n /= np.linalg.norm(fa_n)
+    fa_p = v[i]
+    if fdi in LEVEL: fa_p, fa_n = LEVEL[fdi]['fa'], LEVEL[fdi]['faN']        # levelled: the carried bracket point
     meta[fdi] = dict(fdi=fdi, cr=L['cr'].tolist(), axis=ax.tolist(), apex=L['apex'].tolist(), tip=L['tip'].tolist(),
-                     cej=L['cej'].tolist(), rootLen=L['rootLen'], fa=v[i].tolist(), faN=fa_n.tolist(), out=out.tolist(),
+                     cej=L['cej'].tolist(), rootLen=L['rootLen'], fa=np.asarray(fa_p).tolist(), faN=np.asarray(fa_n).tolist(), out=out.tolist(),
                      crown=cc.tolist(), bmin=v.min(0).tolist(), bmax=v.max(0).tolist())
 for f in INC: meta[f]['crSingle'] = cr_ind[f].tolist()
+if LEVEL:
+    sl_ = {f: np.array(meta[f]['fa']) + np.array(meta[f]['faN']) * (1.75 if f[1] in '67' else 1.55) for f in LOWER}
+    print('slot heights after (mm):', {f: round(float(sl_[f][1]), 2) for f in LOWER})
+    print('contact gaps (mm):', {f: LEVEL[f].get('gap') for f in LOWER})
+if os.environ.get('QUICK') == '1': raise SystemExit(0)
 
 BR_OFF, TUBE_OFF = 1.55, 1.75
 def slot(fdi, off=None):
@@ -159,54 +291,67 @@ def slot(fdi, off=None):
 # ---------------------------------------------------------------- anterior sectional wire with stepped distal extensions (START pose)
 def hdir(a, b):
     d = np.asarray(b) - np.asarray(a); d[1] = 0; return d / np.linalg.norm(d)
-STEP_H = 3.6          # apical step at the distal of the lateral incisor bracket
-RUN0 = 2.2            # straight run distal to the lateral slot before the step
+RUN0 = 2.0            # straight run distal to the lateral slot before the step
 EXT_OFF = 1.45        # labial clearance of the extension from the enamel (centre line)
 Z_END = -5.6          # distal end of the extension (CR at z = 0)
 Z_C = -4.5            # tie configuration C (distal, on the extension)
+BR_HALF = 1.6         # occluso-gingival half-height of the canine / premolar bracket body + tie wings (geom.js)
 def side_wire(sg):
+    """one half of the rigid anterior SS sectional wire, midline → distal end:
+    smooth arch-form curve through the central and lateral slots (levelled: one height) → short straight run →
+    apical STEP (functional: room for the extension under the canine / premolar brackets) → distal extension"""
     q = '3' if sg > 0 else '4'
-    sC, sL, s3 = slot(q + '1'), slot(q + '2'), slot(q + '3')
-    tdir = hdir(sC, sL)
-    A = sL + tdir * RUN0
-    B = A + np.array([0, -STEP_H, 0])
-    # extension: runs distally at the level of B, labial to the canine and the mesial half of the first premolar
-    # (gingival to their brackets), at EXT_OFF clearance from the enamel; ends at z = Z_END (distal to the CR level)
+    sC, sL = slot(q + '1'), slot(q + '2')
+    thL = arch_th(sL); yS = 0.5 * (sC[1] + sL[1])
+    pts = [arch_pt(thL * u, yS)[0] for u in np.linspace(0, 1, 13)]      # θ = 0 (midline) … lateral slot, on the arch form
+    pts[-1] = np.array([sL[0], yS, sL[2]])
+    tdir = hdir(arch_pt(thL - sg * 0.02, yS)[0], arch_pt(thL, yS)[0])
+    A = pts[-1] + tdir * RUN0
+    ext_y = min(slot(q + '3')[1], slot(q + '4')[1]) - BR_HALF - 0.32 - 0.35   # extension clears the canine / premolar brackets
+    B = A + np.array([0, ext_y - A[1], 0])
     band = np.concatenate([T[q + k]['v'][np.abs(T[q + k]['v'][:, 1] - B[1]) < 0.6] for k in '234'])
-    ang = lambda p: math.atan2(p[0] - ARCH_C[0], p[2] - ARCH_C[2])
-    bandA = np.array([ang(p) for p in band]); bandR = np.hypot(band[:, 0] - ARCH_C[0], band[:, 2] - ARCH_C[2])
-    a0 = ang(B); rB = math.hypot(B[0] - ARCH_C[0], B[2] - ARCH_C[2])
+    ang_ = lambda p: math.atan2(p[0] - ARCH_C[0], p[2] - ARCH_C[2])
+    bandA = np.array([ang_(p) for p in band]); bandR = np.hypot(band[:, 0] - ARCH_C[0], band[:, 2] - ARCH_C[2])
+    a0 = ang_(B); rB = math.hypot(B[0] - ARCH_C[0], B[2] - ARCH_C[2])
     A_ = np.linspace(a0, a0 + sg * 1.2, 241)
     rr = np.array([(bandR[np.abs(bandA - a) < 0.035].max() if (np.abs(bandA - a) < 0.035).any() else 0) + EXT_OFF for a in A_])
     rr = ndimage.maximum_filter1d(rr, 9); rr = ndimage.gaussian_filter1d(rr, 3) + 0.15
     w = np.clip((A_ - a0) * sg / 0.10, 0, 1); w = w * w * (3 - 2 * w)
     rr = rB * (1 - w) + np.maximum(rr, 0) * w
-    pts = [sC.copy(), sL.copy(), A.copy(), B.copy()]
+    iB = len(pts) + 1
+    pts = pts + [A.copy(), B.copy()]
     k = 0
     for a, r in zip(A_[1:], rr[1:]):
         k += 1
         p = np.array([ARCH_C[0] + r * math.sin(a), B[1], ARCH_C[2] + r * math.cos(a)])
         if k % 8 == 0: pts.append(p)
         if p[2] < Z_END: pts.append(p); break
-    return pts
-wL, wR = side_wire(+1), side_wire(-1)
-anterior = [p.tolist() for p in reversed(wR)] + [p.tolist() for p in wL]   # right end → left end (polyline control points)
+    return pts, iB
+(wL, iBL), (wR, iBR) = side_wire(+1), side_wire(-1)
+MIR = np.array([-1.0, 1.0, 1.0])
+wR = [p * MIR for p in wL]; iBR = iBL                                  # exact bilateral symmetry of the bent wire (no transverse moments)
+STEP_H = float(wL[iBL - 1][1] - wL[iBL][1])
+print('apical step of the extension (mm):', round(STEP_H, 2))
+anterior = [p.tolist() for p in reversed(wR)] + [p.tolist() for p in wL[1:]]   # both halves start at the same midline point   # right end → left end (polyline control points)
 # three alternative tie configurations of the two cantilevers (START pose) — demonstration configurations of THIS
 # model, not universal anatomical landmarks:
 #   A — mesial: on the anterior sectional wire, between the central and the lateral incisor brackets (labial of the CR)
 #   B — on the stepped extension at the sagittal level of the segment CR (idealised: line of action through the CR)
 #   C — further distal on the extension (line of action lingual/posterior to the CR)
 def on_ext(pts, zt):
-    ext = pts[3:]
+    ext = pts[(iBL if pts is wL else iBR):]
     for a, b in zip(ext[:-1], ext[1:]):
         if (a[2] - zt) * (b[2] - zt) <= 0: u = (zt - a[2]) / (b[2] - a[2]); return a + (b - a) * u
     return None
 POINTS = {}
-POINTS['A'] = [0.5 * (wL[0] + wL[1]), 0.5 * (wR[0] + wR[1])]
-PB = [on_ext(wL, 0.0), on_ext(wR, 0.0)]
+def on_arch(sg):                                                        # A: on the arch-form part, midway between the central and lateral slots
+    q = '3' if sg > 0 else '4'; th = 0.5 * (arch_th(slot(q + '1')) + arch_th(slot(q + '2'))); w = wL if sg > 0 else wR
+    return arch_pt(th, w[0][1])[0]
+POINTS['A'] = [on_arch(1), on_arch(1) * MIR]
+PB = [on_ext(wL, 0.0), on_ext(wL, 0.0) * MIR]
 assert all(p is not None for p in PB), 'the extension does not reach the CR level — lengthen it'
 POINTS['B'] = PB
-POINTS['C'] = [on_ext(wL, Z_C), on_ext(wR, Z_C)]
+POINTS['C'] = [on_ext(wL, Z_C), on_ext(wL, Z_C) * MIR]
 dk = {k: float(np.mean([p[2] for p in v])) for k, v in POINTS.items()}       # signed sagittal lever arm (CR at z = 0)
 print('lever arms d_k (mm, + = anterior to CR):', {k: round(v, 2) for k, v in dk.items()})
 
@@ -215,7 +360,7 @@ print('lever arms d_k (mm, + = anterior to CR):', {k: round(v, 2) for k, v in dk
 # (qualitative: the same compliance scale for the three configurations, so θ ∝ M = F·d; values illustrative and
 #  deliberately moderate — the film uses camera magnification, not exaggerated amplitudes)
 INTR = 2.0
-C_ROT = 0.85                                                             # deg per mm of lever arm (illustrative)
+C_ROT = 0.77                                                             # deg per mm of lever arm (illustrative; θ_A ≈ 8°)
 POSES = {'start': dict(theta=0.0, shift=[0, 0, 0])}
 for k in 'ABC':
     th = C_ROT * dk[k] if abs(dk[k]) > 1e-6 else 0.0
@@ -340,7 +485,7 @@ hdr = {'units': 'mm', 'frame': 'arch frame: origin = CR of the 4-incisor segment
        'skull_to_arch': {'origin': O.tolist(), 'R_rows': R.tolist()}, 'archCentre': ARCH_C.tolist(),
        'source': 'Z-Anatomy (CC BY-SA 4.0), derived from BodyParts3D (c) DBCLS (CC BY-SA 2.1 JP); bone procedural from it',
        'extrusionStart': EXTR, 'intrusion': INTR, 'cRot': C_ROT, 'poses': POSES, 'qa': qa,
-       'wire': {'anterior': anterior, 'left': [p.tolist() for p in wL], 'right': [p.tolist() for p in wR], 'stepH': STEP_H},
+       'wire': {'anterior': anterior, 'left': [p.tolist() for p in wL], 'right': [p.tolist() for p in wR], 'stepH': STEP_H, 'iLat': iBL - 2, 'iRun': iBL - 1},
        'points': {k: [p.tolist() for p in v] for k, v in POINTS.items()}, 'd': dk,
        'slots': {f: slot(f).tolist() for f in LOWER}, 'auxTube': {f: slot(f, TUBE_OFF).tolist() for f in ['36', '46']},
        'meshes': []}

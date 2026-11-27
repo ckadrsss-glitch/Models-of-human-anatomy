@@ -14,7 +14,7 @@ import { W, S, clamp01, smooth, easeOut } from './timeline.js';
 export const KEYWORDS = [
   { id: 'q1', text: 'INTRUSION', text2: 'OR PROCLINATION?', at: -0.3, hold: 3.7, color: 'white', place: 'top', dir: [0, -1], size: 82 },
   { id: 'seg', text: 'SEGMENTED ARCH', at: W.unite2, hold: W.cant2 - W.unite2 - 0.45, color: 'white', place: 'top', dir: [0, -1], size: 84, kicker: '32 · 31 · 41 · 42 — ONE RIGID SEGMENT', kickerAt: W.four2 },
-  { id: 'cant', text: 'BILATERAL', text2: 'CANTILEVERS', at: W.cant2, hold: 3.3, color: 'blue', place: 'top', dir: [1, 0], size: 80, kicker: 'TMA .017 × .025 · AUX TUBES 36 / 46', kickerAt: W.cant2 + 0.3 },
+  { id: 'cant', text: 'BILATERAL', text2: 'CANTILEVERS', at: W.cant2, hold: 3.3, color: 'white', place: 'top', dir: [1, 0], size: 80, kicker: 'TMA .017 × .025 · AUX TUBES 36 / 46', kickerAt: W.cant2 + 0.3 },
   { id: 'posA', text: 'POSITION A', at: 13.15, hold: 3.05, color: 'white', place: 'top', dir: [0, -1], size: 92, kicker: 'TIE: MESIAL · ON THE SECTIONAL WIRE', kickerAt: 13.45 },
   { id: 'procl', text: 'PROCLINATION', at: W.vest3, hold: 23.0 - W.vest3, color: 'white', place: 'top', dir: [1, 0], size: 90, kicker: 'INTRUSION +', kickerAt: W.vest3 },
   { id: 'newp', text: 'NEW TIE POINT?', at: W.what4, hold: 2.75, color: 'white', place: 'top', dir: [0, -1], size: 84, kicker: 'SAME FORCE', kickerAt: W.what4 + 0.3 },

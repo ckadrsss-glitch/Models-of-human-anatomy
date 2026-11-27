@@ -2,7 +2,7 @@
 // force directions, moment signs, equilibrium, anchorage reactions.   node tools/qa.mjs  → docs/QA_REPORT.json
 import fs from 'fs';
 import { V, IDENT, apply, crAt, forceSystem, centreOfRotation } from '../src/model.js';
-import { WIRE, toothFrame, mesialDir, sideWire, pointParams, tieLocal, buccalWire, auxTube, buildEnvelope, cantilever, resample, TIE_KEYS } from '../src/appliance.js';
+import { WIRE, toothFrame, mesialDir, sideWire, pointParams, tieLocal, tieDirLocal, buccalWire, auxTube, buildEnvelope, cantilever, resample, TIE_KEYS } from '../src/appliance.js';
 
 const hdr = JSON.parse(fs.readFileSync('assets/dentition.json'));
 const buf = fs.readFileSync('assets/dentition.bin');
@@ -51,13 +51,32 @@ const toothGrid = grid(LOWER.filter((n) => !INC.includes(n)).flatMap((n) => pts(
 const bucBrG = grid(bracketsBuc);
 for (const side of [1, -1]) {
   const w = resample(sideWire(hdr, side), 200);
-  const ext = w.filter((p) => Math.abs(p[0]) > Math.abs(hdr.wire.left[2][0]) - 0.1 || p[1] < hdr.wire.left[2][1] - 0.5);
+  const ext = w.filter((p) => Math.abs(p[0]) > Math.abs(hdr.wire.left[hdr.wire.iRun][0]) - 0.1 || p[1] < hdr.wire.left[hdr.wire.iRun][1] - 0.5);
   const dT = Math.min(...ext.map((p) => toothGrid(p))) - WIRE.ss.w / 2;
   const dB = Math.min(...ext.map((p) => bucBrG(p))) - WIRE.ss.h / 2;
   const dBone = Math.min(...ext.map((p) => boneG(p)));
   report.anteriorWire[side > 0 ? 'left' : 'right'] = { extensionToTeeth: +dT.toFixed(2), extensionToCanineBrackets: +dB.toFixed(2), extensionToBoneSurface: +dBone.toFixed(2) };
   check(`extension ${side > 0 ? 'L' : 'R'} clear of canine/premolar enamel`, dT > 0.1, dT.toFixed(2));
   check(`extension ${side > 0 ? 'L' : 'R'} not engaged in / clear of the canine bracket`, dB > 0.2, dB.toFixed(2));
+}
+// ---- V3: levelling and alignment completed inside the segments (slots of each segment level / collinear, one smooth
+//      arch form, no rotations of the brackets against the wire, contacts without crowding)
+{
+  const S = hdr.slots, inc = ['31', '32', '41', '42'].map((f) => S[f][1]);
+  const incRange = Math.max(...inc) - Math.min(...inc);
+  check('incisor slots level (one height, rigid sectional wire straight in the vestibular view)', incRange < 0.15, incRange.toFixed(3));
+  const C = hdr.archCentre, th = (p) => Math.abs(Math.atan2(p[0] - C[0], p[2] - C[2]));
+  for (const q of ['3', '4']) {
+    const fs = ['3', '4', '5', '6', '7'].map((k) => q + k), X = fs.map((f) => th(S[f])), Y = fs.map((f) => S[f][1]);
+    const mx = X.reduce((a, b) => a + b) / 5, my = Y.reduce((a, b) => a + b) / 5;
+    const b = X.reduce((a, x, i) => a + (x - mx) * (Y[i] - my), 0) / X.reduce((a, x) => a + (x - mx) ** 2, 0);
+    const dev = Math.max(...X.map((x, i) => Math.abs(Y[i] - (my + b * (x - mx)))));
+    report.levelling = report.levelling || {}; report.levelling['buccal' + q] = { slotHeights: Y.map((v) => +v.toFixed(2)), maxDeviationFromLine: +dev.toFixed(3) };
+    check(`buccal segment ${q}3–${q}7: slots collinear (straight rigid SS wire, no steps)`, dev < 0.2, dev.toFixed(3));
+  }
+  const tw = Math.max(...['31', '32', '33', '34', '35', '36', '37'].map((k) => Math.abs(S['3' + k.slice(1)][1] - S['4' + k.slice(1)][1]) + Math.abs(S['3' + k.slice(1)][0] + S['4' + k.slice(1)][0])));
+  check('levelled arch symmetric left / right', tw < 0.05, tw.toFixed(3));
+  report.levelling.incisorSlotRange = +incRange.toFixed(3);
 }
 // ---- cantilevers for the three tie configurations A / B / C (passive and active) and the re-tie path in between.
 //      The activation is re-adjusted per configuration (same F with a shorter arm → smaller deflection δ ∝ L³).
@@ -85,7 +104,7 @@ for (const [ui, k] of TIE_KEYS.entries()) {
   const rec = {};
   for (const act of [0, 1]) {
     for (let i = 0; i < 2; i++) {
-      const res = cantilever(tubes[i], ties[i], env, { act, delta0: deltaAt(ui), side: i ? -1 : 1 });
+      const res = cantilever(tubes[i], ties[i], env, { act, delta0: deltaAt(ui), side: i ? -1 : 1, tieDir: tieDirLocal(pp, ui)[i] });
       // exclude the part inside the tube and the hook (it touches the anterior wire by design)
       const arm = res.pts.filter((_, j) => res.tags[j] === 'arm' || res.tags[j] === 'bend');
       const armFar = arm.slice(0, Math.max(1, arm.length - 4));
@@ -98,6 +117,16 @@ for (const [ui, k] of TIE_KEYS.entries()) {
       check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'} clear of brackets/tubes`, dBr > 0.1, dBr.toFixed(2));
       check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'} outside bone/gingiva`, dBone > 0.4, dBone.toFixed(2));
       check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'} below the occlusal plane`, yMax < occlusalY - 1.0, `${yMax.toFixed(2)} < ${occlusalY.toFixed(2)}`);
+      // V3: small terminal occlusal bend of the free end (no hook): present, small, clear of brackets and of the anterior wire
+      const term = res.pts.filter((_, j) => res.tags[j] === 'hook'), e = res.pts[res.iEnd];
+      const rise = Math.max(...term.map((p) => p[1])) - e[1];
+      const wireC = resample(sideWire(hdr, i ? -1 : 1), 400);
+      const dWire = Math.min(...term.map((p) => Math.min(...wireC.map((w) => Math.hypot(p[0] - w[0], p[2] - w[2]) + 0 * (p[1] - w[1])))));
+      const dBrT = Math.min(...term.map((p) => brAll(p, 4))) - WIRE.tma.w / 2;
+      rec[`${act ? 'active' : 'passive'}_${i ? 'R' : 'L'}`].terminalBend = { rise: +rise.toFixed(2), toBrackets: +dBrT.toFixed(2), labialToWire: +dWire.toFixed(2) };
+      check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'}: small terminal occlusal bend (0.5–1.2 mm, no hook)`, term.length > 0 && rise > 0.5 && rise < 1.2, rise.toFixed(2));
+      check(`cantilever p${k} ${act ? 'active' : 'passive'} ${i ? 'R' : 'L'}: terminal bend clear of brackets`, dBrT > 0.05, dBrT.toFixed(2));
+      if (act) check(`cantilever p${k} active ${i ? 'R' : 'L'}: free end lies labially beside the anterior wire (no overlap of the sections)`, dWire >= (WIRE.tma.w + WIRE.ss.w) / 2 - 0.02, dWire.toFixed(2));
     }
   }
   report.cantilever[k] = rec;
@@ -120,7 +149,7 @@ check('|d_B| ≈ 0 (B at the CR level — idealised)', Math.abs(hdr.d.B) < 0.15,
 check('d_C < 0 (C behind the CR)', hdr.d.C < -0.5, hdr.d.C);
 check('tie points move distally A → B → C along the wire', hdr.points.A[0][2] > hdr.points.B[0][2] && hdr.points.B[0][2] > hdr.points.C[0][2], [hdr.points.A[0][2], hdr.points.B[0][2], hdr.points.C[0][2]]);
 check('ties A on the sectional wire (between 31/32 brackets), B and C on the stepped extension distal to the lateral bracket',
-  Math.abs(hdr.points.A[0][0]) < Math.abs(hdr.wire.left[1][0]) && Math.abs(hdr.points.B[0][0]) > Math.abs(hdr.wire.left[2][0]) && Math.abs(hdr.points.C[0][0]) > Math.abs(hdr.points.B[0][0]), hdr.points);
+  Math.abs(hdr.points.A[0][0]) < Math.abs(hdr.wire.left[hdr.wire.iLat][0]) && Math.abs(hdr.points.B[0][0]) > Math.abs(hdr.wire.left[hdr.wire.iRun][0]) && Math.abs(hdr.points.C[0][0]) > Math.abs(hdr.points.B[0][0]), hdr.points);
 // movement: crowns / roots, translation + rotation (not a rotation about a fixed CR)
 const mid = (a, b) => [0, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
 const tipS = mid(M.L31.tip, M.L41.tip), apexS = mid(M.L31.apex, M.L41.apex);

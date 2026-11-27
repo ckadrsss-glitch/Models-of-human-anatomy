@@ -82,6 +82,8 @@ export const S = {
   vectors: 12.2,                                // F/2 + F/2 → F
   // 03 position A
   badgeA: 13.25,
+  closeOcc: [14.75, 15.35],                     // occlusal close-up of the free end at A (terminal bend + ligature)
+  closeVes: [15.95, 16.5],                      // vestibular close-up of the free end at A
   sagIn: [16.5, 17.8],
   moveA: [W.tilt3, 22.6],
   // 04 / 05 re-tie A → B
@@ -122,9 +124,10 @@ export const CAMERA = [
   K(11.95, 42, 3, 172, [13, 6, -4]),
   K(12.95, 12, 10, 252, [0, 6, -9]),                        // both sides: F/2 + F/2
   K(14.0, 0, 6, 236, [0, 6, -8]),                           // 03: frontal — position A
-  K(14.9, 0, 74, 250, [0, 8, -3]),                          // occlusal
-  K(15.8, 30, 14, 150, [5, 9, 6]),                        // macro: hook over the sectional wire at A
-  K(16.5, 26, 12, 144, [5, 9, 6], 30, 'lin'),
+  K(14.75, 14, 64, 112, [5.4, 12.6, 9.6]),                 // occlusal close-up of the free end at A (terminal bend + ligature)
+  K(15.35, 20, 66, 106, [5.4, 12.6, 9.6], 30, 'lin'),
+  K(15.95, 40, 5, 88, [7.0, 12.0, 9.8]),                   // vestibular close-up of the free end at A
+  K(16.5, 36, 5, 92, [7.0, 12.0, 9.8], 30, 'lin'),
   sag(17.8),
   sag(23.6, 'lin'),
   K(24.9, -42, 20, 112, [-11, 8, 3]),                         // 04: close to the tie point (3/4, right side)

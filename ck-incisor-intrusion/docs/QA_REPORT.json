@@ -34,8 +34,8 @@
   },
   {
    "name": "cantilever p1 passive L outside bone/gingiva",
-   "ok": false,
-   "value": "0.19"
+   "ok": true,
+   "value": "4.01"
   },
   {
    "name": "cantilever p1 passive L below the occlusal plane",
@@ -54,8 +54,8 @@
   },
   {
    "name": "cantilever p1 passive R outside bone/gingiva",
-   "ok": false,
-   "value": "0.09"
+   "ok": true,
+   "value": "1.75"
   },
   {
    "name": "cantilever p1 passive R below the occlusal plane",
@@ -69,13 +69,13 @@
   },
   {
    "name": "cantilever p1 active L clear of brackets/tubes",
-   "ok": false,
-   "value": "0.09"
+   "ok": true,
+   "value": "0.30"
   },
   {
    "name": "cantilever p1 active L outside bone/gingiva",
    "ok": true,
-   "value": "2.14"
+   "value": "4.01"
   },
   {
    "name": "cantilever p1 active L below the occlusal plane",
@@ -90,12 +90,12 @@
   {
    "name": "cantilever p1 active R clear of brackets/tubes",
    "ok": true,
-   "value": "0.52"
+   "value": "0.59"
   },
   {
    "name": "cantilever p1 active R outside bone/gingiva",
    "ok": true,
-   "value": "1.38"
+   "value": "1.75"
   },
   {
    "name": "cantilever p1 active R below the occlusal plane",
@@ -159,12 +159,12 @@
   {
    "name": "cantilever p2 passive L clear of brackets/tubes",
    "ok": true,
-   "value": "0.41"
+   "value": "0.56"
   },
   {
    "name": "cantilever p2 passive L outside bone/gingiva",
-   "ok": false,
-   "value": "0.14"
+   "ok": true,
+   "value": "4.01"
   },
   {
    "name": "cantilever p2 passive L below the occlusal plane",
@@ -179,12 +179,12 @@
   {
    "name": "cantilever p2 passive R clear of brackets/tubes",
    "ok": true,
-   "value": "1.53"
+   "value": "1.54"
   },
   {
    "name": "cantilever p2 passive R outside bone/gingiva",
-   "ok": false,
-   "value": "0.15"
+   "ok": true,
+   "value": "1.75"
   },
   {
    "name": "cantilever p2 passive R below the occlusal plane",
@@ -199,12 +199,12 @@
   {
    "name": "cantilever p2 active L clear of brackets/tubes",
    "ok": true,
-   "value": "0.11"
+   "value": "0.32"
   },
   {
    "name": "cantilever p2 active L outside bone/gingiva",
    "ok": true,
-   "value": "2.66"
+   "value": "4.01"
   },
   {
    "name": "cantilever p2 active L below the occlusal plane",
@@ -219,7 +219,7 @@
   {
    "name": "cantilever p2 active R clear of brackets/tubes",
    "ok": true,
-   "value": "0.44"
+   "value": "0.79"
   },
   {
    "name": "cantilever p2 active R outside bone/gingiva",
@@ -288,12 +288,12 @@
   {
    "name": "cantilever p3 passive L clear of brackets/tubes",
    "ok": true,
-   "value": "1.08"
+   "value": "1.17"
   },
   {
    "name": "cantilever p3 passive L outside bone/gingiva",
-   "ok": false,
-   "value": "0.13"
+   "ok": true,
+   "value": "4.01"
   },
   {
    "name": "cantilever p3 passive L below the occlusal plane",
@@ -312,8 +312,8 @@
   },
   {
    "name": "cantilever p3 passive R outside bone/gingiva",
-   "ok": false,
-   "value": "0.22"
+   "ok": true,
+   "value": "1.75"
   },
   {
    "name": "cantilever p3 passive R below the occlusal plane",
@@ -328,12 +328,12 @@
   {
    "name": "cantilever p3 active L clear of brackets/tubes",
    "ok": true,
-   "value": "0.19"
+   "value": "0.34"
   },
   {
    "name": "cantilever p3 active L outside bone/gingiva",
    "ok": true,
-   "value": "3.25"
+   "value": "4.01"
   },
   {
    "name": "cantilever p3 active L below the occlusal plane",
@@ -348,7 +348,7 @@
   {
    "name": "cantilever p3 active R clear of brackets/tubes",
    "ok": true,
-   "value": "0.54"
+   "value": "0.91"
   },
   {
    "name": "cantilever p3 active R outside bone/gingiva",
@@ -477,7 +477,7 @@
   {
    "name": "cantilever p4 active R clear of brackets/tubes",
    "ok": true,
-   "value": "1.03"
+   "value": "1.07"
   },
   {
    "name": "cantilever p4 active R outside bone/gingiva",
@@ -723,28 +723,28 @@
    "passive_L": {
     "toTeeth": 1.79,
     "toBrackets": 0.39,
-    "toBone": 0.19,
+    "toBone": 4.01,
     "yMax": 10.13,
     "length": 49.9
    },
    "passive_R": {
     "toTeeth": 2.2,
     "toBrackets": 1.57,
-    "toBone": 0.09,
+    "toBone": 1.75,
     "yMax": 6.63,
     "length": 49.9
    },
    "active_L": {
     "toTeeth": 1.79,
-    "toBrackets": 0.09,
-    "toBone": 2.14,
+    "toBrackets": 0.3,
+    "toBone": 4.01,
     "yMax": 10.96,
     "length": 49.9
    },
    "active_R": {
     "toTeeth": 2.2,
-    "toBrackets": 0.52,
-    "toBone": 1.38,
+    "toBrackets": 0.59,
+    "toBone": 1.75,
     "yMax": 10.96,
     "length": 49.9
    }
@@ -752,28 +752,28 @@
   "p2": {
    "passive_L": {
     "toTeeth": 1.79,
-    "toBrackets": 0.41,
-    "toBone": 0.14,
+    "toBrackets": 0.56,
+    "toBone": 4.01,
     "yMax": 10.13,
     "length": 43.2
    },
    "passive_R": {
     "toTeeth": 2.2,
-    "toBrackets": 1.53,
-    "toBone": 0.15,
+    "toBrackets": 1.54,
+    "toBone": 1.75,
     "yMax": 6.68,
     "length": 43.2
    },
    "active_L": {
     "toTeeth": 1.79,
-    "toBrackets": 0.11,
-    "toBone": 2.66,
+    "toBrackets": 0.32,
+    "toBone": 4.01,
     "yMax": 11.28,
     "length": 43.2
    },
    "active_R": {
     "toTeeth": 2.2,
-    "toBrackets": 0.44,
+    "toBrackets": 0.79,
     "toBone": 1.75,
     "yMax": 11.28,
     "length": 43.2
@@ -782,28 +782,28 @@
   "p3": {
    "passive_L": {
     "toTeeth": 1.79,
-    "toBrackets": 1.08,
-    "toBone": 0.13,
+    "toBrackets": 1.17,
+    "toBone": 4.01,
     "yMax": 10.13,
     "length": 38.1
    },
    "passive_R": {
     "toTeeth": 2.2,
     "toBrackets": 1.45,
-    "toBone": 0.22,
+    "toBone": 1.75,
     "yMax": 6.99,
     "length": 38.1
    },
    "active_L": {
     "toTeeth": 1.79,
-    "toBrackets": 0.19,
-    "toBone": 3.25,
+    "toBrackets": 0.34,
+    "toBone": 4.01,
     "yMax": 11.59,
     "length": 38.1
    },
    "active_R": {
     "toTeeth": 2.2,
-    "toBrackets": 0.54,
+    "toBrackets": 0.91,
     "toBone": 1.75,
     "yMax": 11.59,
     "length": 38.1
@@ -833,7 +833,7 @@
    },
    "active_R": {
     "toTeeth": 2.2,
-    "toBrackets": 1.03,
+    "toBrackets": 1.07,
     "toBone": 1.75,
     "yMax": 8.01,
     "length": 25.6
@@ -1021,12 +1021,12 @@
   "left": {
    "extensionToTeeth": 1.36,
    "extensionToCanineBrackets": 0.64,
-   "extensionToBoneSurface": 0.08
+   "extensionToBoneSurface": 2.7
   },
   "right": {
    "extensionToTeeth": 1.36,
    "extensionToCanineBrackets": 0.64,
-   "extensionToBoneSurface": 0.33
+   "extensionToBoneSurface": 2.78
   }
  },
  "build": {
@@ -1072,6 +1072,6 @@
   "rootsInBoneRest": 1.42,
   "note": "rootsInMandible: depth in the source mandible only (thin, low-poly); rootsInBone: depth in the film bone volume (mandible ∪ alveolar walls around every root in every pose)"
  },
- "passed": 112,
- "failed": 7
+ "passed": 119,
+ "failed": 0
 }

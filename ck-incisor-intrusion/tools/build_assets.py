@@ -249,6 +249,21 @@ smp = (1 - sq)[:, None] * a_[rep] + (sq * (1 - r2))[:, None] * b_[rep] + (sq * r
 gp = np.stack([gx.ravel(), gy.ravel(), gz.ravel()], 1)
 dd, ii = cKDTree(smp).query(gp, workers=-1)
 mand = (np.sum((gp - smp[ii]) * fn_[rep[ii]], 1) < 0).reshape(shape)
+# the source mandible is not watertight (open alveoli): the nearest-surface test can flag empty space next to a
+# socket wall as "inside". Re-test the doubtful voxels of the alveolar part with the generalized winding number.
+doubt = (mand.ravel() & (dd > 1.6) & (gp[:, 1] > -8)).nonzero()[0]
+def winding(q):
+    a = a_[None] - q[:, None]; b = b_[None] - q[:, None]; c = c_[None] - q[:, None]
+    la, lb, lc = [np.linalg.norm(x, axis=2) for x in (a, b, c)]
+    det = np.einsum('ijk,ijk->ij', a, np.cross(b, c))
+    den = la * lb * lc + np.einsum('ijk,ijk->ij', a, b) * lc + np.einsum('ijk,ijk->ij', b, c) * la + np.einsum('ijk,ijk->ij', c, a) * lb
+    return np.abs(np.sum(2 * np.arctan2(det, den), 1) / (4 * np.pi))
+flat = mand.ravel().copy(); removed = 0
+for k in range(0, len(doubt), 96):
+    ids = doubt[k:k + 96]; w = winding(gp[ids])
+    out = ids[w < 0.5]; flat[out] = False; removed += len(out)
+mand = flat.reshape(shape)
+print('doubtful voxels', len(doubt), 'removed (outside by winding number)', removed)
 mand = ndimage.binary_opening(mand, iterations=1)
 print('mandible voxels', int(mand.sum()))
 sd_m_in = ndimage.distance_transform_edt(mand) * VX; sd_m_out = ndimage.distance_transform_edt(~mand) * VX

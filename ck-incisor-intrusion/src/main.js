@@ -23,7 +23,7 @@ try {
   const l = $('loading'); if (l) l.textContent = 'Не удалось загрузить 3D-сцену. Откройте проект через веб-сервер (см. README).';
   throw e;
 }
-window.CK = { duration: DUR, fps: FPS, renderFrame: (i) => film.renderFrame(i), renderTime: (t) => film.renderTime(t), grab: (t, qq) => film.grab(t, qq), setSubtitles: (on) => { film.subtitles = on; }, setCamera: (c) => { film.camOverride = c; } };
+window.CK = { duration: DUR, fps: FPS, renderFrame: (i) => film.renderFrame(i), renderTime: (t) => film.renderTime(t), grab: (t, qq) => film.grab(t, qq), setSubtitles: (on) => { film.subtitles = on; }, setCamera: (c) => { film.camOverride = c; }, setTie: (k) => { film.tieOverride = k; } };
 window.ready = true;
 $('loading')?.remove();
 

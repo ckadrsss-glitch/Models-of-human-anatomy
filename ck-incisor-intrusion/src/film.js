@@ -35,7 +35,7 @@ const COLS = [
   { pose: 'p4', k: 4, top: 'POINT 4', cap: 'PURE INTRUSION', color: COL.green, n: '2' },
   { pose: 'p5', k: 5, top: 'POINT 5', cap: 'RETROCLINATION', color: COL.white, n: '3' },
 ];
-const COL_RECT = { y: 470, h: 990, w: 360 };
+const COL_RECT = { y: 505, h: 960, w: 360 };
 
 // ---------------------------------------------------------------------------- background
 let _bg = null;
@@ -300,6 +300,7 @@ export class Film {
     const u = ramp(t, ...S.back8); return { pose: poseLerp(P('p5'), P('p4'), u), s: 1, target: u < 0.5 ? 'p5' : 'p4' };
   }
   tieK(t) {
+    if (this.tieOverride) return this.tieOverride;
     if (t < 25.1) return 3;
     if (t < S.slide4[0]) return 2;
     if (t < S.slide5[0]) return 2 + 2 * ramp(t, ...S.slide4);
@@ -331,7 +332,7 @@ export class Film {
     if (split(t)) this.renderSplit(t);
     else {
       this.camera = this.mainCam; this.vp = { x: 0, y: 0, w: W, h: H };
-      this.applyCamera(this.mainCam, cameraAt(t), W / H, focusLevel(t));
+      this.applyCamera(this.mainCam, this.camOverride || cameraAt(t), W / H, this.camOverride ? 0 : focusLevel(t));
       this.updateScene(t);
       const r = this.renderer;
       r.setScissorTest(false); r.setViewport(0, 0, W, H); r.clear();
@@ -764,8 +765,9 @@ export class Film {
           const w = apply(pose, p);
           const pr = this.proj(w);
           x.save(); x.globalAlpha = a; x.fillStyle = COL.blue; x.shadowColor = COL.blue; x.shadowBlur = 12; x.beginPath(); x.arc(pr[0], pr[1], 6, 0, Math.PI * 2); x.fill(); x.restore();
-          const off = this.proj(V.add(w, [0, 0, 3.6 + (k === '1' ? 0 : 0)]));
-          this.badge(x, [lerp(pr[0], off[0], 1), lerp(pr[1], off[1], 1) + (occl > 0.5 ? 26 : -30)], k, { alpha: a * (occl > 0.02 ? 1 : 0), scale: sc * 0.95 });
+          const ac = this.hdr.archCentre, out = V.norm([w[0] - ac[0], 0, w[2] - ac[2]]);
+          const off = this.proj(V.add(w, V.mul(out, 4.2)));
+          this.badge(x, [off[0], off[1]], k, { alpha: a * (occl > 0.02 ? 1 : 0), scale: sc * 0.95 });
         }
       });
       this.text(x, 'ALTERNATIVE TIE POINTS · NOT SIMULTANEOUS FORCES', W / 2, 1300, { size: 21, weight: 700, color: COL.dim, alpha: win(t, 20.95, 22.4, 0.3, 0.4), spacing: 2 });
@@ -805,8 +807,8 @@ export class Film {
         const p = this.bucApply(i ? '4' : '3', this.BS, M[i ? 'L46' : 'L36'].cr);
         this.momentArc(x, p, 5.5, 1, { axis: mo.couple, alpha: aM, width: 5, head: 18, progress: easeOut((t - WT.moments9) / 0.6), span: 140, mid: 0 });
       });
-      this.callout(x, this.bucApply('3', this.BS, M.L36.tip), 'REACTIVE EXTRUSION', { dx: 60, dy: -200, color: COL.red, alpha: aF * win(t, WT.reactive, 53.4, 0.3, 0.3), size: 22 });
-      this.callout(x, this.bucApply('4', this.BS, M.L46.cr), 'TIP-BACK MOMENT', { dx: -50, dy: 230, color: COL.purple, alpha: aM, size: 22, sub: 'at the molar tube' });
+      this.callout(x, this.bucApply('3', this.BS, M.L36.tip), 'REACTIVE EXTRUSION', { dx: -60, dy: -230, color: COL.red, alpha: aF * win(t, WT.reactive, 53.4, 0.3, 0.3), size: 22 });
+      this.callout(x, this.bucApply('4', this.BS, M.L46.cr), 'TIP-BACK MOMENT', { dx: 50, dy: 230, color: COL.purple, alpha: aM, size: 22, sub: 'at the molar tube' });
       // distribution over the rigid buccal segment (small arrows on each tooth)
       const aD = win(t, WT.reactive + 0.5, 53.5, 0.3, 0.3) * 0.8;
       for (const q of ['3', '4']) BUC[q].forEach((n, j) => {
@@ -814,7 +816,7 @@ export class Film {
         this.force3(x, V.add(p, [0, 1.2, 0]), [0, 1, 0], [1.6, 2.2, 2.8, 3.4, 2.4][j], { color: COL.red, alpha: aD, width: 3.5, head: 12 });
       });
       const aT = win(t, S.buccalTip[0] + 0.3, 53.5, 0.3, 0.3);
-      this.callout(x, this.bucApply('3', this.BS, M.L37.tip), 'POSSIBLE DISTAL TIPPING', { dx: 50, dy: -120, color: COL.red, alpha: aT, size: 20, sub: 'anchor teeth are not immobile' });
+      this.callout(x, this.bucApply('3', this.BS, M.L37.tip), 'POSSIBLE DISTAL TIPPING', { dx: 70, dy: -330, color: COL.red, alpha: aT, size: 20, sub: 'anchor teeth are not immobile' });
     }
     // anatomy attribution (end)
     this.text(x, 'Anatomy: Z-Anatomy / BodyParts3D © DBCLS · CC BY-SA 4.0', W / 2, 1588, { size: 15, weight: 500, color: COL.dim, alpha: win(t, 48.6, 53.4, 0.5, 0.4) * 0.6, spacing: 1 });

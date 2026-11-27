@@ -30,7 +30,7 @@ export const KEYWORDS = [
   { id: 'retro', text: 'RETROCLINATION', at: W.retro, hold: 1.4, color: 'white', place: 'top', dir: [-1, 0], size: 86, kicker: 'INTRUSION +', kickerAt: W.intr8 },
   { id: 'recip', text: 'RECIPROCAL FORCES', at: W.reactive, hold: W.anchor9 - W.reactive - 0.4, color: 'red', place: 'top', dir: [0, -1], size: 74 },
   { id: 'anch', text: 'ANCHORAGE CONTROL', at: W.anchor9, hold: 1.0, color: 'white', place: 'top', dir: [1, 0], size: 74 },
-  { id: 'q', text: 'WHERE WOULD YOU', text2: 'APPLY THE FORCE?', at: W.bio10 + 0.05, hold: 1.45, out: 0.45, color: 'white', place: 'top', dir: [0, -1], size: 70 },
+  { id: 'q', text: 'WHERE WOULD YOU APPLY THE FORCE?', at: W.bio10 + 0.05, hold: 1.45, out: 0.45, color: 'white', place: 'top', dir: [0, -1], size: 50 },
 ];
 export const KW = Object.fromEntries(KEYWORDS.map((k) => [k.id, k]));
 

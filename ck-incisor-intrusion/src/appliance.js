@@ -219,7 +219,7 @@ export function cantilever(tube, tie, env, opts = {}) {
     const s = S[i];
     // vestibular stand-off: where the arm hangs below the tie level (passive), it lies further out in the vestibule
     const y = yAt(s), drop = Math.max(0, end[1] - y), xr = (s - sBend) / (Ltot - sBend);
-    const wO = Math.min(1, Math.max(0, (xr - 0.5) / 0.3)), ro = 0.32 * drop * wO * wO * (3 - 2 * wO);
+    const wO = Math.min(1, Math.max(0, (xr - 0.35) / 0.35)), ro = 0.62 * drop * wO * wO * (3 - 2 * wO);
     const rd = V.norm([P2[i][0] - C[0], 0, P2[i][1] - C[2]]);
     pts.push([P2[i][0] + rd[0] * ro, y, P2[i][1] + rd[2] * ro]);
     tags.push(i <= 1 ? 'tube' : s <= sBend + 1.5 ? 'bend' : 'arm');

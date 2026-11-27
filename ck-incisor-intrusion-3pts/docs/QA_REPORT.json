@@ -1,0 +1,964 @@
+{
+ "units": "mm",
+ "occlusalPlaneY": 14.94,
+ "checks": [
+  {
+   "name": "extension L clear of canine/premolar enamel",
+   "ok": true,
+   "value": "1.36"
+  },
+  {
+   "name": "extension L not engaged in / clear of the canine bracket",
+   "ok": true,
+   "value": "0.64"
+  },
+  {
+   "name": "extension R clear of canine/premolar enamel",
+   "ok": true,
+   "value": "1.36"
+  },
+  {
+   "name": "extension R not engaged in / clear of the canine bracket",
+   "ok": true,
+   "value": "0.64"
+  },
+  {
+   "name": "re-tie path u=0.00 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 4.01"
+  },
+  {
+   "name": "re-tie path u=0.00 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=0.25 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 4.01"
+  },
+  {
+   "name": "re-tie path u=0.25 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=0.50 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 4.01"
+  },
+  {
+   "name": "re-tie path u=0.50 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=0.75 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 4.01"
+  },
+  {
+   "name": "re-tie path u=0.75 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=1.00 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 3.67"
+  },
+  {
+   "name": "re-tie path u=1.00 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=1.25 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 4.00"
+  },
+  {
+   "name": "re-tie path u=1.25 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=1.50 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 3.99"
+  },
+  {
+   "name": "re-tie path u=1.50 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=1.75 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 3.99"
+  },
+  {
+   "name": "re-tie path u=1.75 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "re-tie path u=2.00 L: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "1.79 / 3.93"
+  },
+  {
+   "name": "re-tie path u=2.00 R: passive arm clear of teeth and outside the gingiva",
+   "ok": true,
+   "value": "2.20 / 1.75"
+  },
+  {
+   "name": "cantilever pA passive L clear of teeth",
+   "ok": true,
+   "value": "1.79"
+  },
+  {
+   "name": "cantilever pA passive L clear of brackets/tubes",
+   "ok": true,
+   "value": "0.56"
+  },
+  {
+   "name": "cantilever pA passive L outside bone/gingiva",
+   "ok": true,
+   "value": "4.01"
+  },
+  {
+   "name": "cantilever pA passive L below the occlusal plane",
+   "ok": true,
+   "value": "10.13 < 14.94"
+  },
+  {
+   "name": "cantilever pA passive R clear of teeth",
+   "ok": true,
+   "value": "2.20"
+  },
+  {
+   "name": "cantilever pA passive R clear of brackets/tubes",
+   "ok": true,
+   "value": "1.54"
+  },
+  {
+   "name": "cantilever pA passive R outside bone/gingiva",
+   "ok": true,
+   "value": "1.75"
+  },
+  {
+   "name": "cantilever pA passive R below the occlusal plane",
+   "ok": true,
+   "value": "6.68 < 14.94"
+  },
+  {
+   "name": "cantilever pA active L clear of teeth",
+   "ok": true,
+   "value": "1.79"
+  },
+  {
+   "name": "cantilever pA active L clear of brackets/tubes",
+   "ok": true,
+   "value": "0.32"
+  },
+  {
+   "name": "cantilever pA active L outside bone/gingiva",
+   "ok": true,
+   "value": "4.01"
+  },
+  {
+   "name": "cantilever pA active L below the occlusal plane",
+   "ok": true,
+   "value": "11.28 < 14.94"
+  },
+  {
+   "name": "cantilever pA active R clear of teeth",
+   "ok": true,
+   "value": "2.20"
+  },
+  {
+   "name": "cantilever pA active R clear of brackets/tubes",
+   "ok": true,
+   "value": "0.79"
+  },
+  {
+   "name": "cantilever pA active R outside bone/gingiva",
+   "ok": true,
+   "value": "1.75"
+  },
+  {
+   "name": "cantilever pA active R below the occlusal plane",
+   "ok": true,
+   "value": "11.28 < 14.94"
+  },
+  {
+   "name": "pA: intrusive resultant is apical (−y)",
+   "ok": true,
+   "value": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "pA: same resultant magnitude and direction for A, B and C",
+   "ok": true,
+   "value": 1
+  },
+  {
+   "name": "pA: moment sign matches the shown rotation (d>0 → proclination, d<0 → retroclination, d≈0 → none)",
+   "ok": true,
+   "value": "d=9.39 Mx=9.39 θ=7.985"
+  },
+  {
+   "name": "pA: symmetric → no transverse moments",
+   "ok": true,
+   "value": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "pA: wire equilibrium ΣF = 0, ΣM = 0",
+   "ok": true,
+   "value": [
+    {
+     "sumF": 0,
+     "sumM": 0
+    },
+    {
+     "sumF": 0,
+     "sumM": 0
+    }
+   ]
+  },
+  {
+   "name": "pA: molar reaction extrusive and tip-back (crown distal)",
+   "ok": true,
+   "value": [
+    "-14.64",
+    "-14.61"
+   ]
+  },
+  {
+   "name": "cantilever pB passive L clear of teeth",
+   "ok": true,
+   "value": "1.79"
+  },
+  {
+   "name": "cantilever pB passive L clear of brackets/tubes",
+   "ok": true,
+   "value": "0.31"
+  },
+  {
+   "name": "cantilever pB passive L outside bone/gingiva",
+   "ok": true,
+   "value": "3.67"
+  },
+  {
+   "name": "cantilever pB passive L below the occlusal plane",
+   "ok": true,
+   "value": "10.13 < 14.94"
+  },
+  {
+   "name": "cantilever pB passive R clear of teeth",
+   "ok": true,
+   "value": "2.20"
+  },
+  {
+   "name": "cantilever pB passive R clear of brackets/tubes",
+   "ok": true,
+   "value": "1.20"
+  },
+  {
+   "name": "cantilever pB passive R outside bone/gingiva",
+   "ok": true,
+   "value": "1.75"
+  },
+  {
+   "name": "cantilever pB passive R below the occlusal plane",
+   "ok": true,
+   "value": "7.03 < 14.94"
+  },
+  {
+   "name": "cantilever pB active L clear of teeth",
+   "ok": true,
+   "value": "1.79"
+  },
+  {
+   "name": "cantilever pB active L clear of brackets/tubes",
+   "ok": true,
+   "value": "0.29"
+  },
+  {
+   "name": "cantilever pB active L outside bone/gingiva",
+   "ok": true,
+   "value": "3.46"
+  },
+  {
+   "name": "cantilever pB active L below the occlusal plane",
+   "ok": true,
+   "value": "10.13 < 14.94"
+  },
+  {
+   "name": "cantilever pB active R clear of teeth",
+   "ok": true,
+   "value": "2.20"
+  },
+  {
+   "name": "cantilever pB active R clear of brackets/tubes",
+   "ok": true,
+   "value": "0.94"
+  },
+  {
+   "name": "cantilever pB active R outside bone/gingiva",
+   "ok": true,
+   "value": "1.75"
+  },
+  {
+   "name": "cantilever pB active R below the occlusal plane",
+   "ok": true,
+   "value": "8.01 < 14.94"
+  },
+  {
+   "name": "pB: intrusive resultant is apical (−y)",
+   "ok": true,
+   "value": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "pB: same resultant magnitude and direction for A, B and C",
+   "ok": true,
+   "value": 1
+  },
+  {
+   "name": "pB: moment sign matches the shown rotation (d>0 → proclination, d<0 → retroclination, d≈0 → none)",
+   "ok": true,
+   "value": "d=0.05 Mx=0.05 θ=0"
+  },
+  {
+   "name": "pB: symmetric → no transverse moments",
+   "ok": true,
+   "value": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "pB: wire equilibrium ΣF = 0, ΣM = 0",
+   "ok": true,
+   "value": [
+    {
+     "sumF": 0,
+     "sumM": 0
+    },
+    {
+     "sumF": 0,
+     "sumM": 0
+    }
+   ]
+  },
+  {
+   "name": "pB: molar reaction extrusive and tip-back (crown distal)",
+   "ok": true,
+   "value": [
+    "-9.97",
+    "-9.94"
+   ]
+  },
+  {
+   "name": "cantilever pC passive L clear of teeth",
+   "ok": true,
+   "value": "1.79"
+  },
+  {
+   "name": "cantilever pC passive L clear of brackets/tubes",
+   "ok": true,
+   "value": "0.41"
+  },
+  {
+   "name": "cantilever pC passive L outside bone/gingiva",
+   "ok": true,
+   "value": "3.93"
+  },
+  {
+   "name": "cantilever pC passive L below the occlusal plane",
+   "ok": true,
+   "value": "10.13 < 14.94"
+  },
+  {
+   "name": "cantilever pC passive R clear of teeth",
+   "ok": true,
+   "value": "2.20"
+  },
+  {
+   "name": "cantilever pC passive R clear of brackets/tubes",
+   "ok": true,
+   "value": "1.05"
+  },
+  {
+   "name": "cantilever pC passive R outside bone/gingiva",
+   "ok": true,
+   "value": "1.75"
+  },
+  {
+   "name": "cantilever pC passive R below the occlusal plane",
+   "ok": true,
+   "value": "7.64 < 14.94"
+  },
+  {
+   "name": "cantilever pC active L clear of teeth",
+   "ok": true,
+   "value": "1.79"
+  },
+  {
+   "name": "cantilever pC active L clear of brackets/tubes",
+   "ok": true,
+   "value": "0.35"
+  },
+  {
+   "name": "cantilever pC active L outside bone/gingiva",
+   "ok": true,
+   "value": "3.94"
+  },
+  {
+   "name": "cantilever pC active L below the occlusal plane",
+   "ok": true,
+   "value": "10.13 < 14.94"
+  },
+  {
+   "name": "cantilever pC active R clear of teeth",
+   "ok": true,
+   "value": "2.20"
+  },
+  {
+   "name": "cantilever pC active R clear of brackets/tubes",
+   "ok": true,
+   "value": "1.05"
+  },
+  {
+   "name": "cantilever pC active R outside bone/gingiva",
+   "ok": true,
+   "value": "1.75"
+  },
+  {
+   "name": "cantilever pC active R below the occlusal plane",
+   "ok": true,
+   "value": "8.01 < 14.94"
+  },
+  {
+   "name": "pC: intrusive resultant is apical (−y)",
+   "ok": true,
+   "value": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "pC: same resultant magnitude and direction for A, B and C",
+   "ok": true,
+   "value": 1
+  },
+  {
+   "name": "pC: moment sign matches the shown rotation (d>0 → proclination, d<0 → retroclination, d≈0 → none)",
+   "ok": true,
+   "value": "d=-4.50 Mx=-4.50 θ=-3.825"
+  },
+  {
+   "name": "pC: symmetric → no transverse moments",
+   "ok": true,
+   "value": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "pC: wire equilibrium ΣF = 0, ΣM = 0",
+   "ok": true,
+   "value": [
+    {
+     "sumF": 0,
+     "sumM": 0
+    },
+    {
+     "sumF": 0,
+     "sumM": 0
+    }
+   ]
+  },
+  {
+   "name": "pC: molar reaction extrusive and tip-back (crown distal)",
+   "ok": true,
+   "value": [
+    "-7.69",
+    "-7.66"
+   ]
+  },
+  {
+   "name": "d_A > 0 (A in front of the CR)",
+   "ok": true,
+   "value": 9.394593882157347
+  },
+  {
+   "name": "|d_B| ≈ 0 (B at the CR level — idealised)",
+   "ok": true,
+   "value": 0
+  },
+  {
+   "name": "d_C < 0 (C behind the CR)",
+   "ok": true,
+   "value": -4.5
+  },
+  {
+   "name": "tie points move distally A → B → C along the wire",
+   "ok": true,
+   "value": [
+    9.394593882157347,
+    0,
+    -4.5
+   ]
+  },
+  {
+   "name": "ties A on the sectional wire (between 31/32 brackets), B and C on the stepped extension distal to the lateral bracket",
+   "ok": true,
+   "value": {
+    "A": [
+     [
+      5.44108526914488,
+      10.384502295653569,
+      9.394593882157347
+     ],
+     [
+      -5.44108526914488,
+      10.384502295653569,
+      9.394593882157347
+     ]
+    ],
+    "B": [
+     [
+      18.0931011218595,
+      7.110459054638065,
+      0
+     ],
+     [
+      -18.0931011218595,
+      7.110459054638065,
+      0
+     ]
+    ],
+    "C": [
+     [
+      22.35464687303945,
+      7.110459054638065,
+      -4.5
+     ],
+     [
+      -22.35464687303945,
+      7.110459054638065,
+      -4.5
+     ]
+    ]
+   }
+  },
+  {
+   "name": "A: crown labial, root apex lingual, both intruded at the CR",
+   "ok": true,
+   "value": {
+    "tip": [
+     0,
+     -3.38,
+     2.35
+    ],
+    "apex": [
+     0,
+     -1.27,
+     -1.27
+    ]
+   }
+  },
+  {
+   "name": "B: crown and apex move apically by the same amount (axis unchanged)",
+   "ok": true,
+   "value": {
+    "tip": [
+     0,
+     -2,
+     0
+    ],
+    "apex": [
+     0,
+     -2,
+     0
+    ]
+   }
+  },
+  {
+   "name": "C: crown lingual, root apex labial",
+   "ok": true,
+   "value": {
+    "tip": [
+     0,
+     -1.46,
+     -1.19
+    ],
+    "apex": [
+     0,
+     -2.29,
+     0.64
+    ]
+   }
+  },
+  {
+   "name": "A / C: CR translates along F while the segment rotates (centre of rotation ≠ CR)",
+   "ok": true,
+   "value": [
+    [
+     0,
+     0,
+     -14.350852727133955
+    ],
+    [
+     0,
+     0,
+     29.958577523180296
+    ]
+   ]
+  },
+  {
+   "name": "moderate amplitudes (≤ 2 mm intrusion, |θ| ≤ 8°)",
+   "ok": true,
+   "value": [
+    7.985,
+    0,
+    -3.825
+   ]
+  },
+  {
+   "name": "exactly three tie configurations (A, B, C)",
+   "ok": true,
+   "value": [
+    "A",
+    "B",
+    "C"
+   ]
+  },
+  {
+   "name": "active segment = exactly 4 incisors (31 32 41 42); canines in the buccal segments",
+   "ok": true,
+   "value": [
+    "L31",
+    "L32",
+    "L41",
+    "L42"
+   ]
+  },
+  {
+   "name": "roots inside the bone volume in every pose (build QA)",
+   "ok": true,
+   "value": {
+    "start": 2.15,
+    "pA": 1.18,
+    "pB": 2.13,
+    "pC": 2.62
+   }
+  },
+  {
+   "name": "lateral incisors never penetrate the canines (build QA)",
+   "ok": true,
+   "value": {
+    "start": 0.55,
+    "pA": 1.05,
+    "pB": 0.4,
+    "pC": 0.1
+   }
+  }
+ ],
+ "cantilever": {
+  "A": {
+   "passive_L": {
+    "toTeeth": 1.79,
+    "toBrackets": 0.56,
+    "toBone": 4.01,
+    "yMax": 10.13,
+    "length": 43.2
+   },
+   "passive_R": {
+    "toTeeth": 2.2,
+    "toBrackets": 1.54,
+    "toBone": 1.75,
+    "yMax": 6.68,
+    "length": 43.2
+   },
+   "active_L": {
+    "toTeeth": 1.79,
+    "toBrackets": 0.32,
+    "toBone": 4.01,
+    "yMax": 11.28,
+    "length": 43.2
+   },
+   "active_R": {
+    "toTeeth": 2.2,
+    "toBrackets": 0.79,
+    "toBone": 1.75,
+    "yMax": 11.28,
+    "length": 43.2
+   }
+  },
+  "B": {
+   "passive_L": {
+    "toTeeth": 1.79,
+    "toBrackets": 0.31,
+    "toBone": 3.67,
+    "yMax": 10.13,
+    "length": 25.8
+   },
+   "passive_R": {
+    "toTeeth": 2.2,
+    "toBrackets": 1.2,
+    "toBone": 1.75,
+    "yMax": 7.03,
+    "length": 25.6
+   },
+   "active_L": {
+    "toTeeth": 1.79,
+    "toBrackets": 0.29,
+    "toBone": 3.46,
+    "yMax": 10.13,
+    "length": 25.8
+   },
+   "active_R": {
+    "toTeeth": 2.2,
+    "toBrackets": 0.94,
+    "toBone": 1.75,
+    "yMax": 8.01,
+    "length": 25.6
+   }
+  },
+  "C": {
+   "passive_L": {
+    "toTeeth": 1.79,
+    "toBrackets": 0.41,
+    "toBone": 3.93,
+    "yMax": 10.13,
+    "length": 18.7
+   },
+   "passive_R": {
+    "toTeeth": 2.2,
+    "toBrackets": 1.05,
+    "toBone": 1.75,
+    "yMax": 7.64,
+    "length": 18.6
+   },
+   "active_L": {
+    "toTeeth": 1.79,
+    "toBrackets": 0.35,
+    "toBone": 3.94,
+    "yMax": 10.13,
+    "length": 18.7
+   },
+   "active_R": {
+    "toTeeth": 2.2,
+    "toBrackets": 1.05,
+    "toBone": 1.75,
+    "yMax": 8.01,
+    "length": 18.6
+   }
+  }
+ },
+ "forces": {
+  "pA": {
+   "d": 9.39,
+   "Mx": 9.395,
+   "My": 0,
+   "Mz": 0,
+   "theta": 7.985,
+   "molarL": {
+    "force": [
+     0,
+     0.5,
+     0
+    ],
+    "couple": [
+     -14.64,
+     0,
+     -12.18
+    ]
+   },
+   "equilibrium": [
+    {
+     "sumF": 0,
+     "sumM": 0
+    },
+    {
+     "sumF": 0,
+     "sumM": 0
+    }
+   ]
+  },
+  "pB": {
+   "d": 0.05,
+   "Mx": 0.051,
+   "My": 0,
+   "Mz": 0,
+   "theta": 0,
+   "molarL": {
+    "force": [
+     0,
+     0.5,
+     0
+    ],
+    "couple": [
+     -9.97,
+     0,
+     -5.83
+    ]
+   },
+   "equilibrium": [
+    {
+     "sumF": 0,
+     "sumM": 0
+    },
+    {
+     "sumF": 0,
+     "sumM": 0
+    }
+   ]
+  },
+  "pC": {
+   "d": -4.5,
+   "Mx": -4.503,
+   "My": 0,
+   "Mz": 0,
+   "theta": -3.825,
+   "molarL": {
+    "force": [
+     0,
+     0.5,
+     0
+    ],
+    "couple": [
+     -7.69,
+     0,
+     -3.74
+    ]
+   },
+   "equilibrium": [
+    {
+     "sumF": 0,
+     "sumM": 0
+    },
+    {
+     "sumF": 0,
+     "sumM": 0
+    }
+   ]
+  }
+ },
+ "anteriorWire": {
+  "left": {
+   "extensionToTeeth": 1.36,
+   "extensionToCanineBrackets": 0.64,
+   "extensionToBoneSurface": 2.7
+  },
+  "right": {
+   "extensionToTeeth": 1.36,
+   "extensionToCanineBrackets": 0.64,
+   "extensionToBoneSurface": 2.78
+  }
+ },
+ "activation": {
+  "armLength": [
+   43.2,
+   25.8,
+   18.7
+  ],
+  "passiveDeflection": [
+   4.6,
+   0.98,
+   0.37
+  ],
+  "note": "illustrative: same F for A/B/C with δ ∝ L³ (cantilever beam), not measured"
+ },
+ "movement": {
+  "pA": {
+   "tip": [
+    0,
+    -3.38,
+    2.35
+   ],
+   "apex": [
+    0,
+    -1.27,
+    -1.27
+   ]
+  },
+  "pB": {
+   "tip": [
+    0,
+    -2,
+    0
+   ],
+   "apex": [
+    0,
+    -2,
+    0
+   ]
+  },
+  "pC": {
+   "tip": [
+    0,
+    -1.46,
+    -1.19
+   ],
+   "apex": [
+    0,
+    -2.29,
+    0.64
+   ]
+  }
+ },
+ "build": {
+  "rootsInMandible": {
+   "start": -1.76,
+   "pA": -2.39,
+   "pB": -2,
+   "pC": -1.9
+  },
+  "minClear": {
+   "start": 0.55,
+   "pA": 1.05,
+   "pB": 0.4,
+   "pC": 0.1
+  },
+  "rootsInMandibleRest": {
+   "33": -0.62,
+   "34": -0.37,
+   "35": -0.54,
+   "36": 0.04,
+   "37": -0.43,
+   "43": -0.61,
+   "44": -0.41,
+   "45": -0.5,
+   "46": 0.12,
+   "47": -0.36
+  },
+  "upperLowerIncisorClear": 0.04,
+  "overbite": 5.6,
+  "upperLowerMolarClear": 1.49,
+  "rootsInBone": {
+   "start": 2.15,
+   "pA": 1.18,
+   "pB": 2.13,
+   "pC": 2.62
+  },
+  "rootsInBoneRest": 1.42,
+  "note": "rootsInMandible: depth in the source mandible only (thin, low-poly); rootsInBone: depth in the film bone volume (mandible ∪ alveolar walls around every root in every pose)"
+ },
+ "passed": 102,
+ "failed": 0
+}

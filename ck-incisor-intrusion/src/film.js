@@ -770,7 +770,7 @@ export class Film {
           this.badge(x, [off[0], off[1]], k, { alpha: a * (occl > 0.02 ? 1 : 0), scale: sc * 0.95 });
         }
       });
-      this.text(x, 'ALTERNATIVE TIE POINTS · NOT SIMULTANEOUS FORCES', W / 2, 1300, { size: 21, weight: 700, color: COL.dim, alpha: win(t, 20.95, 22.4, 0.3, 0.4), spacing: 2 });
+      this.text(x, 'ALTERNATIVE TIE POINTS · NOT SIMULTANEOUS FORCES', W / 2, 1392, { size: 21, weight: 700, color: COL.dim, alpha: win(t, 20.95, 22.4, 0.3, 0.4), spacing: 2 });
       // sagittal: CR, then the line of action of each option
       const aCR = win(t, S.crIn - 0.05, 25.3, 0.3, 0.3);
       this.dot(x, this.proj(cr), { alpha: aCR, r: 9 });

@@ -5,52 +5,112 @@
   {
    "name": "extension L clear of canine/premolar enamel",
    "ok": true,
-   "value": "1.05"
+   "value": "1.35"
   },
   {
    "name": "extension L not engaged in / clear of the canine bracket",
    "ok": true,
-   "value": "0.53"
+   "value": "1.05"
   },
   {
-   "name": "extension L: short up-turned occlusal tip (0.5–1.2 mm)",
+   "name": "extension L cfg A: short up-turned occlusal tip (0.8–1.2 mm)",
    "ok": true,
    "value": "1.00"
   },
   {
-   "name": "extension L: distal run straight in the vertical (< 0.02 mm)",
+   "name": "extension L cfg A: distal run straight in the vertical",
    "ok": true,
    "value": "0.000"
   },
   {
-   "name": "extension L: no excess length (tip 0.5–1.2 mm distal to tie C)",
+   "name": "extension L cfg A: compact — run after the step ≤ 1.6 mm",
    "ok": true,
-   "value": "0.98"
+   "value": "1.43"
+  },
+  {
+   "name": "extension L cfg B: short up-turned occlusal tip (0.8–1.2 mm)",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension L cfg B: distal run straight in the vertical",
+   "ok": true,
+   "value": "0.000"
+  },
+  {
+   "name": "extension L cfg B: compact — ends 0.7–1.3 mm past its tie",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension L cfg C: short up-turned occlusal tip (0.8–1.2 mm)",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension L cfg C: distal run straight in the vertical",
+   "ok": true,
+   "value": "0.000"
+  },
+  {
+   "name": "extension L cfg C: compact — ends 0.7–1.3 mm past its tie",
+   "ok": true,
+   "value": "1.00"
   },
   {
    "name": "extension R clear of canine/premolar enamel",
    "ok": true,
-   "value": "1.07"
+   "value": "1.34"
   },
   {
    "name": "extension R not engaged in / clear of the canine bracket",
    "ok": true,
-   "value": "0.53"
+   "value": "1.05"
   },
   {
-   "name": "extension R: short up-turned occlusal tip (0.5–1.2 mm)",
+   "name": "extension R cfg A: short up-turned occlusal tip (0.8–1.2 mm)",
    "ok": true,
    "value": "1.00"
   },
   {
-   "name": "extension R: distal run straight in the vertical (< 0.02 mm)",
+   "name": "extension R cfg A: distal run straight in the vertical",
    "ok": true,
    "value": "0.000"
   },
   {
-   "name": "extension R: no excess length (tip 0.5–1.2 mm distal to tie C)",
+   "name": "extension R cfg A: compact — run after the step ≤ 1.6 mm",
    "ok": true,
-   "value": "0.98"
+   "value": "1.43"
+  },
+  {
+   "name": "extension R cfg B: short up-turned occlusal tip (0.8–1.2 mm)",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension R cfg B: distal run straight in the vertical",
+   "ok": true,
+   "value": "0.000"
+  },
+  {
+   "name": "extension R cfg B: compact — ends 0.7–1.3 mm past its tie",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension R cfg C: short up-turned occlusal tip (0.8–1.2 mm)",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "extension R cfg C: distal run straight in the vertical",
+   "ok": true,
+   "value": "0.000"
+  },
+  {
+   "name": "extension R cfg C: compact — ends 0.7–1.3 mm past its tie",
+   "ok": true,
+   "value": "1.00"
   },
   {
    "name": "incisor slots level (one height, rigid sectional wire straight in the vestibular view)",
@@ -73,204 +133,524 @@
    "value": "0.014"
   },
   {
-   "name": "re-tie path u=0.00 L: passive arm clear of teeth and outside the gingiva",
+   "name": "cantilever pA L act=0: clear of brackets / tubes",
    "ok": true,
-   "value": "2.69 / 9.05"
+   "value": "0.33"
   },
   {
-   "name": "re-tie path u=0.00 R: passive arm clear of teeth and outside the gingiva",
+   "name": "cantilever pA L act=0: no contact with the buccal SS wire",
    "ok": true,
-   "value": "2.13 / 3.53"
+   "value": "0.96"
   },
   {
-   "name": "re-tie path u=0.25 L: passive arm clear of teeth and outside the gingiva",
+   "name": "cantilever pA L act=0: clear of enamel",
    "ok": true,
-   "value": "2.69 / 8.90"
+   "value": "1.96"
   },
   {
-   "name": "re-tie path u=0.25 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "re-tie path u=0.50 L: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.69 / 6.94"
-  },
-  {
-   "name": "re-tie path u=0.50 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "re-tie path u=0.75 L: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.69 / 5.94"
-  },
-  {
-   "name": "re-tie path u=0.75 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "re-tie path u=1.00 L: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.69 / 5.79"
-  },
-  {
-   "name": "re-tie path u=1.00 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "re-tie path u=1.25 L: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.69 / 6.02"
-  },
-  {
-   "name": "re-tie path u=1.25 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "re-tie path u=1.50 L: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.69 / 5.85"
-  },
-  {
-   "name": "re-tie path u=1.50 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "re-tie path u=1.75 L: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.69 / 5.54"
-  },
-  {
-   "name": "re-tie path u=1.75 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "re-tie path u=2.00 L: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.69 / 4.99"
-  },
-  {
-   "name": "re-tie path u=2.00 R: passive arm clear of teeth and outside the gingiva",
-   "ok": true,
-   "value": "2.13 / 3.53"
-  },
-  {
-   "name": "cantilever pA passive L clear of teeth",
-   "ok": true,
-   "value": "2.69"
-  },
-  {
-   "name": "cantilever pA passive L clear of brackets/tubes",
+   "name": "cantilever pA L act=0: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
    "value": "1.49"
   },
   {
-   "name": "cantilever pA passive L outside bone/gingiva",
+   "name": "cantilever pA L act=0: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "9.04"
+   "value": "9.00"
   },
   {
-   "name": "cantilever pA passive L below the occlusal plane",
+   "name": "activation pA L: free end moves occlusally from passive to engaged (δ)",
    "ok": true,
-   "value": "13.79 < 16.29"
+   "value": "4.60"
   },
   {
-   "name": "cantilever pA passive L: straight free end (no terminal bend / hook)",
+   "name": "cantilever pA L act=0.35: clear of brackets / tubes",
    "ok": true,
-   "value": "0.000"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pA passive R clear of teeth",
+   "name": "cantilever pA L act=0.35: no contact with the buccal SS wire",
    "ok": true,
-   "value": "2.13"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pA passive R clear of brackets/tubes",
+   "name": "cantilever pA L act=0.35: clear of enamel",
    "ok": true,
-   "value": "1.42"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pA passive R outside bone/gingiva",
+   "name": "cantilever pA L act=0.35: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "3.53"
+   "value": "1.49"
   },
   {
-   "name": "cantilever pA passive R below the occlusal plane",
+   "name": "cantilever pA L act=0.35: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "10.29 < 16.29"
+   "value": "1.06"
   },
   {
-   "name": "cantilever pA passive R: straight free end (no terminal bend / hook)",
+   "name": "cantilever pA L act=0.7: clear of brackets / tubes",
    "ok": true,
-   "value": "0.000"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pA active L clear of teeth",
+   "name": "cantilever pA L act=0.7: no contact with the buccal SS wire",
    "ok": true,
-   "value": "2.23"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pA active L clear of brackets/tubes",
+   "name": "cantilever pA L act=0.7: clear of enamel",
    "ok": true,
-   "value": "0.13"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pA active L outside bone/gingiva",
+   "name": "cantilever pA L act=0.7: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "1000000000.00"
+   "value": "1.49"
   },
   {
-   "name": "cantilever pA active L below the occlusal plane",
+   "name": "cantilever pA L act=0.7: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "13.79 < 16.29"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pA active L: straight free end (no terminal bend / hook)",
+   "name": "cantilever pA L act=0.78: clear of brackets / tubes",
    "ok": true,
-   "value": "0.000"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pA active L: free end lies labially beside the anterior wire (no overlap of the sections)",
+   "name": "cantilever pA L act=0.78: no contact with the buccal SS wire",
    "ok": true,
-   "value": "0.70"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pA active R clear of teeth",
+   "name": "cantilever pA L act=0.78: clear of enamel",
    "ok": true,
-   "value": "2.13"
+   "value": "1.46"
   },
   {
-   "name": "cantilever pA active R clear of brackets/tubes",
+   "name": "cantilever pA L act=0.78: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "0.25"
+   "value": "1.49"
   },
   {
-   "name": "cantilever pA active R outside bone/gingiva",
+   "name": "cantilever pA L act=0.78: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "3.53"
+   "value": "0.10"
   },
   {
-   "name": "cantilever pA active R below the occlusal plane",
+   "name": "cantilever pA L act=0.85: clear of brackets / tubes",
    "ok": true,
-   "value": "13.50 < 16.29"
+   "value": "0.15"
   },
   {
-   "name": "cantilever pA active R: straight free end (no terminal bend / hook)",
+   "name": "cantilever pA L act=0.85: no contact with the buccal SS wire",
    "ok": true,
-   "value": "0.000"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pA active R: free end lies labially beside the anterior wire (no overlap of the sections)",
+   "name": "cantilever pA L act=0.85: clear of enamel",
    "ok": true,
-   "value": "0.70"
+   "value": "0.91"
+  },
+  {
+   "name": "cantilever pA L act=0.85: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.49"
+  },
+  {
+   "name": "cantilever pA L act=0.85: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pA L act=0.93: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.24"
+  },
+  {
+   "name": "cantilever pA L act=0.93: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA L act=0.93: clear of enamel",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA L act=0.93: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.49"
+  },
+  {
+   "name": "cantilever pA L act=0.93: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.32"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0: clear of enamel",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.49"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.79"
+  },
+  {
+   "name": "hook pA L: crown seated on the occlusal surface of the anterior wire at the force point",
+   "ok": true,
+   "value": "0.000 / 0.000"
+  },
+  {
+   "name": "hook pA L: no protruding wire mesial to the force point (≤ half wire)",
+   "ok": true,
+   "value": "0.00"
+  },
+  {
+   "name": "hook pA L: free play at both sides of the anterior wire (no clamping → no couple)",
+   "ok": true,
+   "value": "0.080"
+  },
+  {
+   "name": "hook pA L: compact (width ≤ 1.6 mm, no loop / spiral)",
+   "ok": true,
+   "value": "1.44 × 2.76"
+  },
+  {
+   "name": "cantilever pA L: apical step right after the auxiliary tube (≥ 1.5 mm within 5 mm)",
+   "ok": true,
+   "value": "1.89 mm at 4.7 mm"
+  },
+  {
+   "name": "cantilever pA L: arm below the canine / premolar brackets (gingival to the slots)",
+   "ok": true,
+   "value": "8.40 < 9.41"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0.5: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0.5: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0.5: clear of enamel",
+   "ok": true,
+   "value": "1.00"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0.5: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.49"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=0.5: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.38"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=1: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=1: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=1: clear of enamel",
+   "ok": true,
+   "value": "0.99"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=1: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.49"
+  },
+  {
+   "name": "cantilever pA L act=1 pose=1: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.89"
+  },
+  {
+   "name": "cantilever pA R act=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA R act=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=0: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pA R act=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=0: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "9.00"
+  },
+  {
+   "name": "activation pA R: free end moves occlusally from passive to engaged (δ)",
+   "ok": true,
+   "value": "4.60"
+  },
+  {
+   "name": "cantilever pA R act=0.35: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA R act=0.35: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=0.35: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pA R act=0.35: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=0.35: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "1.06"
+  },
+  {
+   "name": "cantilever pA R act=0.7: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA R act=0.7: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=0.7: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pA R act=0.7: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=0.7: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "cantilever pA R act=0.78: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA R act=0.78: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=0.78: clear of enamel",
+   "ok": true,
+   "value": "1.46"
+  },
+  {
+   "name": "cantilever pA R act=0.78: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=0.78: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.10"
+  },
+  {
+   "name": "cantilever pA R act=0.85: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.15"
+  },
+  {
+   "name": "cantilever pA R act=0.85: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=0.85: clear of enamel",
+   "ok": true,
+   "value": "0.91"
+  },
+  {
+   "name": "cantilever pA R act=0.85: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=0.85: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pA R act=0.93: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.24"
+  },
+  {
+   "name": "cantilever pA R act=0.93: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=0.93: clear of enamel",
+   "ok": true,
+   "value": "0.95"
+  },
+  {
+   "name": "cantilever pA R act=0.93: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=0.93: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.32"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0: clear of enamel",
+   "ok": true,
+   "value": "0.99"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.80"
+  },
+  {
+   "name": "hook pA R: crown seated on the occlusal surface of the anterior wire at the force point",
+   "ok": true,
+   "value": "0.000 / 0.000"
+  },
+  {
+   "name": "hook pA R: no protruding wire mesial to the force point (≤ half wire)",
+   "ok": true,
+   "value": "0.00"
+  },
+  {
+   "name": "hook pA R: free play at both sides of the anterior wire (no clamping → no couple)",
+   "ok": true,
+   "value": "0.080"
+  },
+  {
+   "name": "hook pA R: compact (width ≤ 1.6 mm, no loop / spiral)",
+   "ok": true,
+   "value": "1.44 × 2.76"
+  },
+  {
+   "name": "cantilever pA R: apical step right after the auxiliary tube (≥ 1.5 mm within 5 mm)",
+   "ok": true,
+   "value": "1.89 mm at 4.7 mm"
+  },
+  {
+   "name": "cantilever pA R: arm below the canine / premolar brackets (gingival to the slots)",
+   "ok": true,
+   "value": "8.40 < 9.41"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0.5: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0.5: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0.5: clear of enamel",
+   "ok": true,
+   "value": "0.99"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0.5: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=0.5: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.38"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=1: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=1: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=1: clear of enamel",
+   "ok": true,
+   "value": "0.98"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=1: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pA R act=1 pose=1: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.89"
   },
   {
    "name": "pA: intrusive resultant is apical (−y)",
@@ -322,114 +702,524 @@
    ]
   },
   {
-   "name": "cantilever pB passive L clear of teeth",
+   "name": "cantilever pB L act=0: clear of brackets / tubes",
    "ok": true,
-   "value": "2.69"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pB passive L clear of brackets/tubes",
+   "name": "cantilever pB L act=0: no contact with the buccal SS wire",
    "ok": true,
-   "value": "1.14"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pB passive L outside bone/gingiva",
+   "name": "cantilever pB L act=0: clear of enamel",
    "ok": true,
-   "value": "5.79"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pB passive L below the occlusal plane",
+   "name": "cantilever pB L act=0: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "13.79 < 16.29"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pB passive L: straight free end (no terminal bend / hook)",
+   "name": "cantilever pB L act=0: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "0.000"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pB passive R clear of teeth",
+   "name": "activation pB L: free end moves occlusally from passive to engaged (δ)",
    "ok": true,
-   "value": "2.13"
+   "value": "0.54"
   },
   {
-   "name": "cantilever pB passive R clear of brackets/tubes",
+   "name": "cantilever pB L act=0.35: clear of brackets / tubes",
    "ok": true,
-   "value": "1.15"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pB passive R outside bone/gingiva",
+   "name": "cantilever pB L act=0.35: no contact with the buccal SS wire",
    "ok": true,
-   "value": "3.53"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pB passive R below the occlusal plane",
+   "name": "cantilever pB L act=0.35: clear of enamel",
    "ok": true,
-   "value": "10.29 < 16.29"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pB passive R: straight free end (no terminal bend / hook)",
+   "name": "cantilever pB L act=0.35: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "0.000"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pB active L clear of teeth",
+   "name": "cantilever pB L act=0.35: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "2.22"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pB active L clear of brackets/tubes",
+   "name": "cantilever pB L act=0.7: clear of brackets / tubes",
    "ok": true,
-   "value": "0.61"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pB active L outside bone/gingiva",
+   "name": "cantilever pB L act=0.7: no contact with the buccal SS wire",
    "ok": true,
-   "value": "5.79"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pB active L below the occlusal plane",
+   "name": "cantilever pB L act=0.7: clear of enamel",
    "ok": true,
-   "value": "13.79 < 16.29"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pB active L: straight free end (no terminal bend / hook)",
+   "name": "cantilever pB L act=0.7: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "0.000"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pB active L: free end lies labially beside the anterior wire (no overlap of the sections)",
+   "name": "cantilever pB L act=0.7: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "0.70"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pB active R clear of teeth",
+   "name": "cantilever pB L act=0.78: clear of brackets / tubes",
    "ok": true,
-   "value": "2.13"
+   "value": "0.23"
   },
   {
-   "name": "cantilever pB active R clear of brackets/tubes",
+   "name": "cantilever pB L act=0.78: no contact with the buccal SS wire",
    "ok": true,
-   "value": "0.78"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pB active R outside bone/gingiva",
+   "name": "cantilever pB L act=0.78: clear of enamel",
    "ok": true,
-   "value": "3.53"
+   "value": "1.17"
   },
   {
-   "name": "cantilever pB active R below the occlusal plane",
+   "name": "cantilever pB L act=0.78: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "10.29 < 16.29"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pB active R: straight free end (no terminal bend / hook)",
+   "name": "cantilever pB L act=0.78: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "0.000"
+   "value": "0.10"
   },
   {
-   "name": "cantilever pB active R: free end lies labially beside the anterior wire (no overlap of the sections)",
+   "name": "cantilever pB L act=0.85: clear of brackets / tubes",
    "ok": true,
-   "value": "0.70"
+   "value": "0.18"
+  },
+  {
+   "name": "cantilever pB L act=0.85: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB L act=0.85: clear of enamel",
+   "ok": true,
+   "value": "0.51"
+  },
+  {
+   "name": "cantilever pB L act=0.85: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pB L act=0.85: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pB L act=0.93: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.31"
+  },
+  {
+   "name": "cantilever pB L act=0.93: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB L act=0.93: clear of enamel",
+   "ok": true,
+   "value": "0.55"
+  },
+  {
+   "name": "cantilever pB L act=0.93: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pB L act=0.93: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0: clear of enamel",
+   "ok": true,
+   "value": "0.58"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.40"
+  },
+  {
+   "name": "hook pB L: crown seated on the occlusal surface of the anterior wire at the force point",
+   "ok": true,
+   "value": "0.000 / 0.000"
+  },
+  {
+   "name": "hook pB L: no protruding wire mesial to the force point (≤ half wire)",
+   "ok": true,
+   "value": "0.00"
+  },
+  {
+   "name": "hook pB L: free play at both sides of the anterior wire (no clamping → no couple)",
+   "ok": true,
+   "value": "0.080"
+  },
+  {
+   "name": "hook pB L: compact (width ≤ 1.6 mm, no loop / spiral)",
+   "ok": true,
+   "value": "1.44 × 1.41"
+  },
+  {
+   "name": "cantilever pB L: apical step right after the auxiliary tube (≥ 1.5 mm within 5 mm)",
+   "ok": true,
+   "value": "1.93 mm at 4.6 mm"
+  },
+  {
+   "name": "cantilever pB L: arm below the canine / premolar brackets (gingival to the slots)",
+   "ok": true,
+   "value": "8.36 < 9.41"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0.5: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0.5: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0.5: clear of enamel",
+   "ok": true,
+   "value": "1.04"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0.5: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=0.5: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.36"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=1: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=1: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=1: clear of enamel",
+   "ok": true,
+   "value": "1.53"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=1: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pB L act=1 pose=1: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.30"
+  },
+  {
+   "name": "cantilever pB R act=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB R act=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=0: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pB R act=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=0: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "activation pB R: free end moves occlusally from passive to engaged (δ)",
+   "ok": true,
+   "value": "0.54"
+  },
+  {
+   "name": "cantilever pB R act=0.35: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB R act=0.35: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=0.35: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pB R act=0.35: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=0.35: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "cantilever pB R act=0.7: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB R act=0.7: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=0.7: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pB R act=0.7: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=0.7: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "cantilever pB R act=0.78: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.22"
+  },
+  {
+   "name": "cantilever pB R act=0.78: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=0.78: clear of enamel",
+   "ok": true,
+   "value": "1.16"
+  },
+  {
+   "name": "cantilever pB R act=0.78: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=0.78: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.10"
+  },
+  {
+   "name": "cantilever pB R act=0.85: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.18"
+  },
+  {
+   "name": "cantilever pB R act=0.85: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=0.85: clear of enamel",
+   "ok": true,
+   "value": "0.50"
+  },
+  {
+   "name": "cantilever pB R act=0.85: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=0.85: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pB R act=0.93: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.31"
+  },
+  {
+   "name": "cantilever pB R act=0.93: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=0.93: clear of enamel",
+   "ok": true,
+   "value": "0.54"
+  },
+  {
+   "name": "cantilever pB R act=0.93: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=0.93: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0: clear of enamel",
+   "ok": true,
+   "value": "0.58"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.40"
+  },
+  {
+   "name": "hook pB R: crown seated on the occlusal surface of the anterior wire at the force point",
+   "ok": true,
+   "value": "0.000 / 0.000"
+  },
+  {
+   "name": "hook pB R: no protruding wire mesial to the force point (≤ half wire)",
+   "ok": true,
+   "value": "0.00"
+  },
+  {
+   "name": "hook pB R: free play at both sides of the anterior wire (no clamping → no couple)",
+   "ok": true,
+   "value": "0.080"
+  },
+  {
+   "name": "hook pB R: compact (width ≤ 1.6 mm, no loop / spiral)",
+   "ok": true,
+   "value": "1.44 × 1.41"
+  },
+  {
+   "name": "cantilever pB R: apical step right after the auxiliary tube (≥ 1.5 mm within 5 mm)",
+   "ok": true,
+   "value": "1.93 mm at 4.6 mm"
+  },
+  {
+   "name": "cantilever pB R: arm below the canine / premolar brackets (gingival to the slots)",
+   "ok": true,
+   "value": "8.36 < 9.41"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0.5: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0.5: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0.5: clear of enamel",
+   "ok": true,
+   "value": "1.03"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0.5: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=0.5: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.36"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=1: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=1: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=1: clear of enamel",
+   "ok": true,
+   "value": "1.52"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=1: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pB R act=1 pose=1: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.30"
   },
   {
    "name": "pB: intrusive resultant is apical (−y)",
@@ -448,7 +1238,7 @@
   {
    "name": "pB: moment sign matches the shown rotation (d>0 → proclination, d<0 → retroclination, d≈0 → none)",
    "ok": true,
-   "value": "d=-0.00 Mx=-0.00 θ=0"
+   "value": "d=0.00 Mx=0.00 θ=0"
   },
   {
    "name": "pB: symmetric → no transverse moments",
@@ -481,114 +1271,524 @@
    ]
   },
   {
-   "name": "cantilever pC passive L clear of teeth",
+   "name": "cantilever pC L act=0: clear of brackets / tubes",
    "ok": true,
-   "value": "2.69"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pC passive L clear of brackets/tubes",
+   "name": "cantilever pC L act=0: no contact with the buccal SS wire",
    "ok": true,
-   "value": "1.03"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pC passive L outside bone/gingiva",
+   "name": "cantilever pC L act=0: clear of enamel",
    "ok": true,
-   "value": "4.77"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pC passive L below the occlusal plane",
+   "name": "cantilever pC L act=0: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "13.79 < 16.29"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pC passive L: straight free end (no terminal bend / hook)",
+   "name": "cantilever pC L act=0: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "0.000"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pC passive R clear of teeth",
+   "name": "activation pC L: free end moves occlusally from passive to engaged (δ)",
    "ok": true,
-   "value": "2.13"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pC passive R clear of brackets/tubes",
+   "name": "cantilever pC L act=0.35: clear of brackets / tubes",
    "ok": true,
-   "value": "1.05"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pC passive R outside bone/gingiva",
+   "name": "cantilever pC L act=0.35: no contact with the buccal SS wire",
    "ok": true,
-   "value": "3.53"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pC passive R below the occlusal plane",
+   "name": "cantilever pC L act=0.35: clear of enamel",
    "ok": true,
-   "value": "10.29 < 16.29"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pC passive R: straight free end (no terminal bend / hook)",
+   "name": "cantilever pC L act=0.35: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "0.000"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pC active L clear of teeth",
+   "name": "cantilever pC L act=0.35: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "2.69"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pC active L clear of brackets/tubes",
+   "name": "cantilever pC L act=0.7: clear of brackets / tubes",
    "ok": true,
-   "value": "1.03"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pC active L outside bone/gingiva",
+   "name": "cantilever pC L act=0.7: no contact with the buccal SS wire",
    "ok": true,
-   "value": "4.80"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pC active L below the occlusal plane",
+   "name": "cantilever pC L act=0.7: clear of enamel",
    "ok": true,
-   "value": "13.79 < 16.29"
+   "value": "1.96"
   },
   {
-   "name": "cantilever pC active L: straight free end (no terminal bend / hook)",
+   "name": "cantilever pC L act=0.7: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "0.000"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pC active L: free end lies labially beside the anterior wire (no overlap of the sections)",
+   "name": "cantilever pC L act=0.7: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "0.69"
+   "value": "0.19"
   },
   {
-   "name": "cantilever pC active R clear of teeth",
+   "name": "cantilever pC L act=0.78: clear of brackets / tubes",
    "ok": true,
-   "value": "2.13"
+   "value": "0.33"
   },
   {
-   "name": "cantilever pC active R clear of brackets/tubes",
+   "name": "cantilever pC L act=0.78: no contact with the buccal SS wire",
    "ok": true,
-   "value": "1.05"
+   "value": "0.96"
   },
   {
-   "name": "cantilever pC active R outside bone/gingiva",
+   "name": "cantilever pC L act=0.78: clear of enamel",
    "ok": true,
-   "value": "3.53"
+   "value": "1.92"
   },
   {
-   "name": "cantilever pC active R below the occlusal plane",
+   "name": "cantilever pC L act=0.78: outside the gingiva (≥ 1 mm from bone)",
    "ok": true,
-   "value": "10.29 < 16.29"
+   "value": "1.43"
   },
   {
-   "name": "cantilever pC active R: straight free end (no terminal bend / hook)",
+   "name": "cantilever pC L act=0.78: no extra contact with the anterior wire (hook passes over it)",
    "ok": true,
-   "value": "0.000"
+   "value": "0.10"
   },
   {
-   "name": "cantilever pC active R: free end lies labially beside the anterior wire (no overlap of the sections)",
+   "name": "cantilever pC L act=0.85: clear of brackets / tubes",
    "ok": true,
-   "value": "0.69"
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC L act=0.85: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC L act=0.85: clear of enamel",
+   "ok": true,
+   "value": "1.38"
+  },
+  {
+   "name": "cantilever pC L act=0.85: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pC L act=0.85: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pC L act=0.93: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC L act=0.93: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC L act=0.93: clear of enamel",
+   "ok": true,
+   "value": "1.41"
+  },
+  {
+   "name": "cantilever pC L act=0.93: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pC L act=0.93: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0: clear of enamel",
+   "ok": true,
+   "value": "1.44"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.37"
+  },
+  {
+   "name": "hook pC L: crown seated on the occlusal surface of the anterior wire at the force point",
+   "ok": true,
+   "value": "0.000 / 0.000"
+  },
+  {
+   "name": "hook pC L: no protruding wire mesial to the force point (≤ half wire)",
+   "ok": true,
+   "value": "0.00"
+  },
+  {
+   "name": "hook pC L: free play at both sides of the anterior wire (no clamping → no couple)",
+   "ok": true,
+   "value": "0.080"
+  },
+  {
+   "name": "hook pC L: compact (width ≤ 1.6 mm, no loop / spiral)",
+   "ok": true,
+   "value": "1.44 × 1.41"
+  },
+  {
+   "name": "cantilever pC L: apical step right after the auxiliary tube (≥ 1.5 mm within 5 mm)",
+   "ok": true,
+   "value": "1.93 mm at 4.6 mm"
+  },
+  {
+   "name": "cantilever pC L: arm below the canine / premolar brackets (gingival to the slots)",
+   "ok": true,
+   "value": "8.36 < 9.41"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0.5: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0.5: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0.5: clear of enamel",
+   "ok": true,
+   "value": "1.85"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0.5: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=0.5: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.24"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=1: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=1: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=1: clear of enamel",
+   "ok": true,
+   "value": "1.92"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=1: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.43"
+  },
+  {
+   "name": "cantilever pC L act=1 pose=1: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.13"
+  },
+  {
+   "name": "cantilever pC R act=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=0: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pC R act=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=0: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "activation pC R: free end moves occlusally from passive to engaged (δ)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "cantilever pC R act=0.35: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=0.35: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=0.35: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pC R act=0.35: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=0.35: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "cantilever pC R act=0.7: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=0.7: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=0.7: clear of enamel",
+   "ok": true,
+   "value": "1.96"
+  },
+  {
+   "name": "cantilever pC R act=0.7: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=0.7: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.19"
+  },
+  {
+   "name": "cantilever pC R act=0.78: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=0.78: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=0.78: clear of enamel",
+   "ok": true,
+   "value": "1.93"
+  },
+  {
+   "name": "cantilever pC R act=0.78: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=0.78: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.10"
+  },
+  {
+   "name": "cantilever pC R act=0.85: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=0.85: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=0.85: clear of enamel",
+   "ok": true,
+   "value": "1.39"
+  },
+  {
+   "name": "cantilever pC R act=0.85: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=0.85: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pC R act=0.93: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=0.93: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=0.93: clear of enamel",
+   "ok": true,
+   "value": "1.42"
+  },
+  {
+   "name": "cantilever pC R act=0.93: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=0.93: no extra contact with the anterior wire (hook passes over it)",
+   "ok": true,
+   "value": "0.08"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0: clear of enamel",
+   "ok": true,
+   "value": "1.45"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.37"
+  },
+  {
+   "name": "hook pC R: crown seated on the occlusal surface of the anterior wire at the force point",
+   "ok": true,
+   "value": "0.000 / 0.000"
+  },
+  {
+   "name": "hook pC R: no protruding wire mesial to the force point (≤ half wire)",
+   "ok": true,
+   "value": "0.00"
+  },
+  {
+   "name": "hook pC R: free play at both sides of the anterior wire (no clamping → no couple)",
+   "ok": true,
+   "value": "0.080"
+  },
+  {
+   "name": "hook pC R: compact (width ≤ 1.6 mm, no loop / spiral)",
+   "ok": true,
+   "value": "1.44 × 1.41"
+  },
+  {
+   "name": "cantilever pC R: apical step right after the auxiliary tube (≥ 1.5 mm within 5 mm)",
+   "ok": true,
+   "value": "1.93 mm at 4.6 mm"
+  },
+  {
+   "name": "cantilever pC R: arm below the canine / premolar brackets (gingival to the slots)",
+   "ok": true,
+   "value": "8.36 < 9.41"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0.5: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0.5: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0.5: clear of enamel",
+   "ok": true,
+   "value": "1.86"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0.5: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=0.5: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.24"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=1: clear of brackets / tubes",
+   "ok": true,
+   "value": "0.33"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=1: no contact with the buccal SS wire",
+   "ok": true,
+   "value": "0.96"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=1: clear of enamel",
+   "ok": true,
+   "value": "1.93"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=1: outside the gingiva (≥ 1 mm from bone)",
+   "ok": true,
+   "value": "1.47"
+  },
+  {
+   "name": "cantilever pC R act=1 pose=1: no extra contact with the anterior wire (arm)",
+   "ok": true,
+   "value": "0.13"
   },
   {
    "name": "pC: intrusive resultant is apical (−y)",
@@ -640,6 +1840,176 @@
    ]
   },
   {
+   "name": "configuration change u=0.000 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.49 / 9.00"
+  },
+  {
+   "name": "configuration change u=0.000 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.52 / 9.00"
+  },
+  {
+   "name": "configuration change u=0.125 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.49 / 1.38"
+  },
+  {
+   "name": "configuration change u=0.125 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.52 / 1.38"
+  },
+  {
+   "name": "configuration change u=0.250 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.49 / 0.11"
+  },
+  {
+   "name": "configuration change u=0.250 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.52 / 0.11"
+  },
+  {
+   "name": "configuration change u=0.375 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.49 / 0.48"
+  },
+  {
+   "name": "configuration change u=0.375 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.52 / 0.48"
+  },
+  {
+   "name": "configuration change u=0.500 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.80"
+  },
+  {
+   "name": "configuration change u=0.500 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.80"
+  },
+  {
+   "name": "configuration change u=0.625 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.53"
+  },
+  {
+   "name": "configuration change u=0.625 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.53"
+  },
+  {
+   "name": "configuration change u=0.750 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.30"
+  },
+  {
+   "name": "configuration change u=0.750 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.30"
+  },
+  {
+   "name": "configuration change u=0.875 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.21"
+  },
+  {
+   "name": "configuration change u=0.875 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.21"
+  },
+  {
+   "name": "configuration change u=1.000 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.000 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.125 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.125 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.250 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.250 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.375 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.375 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.500 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.500 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.625 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.625 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.750 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.750 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.875 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=1.875 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
+   "name": "configuration change u=2.000 L: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.43 / 0.19"
+  },
+  {
+   "name": "configuration change u=2.000 R: passive cantilever clear of brackets, wires, enamel, gingiva",
+   "ok": true,
+   "value": "0.33 / 0.96 / 1.96 / 1.47 / 0.19"
+  },
+  {
    "name": "d_A > 0 (A in front of the CR)",
    "ok": true,
    "value": 10.38026569686595
@@ -681,25 +2051,25 @@
     ],
     "B": [
      [
-      21.023460781612112,
-      8.81376397947147,
+      20.728985353730486,
+      8.321013998064348,
       0
      ],
      [
-      -21.023460781612112,
-      8.81376397947147,
+      -20.728985353730486,
+      8.321013998064348,
       0
      ]
     ],
     "C": [
      [
-      22.99608677916826,
-      8.81376397947147,
+      23.35582351279259,
+      8.321013998064348,
       -4
      ],
      [
-      -22.99608677916826,
-      8.81376397947147,
+      -23.35582351279259,
+      8.321013998064348,
       -4
      ]
     ]
@@ -821,139 +2191,133 @@
  "cantilever": {
   "A": {
    "passive_L": {
-    "toTeeth": 2.69,
-    "toBrackets": 1.49,
-    "toBone": 9.04,
-    "yMax": 13.79,
-    "length": 43.3,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 3.54
+    "toBrackets": 0.33,
+    "toTeeth": 1.96,
+    "toBone": 1.49,
+    "freeEndRise": 4.6
+   },
+   "active_L": {
+    "toBrackets": 0.32,
+    "toBuccalWire": 0.96,
+    "toTeeth": 1,
+    "toBone": 1.49,
+    "armLength": 36.6,
+    "step": 1.89,
+    "armMaxYbuccal": 8.4,
+    "hook": {
+     "seat": 0,
+     "play": 0.08,
+     "width": 1.44,
+     "height": 2.76
     }
    },
    "passive_R": {
-    "toTeeth": 2.13,
-    "toBrackets": 1.42,
-    "toBone": 3.53,
-    "yMax": 10.29,
-    "length": 43.3,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 3.54
-    }
-   },
-   "active_L": {
-    "toTeeth": 2.23,
-    "toBrackets": 0.13,
-    "toBone": 1000000000,
-    "yMax": 13.79,
-    "length": 43.3,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.7
-    }
+    "toBrackets": 0.33,
+    "toTeeth": 1.96,
+    "toBone": 1.52,
+    "freeEndRise": 4.6
    },
    "active_R": {
-    "toTeeth": 2.13,
-    "toBrackets": 0.25,
-    "toBone": 3.53,
-    "yMax": 13.5,
-    "length": 43.3,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.7
+    "toBrackets": 0.32,
+    "toBuccalWire": 0.96,
+    "toTeeth": 0.99,
+    "toBone": 1.52,
+    "armLength": 36.7,
+    "step": 1.89,
+    "armMaxYbuccal": 8.4,
+    "hook": {
+     "seat": 0,
+     "play": 0.08,
+     "width": 1.44,
+     "height": 2.76
     }
    }
   },
   "B": {
    "passive_L": {
-    "toTeeth": 2.69,
-    "toBrackets": 1.14,
-    "toBone": 5.79,
-    "yMax": 13.79,
-    "length": 24.8,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 1.23
+    "toBrackets": 0.33,
+    "toTeeth": 1.96,
+    "toBone": 1.43,
+    "freeEndRise": 0.54
+   },
+   "active_L": {
+    "toBrackets": 0.33,
+    "toBuccalWire": 0.96,
+    "toTeeth": 0.58,
+    "toBone": 1.43,
+    "armLength": 17.9,
+    "step": 1.93,
+    "armMaxYbuccal": 8.36,
+    "hook": {
+     "seat": 0,
+     "play": 0.08,
+     "width": 1.44,
+     "height": 1.41
     }
    },
    "passive_R": {
-    "toTeeth": 2.13,
-    "toBrackets": 1.15,
-    "toBone": 3.53,
-    "yMax": 10.29,
-    "length": 24.8,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 1.23
-    }
-   },
-   "active_L": {
-    "toTeeth": 2.22,
-    "toBrackets": 0.61,
-    "toBone": 5.79,
-    "yMax": 13.79,
-    "length": 24.8,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.7
-    }
+    "toBrackets": 0.33,
+    "toTeeth": 1.96,
+    "toBone": 1.47,
+    "freeEndRise": 0.54
    },
    "active_R": {
-    "toTeeth": 2.13,
-    "toBrackets": 0.78,
-    "toBone": 3.53,
-    "yMax": 10.29,
-    "length": 24.8,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.7
+    "toBrackets": 0.33,
+    "toBuccalWire": 0.96,
+    "toTeeth": 0.58,
+    "toBone": 1.47,
+    "armLength": 17.9,
+    "step": 1.93,
+    "armMaxYbuccal": 8.36,
+    "hook": {
+     "seat": 0,
+     "play": 0.08,
+     "width": 1.44,
+     "height": 1.41
     }
    }
   },
   "C": {
    "passive_L": {
-    "toTeeth": 2.69,
-    "toBrackets": 1.03,
-    "toBone": 4.77,
-    "yMax": 13.79,
-    "length": 20.4,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.83
+    "toBrackets": 0.33,
+    "toTeeth": 1.96,
+    "toBone": 1.43,
+    "freeEndRise": 0.19
+   },
+   "active_L": {
+    "toBrackets": 0.33,
+    "toBuccalWire": 0.96,
+    "toTeeth": 1.44,
+    "toBone": 1.43,
+    "armLength": 12.6,
+    "step": 1.93,
+    "armMaxYbuccal": 8.36,
+    "hook": {
+     "seat": 0,
+     "play": 0.08,
+     "width": 1.44,
+     "height": 1.41
     }
    },
    "passive_R": {
-    "toTeeth": 2.13,
-    "toBrackets": 1.05,
-    "toBone": 3.53,
-    "yMax": 10.29,
-    "length": 20.4,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.83
-    }
-   },
-   "active_L": {
-    "toTeeth": 2.69,
-    "toBrackets": 1.03,
-    "toBone": 4.8,
-    "yMax": 13.79,
-    "length": 20.4,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.69
-    }
+    "toBrackets": 0.33,
+    "toTeeth": 1.96,
+    "toBone": 1.47,
+    "freeEndRise": 0.19
    },
    "active_R": {
-    "toTeeth": 2.13,
-    "toBrackets": 1.05,
-    "toBone": 3.53,
-    "yMax": 10.29,
-    "length": 20.4,
-    "freeEnd": {
-     "verticalDeviation": 0,
-     "labialToWire": 0.69
+    "toBrackets": 0.33,
+    "toBuccalWire": 0.96,
+    "toTeeth": 1.45,
+    "toBone": 1.47,
+    "armLength": 12.6,
+    "step": 1.93,
+    "armMaxYbuccal": 8.36,
+    "hook": {
+     "seat": 0,
+     "play": 0.08,
+     "width": 1.44,
+     "height": 1.41
     }
    }
   }
@@ -1003,7 +2367,7 @@
     "couple": [
      -10.11,
      0,
-     -3.96
+     -4.1
     ]
    },
    "equilibrium": [
@@ -1032,7 +2396,7 @@
     "couple": [
      -8.11,
      0,
-     -2.97
+     -2.79
     ]
    },
    "equilibrium": [
@@ -1049,25 +2413,43 @@
  },
  "anteriorWire": {
   "left": {
-   "extensionToTeeth": 1.05,
-   "extensionToCanineBrackets": 0.53,
-   "extensionToBoneSurface": 3.71,
-   "tip": {
-    "rise": 1,
-    "distalRunFlatness": 0,
-    "distalRunLength": 19.5,
-    "pastTieC": 0.98
+   "extensionToTeeth": 1.35,
+   "extensionToCanineBrackets": 1.05,
+   "extensionToBoneSurface": 3.77,
+   "cfgA": {
+    "tipRise": 1,
+    "runFlatness": 0,
+    "runAfterStep": 1.43
+   },
+   "cfgB": {
+    "tipRise": 1,
+    "runFlatness": 0,
+    "pastTie": 1
+   },
+   "cfgC": {
+    "tipRise": 1,
+    "runFlatness": 0,
+    "pastTie": 1
    }
   },
   "right": {
-   "extensionToTeeth": 1.07,
-   "extensionToCanineBrackets": 0.53,
-   "extensionToBoneSurface": 3.68,
-   "tip": {
-    "rise": 1,
-    "distalRunFlatness": 0,
-    "distalRunLength": 19.5,
-    "pastTieC": 0.98
+   "extensionToTeeth": 1.34,
+   "extensionToCanineBrackets": 1.05,
+   "extensionToBoneSurface": 3.88,
+   "cfgA": {
+    "tipRise": 1,
+    "runFlatness": 0,
+    "runAfterStep": 1.43
+   },
+   "cfgB": {
+    "tipRise": 1,
+    "runFlatness": 0,
+    "pastTie": 1
+   },
+   "cfgC": {
+    "tipRise": 1,
+    "runFlatness": 0,
+    "pastTie": 1
    }
   }
  },
@@ -1096,16 +2478,38 @@
  },
  "activation": {
   "armLength": [
-   43.4,
-   24.8,
-   20.9
+   36.6,
+   17.9,
+   12.7
   ],
   "passiveDeflection": [
    4.6,
-   0.86,
-   0.51
+   0.54,
+   0.19
   ],
   "note": "illustrative: same F for A/B/C with δ ∝ L³ (cantilever beam), not measured"
+ },
+ "minClearances": {
+  "brackets A": 0.15,
+  "buccal wire A": 0.96,
+  "teeth A": 0.91,
+  "gingiva A": 1.49,
+  "anterior wire A": 0.08,
+  "brackets B": 0.18,
+  "buccal wire B": 0.96,
+  "teeth B": 0.5,
+  "gingiva B": 1.43,
+  "anterior wire B": 0.08,
+  "brackets C": 0.33,
+  "buccal wire C": 0.96,
+  "teeth C": 1.38,
+  "gingiva C": 1.43,
+  "anterior wire C": 0.08,
+  "brackets transition": 0.33,
+  "buccal wire transition": 0.96,
+  "teeth transition": 1.96,
+  "gingiva transition": 1.43,
+  "anterior wire transition": 0.11
  },
  "movement": {
   "pA": {
@@ -1182,6 +2586,6 @@
   "rootsInBoneRest": 0.79,
   "note": "rootsInMandible: depth in the source mandible only (thin, low-poly); rootsInBone: depth in the film bone volume (mandible ∪ alveolar walls around every root in every pose)"
  },
- "passed": 130,
+ "passed": 404,
  "failed": 0
 }

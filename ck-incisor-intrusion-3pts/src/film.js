@@ -11,7 +11,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { BRAND, backgroundCanvas, drawLogo } from './brand.js';
 import { DURATION, FPS, OUTRO_T0, SUBS, S, W as WT, toAnim, VIS, BUCCAL_TIP, cameraAt, ZONE, ZONE_CAM, split, clamp01, smooth, lerp, ramp, win, easeOut, easeInOut } from './timeline.js';
 import { V, IDENT, apply, applyDir, poseLerp, crAt, forceSystem, centreOfRotation } from './model.js';
-import { WIRE, END, toothFrame, mesialDir, resample, sideWire, pointParams, tieLocal, tieDirLocal, buccalWire, auxTube, buildEnvelope, cantilever, TIE_KEYS } from './appliance.js';
+import { WIRE, toothFrame, mesialDir, resample, sideWire, sideWireCfg, extensionCut, pointParams, tieLocal, tieDirLocal, buccalWire, auxTube, cantileverEnvelope, bracketBoxes, cantilever, HOOK, TIE_KEYS } from './appliance.js';
 import { bracketGeometry, sweepRect, doubleTubeGeometry, singleTubeGeometry } from './geom.js';
 import { KEYWORDS, keywordState, kickerState, focusLevel } from './kinetic.js';
 
@@ -143,8 +143,13 @@ function toothMaterial() {
 // anterior sectional wire (one silver), TMA cantilevers in their natural satin silver (slightly warmer, less mirror-like).
 // Slightly darker than enamel so the wires never merge with the white teeth. Elements are pointed out only by a thin,
 // temporary contour glow (outline shell, additive) that fades after the explanation — gold is reserved for the CR / d.
-const steel = () => new THREE.MeshPhysicalMaterial({ color: 0xc4cbd6, metalness: 1, roughness: 0.24, envMapIntensity: 1.25, clearcoat: 0.3, clearcoatRoughness: 0.2, transparent: true });
-const tma = () => new THREE.MeshPhysicalMaterial({ color: 0xb3b5b9, metalness: 1, roughness: 0.36, envMapIntensity: 1.05, clearcoat: 0.15, clearcoatRoughness: 0.4, transparent: true });
+// V5: less exposure on the metal — darker base colour + lower environment gain → silver-grey with distinct highlights
+//     (polished SS) and a satin graphite-silver (TMA), both clearly darker than enamel; a thin dark edge shell
+//     (back faces, EDGE_PAD) keeps the rectangular wire edges crisp against the white teeth.
+const steel = () => new THREE.MeshPhysicalMaterial({ color: 0x9ea6b1, metalness: 1, roughness: 0.2, envMapIntensity: 0.85, clearcoat: 0.45, clearcoatRoughness: 0.12, transparent: true });
+const tma = () => new THREE.MeshPhysicalMaterial({ color: 0x7d838b, metalness: 1, roughness: 0.3, envMapIntensity: 0.8, clearcoat: 0.25, clearcoatRoughness: 0.3, transparent: true });
+const EDGE_PAD = 0.07;
+const edgeMat = () => new THREE.MeshBasicMaterial({ color: 0x04070c, side: THREE.BackSide, transparent: true, opacity: 0.9 });
 const OUTLINE = '#cfeaff';
 const outlineMat = () => new THREE.MeshBasicMaterial({ color: new THREE.Color(OUTLINE), transparent: true, opacity: 0, side: THREE.BackSide,
   depthWrite: false, blending: THREE.AdditiveBlending });
@@ -273,46 +278,68 @@ export class Film {
       const bw = resample(new THREE.CatmullRomCurve3(buccalWire(hdr, q).map((p) => new THREE.Vector3(...p))).getPoints(90).map((v) => [v.x, v.y, v.z]), 100);
       const wm = new THREE.Mesh(sweepRect(bw, WIRE.ss.w, WIRE.ss.h, [0, 1, 0]), this.bucMetal); wm.renderOrder = 2; inner.add(wm);
       this.buc[q].wire = wm;
+      const we = new THREE.Mesh(sweepRect(bw, WIRE.ss.w + EDGE_PAD, WIRE.ss.h + EDGE_PAD, [0, 1, 0]), this.bucEdge ??= edgeMat()); we.renderOrder = 1; inner.add(we);
+      this.buc[q].edge = we;
       const wo = new THREE.Mesh(sweepRect(bw, WIRE.ss.w + OUT_PAD, WIRE.ss.h + OUT_PAD, [0, 1, 0]), outlineMat()); wo.renderOrder = 8; inner.add(wo);
       this.buc[q].outline = wo;
       this.buc[q].aux = auxTube(hdr, M, q);
     }
-    // anterior sectional wire: two halves from the midline (draw-on in scene 02)
-    this.antHalves = [1, -1].map((side) => {
-      const pts = resample(sideWire(hdr, side), 160);
-      const mesh = new THREE.Mesh(sweepRect(pts, WIRE.ss.w, WIRE.ss.h, [0, 1, 0]), this.antMetal); mesh.renderOrder = 2; this.inc.add(mesh);
-      const ol = new THREE.Mesh(sweepRect(pts, WIRE.ss.w + OUT_PAD, WIRE.ss.h + OUT_PAD, [0, 1, 0]), this.antOutline ??= outlineMat()); ol.renderOrder = 8; this.inc.add(ol);
-      return { mesh, ol, pts, idx: mesh.geometry.index.count };
-    });
+    // anterior sectional wire: two halves from the midline (draw-on in scene 02); V5: cut per configuration
     this.pp = pointParams(hdr);
+    this.cuts = extensionCut(hdr, this.pp);
+    this.antHalves = [1, -1].map((side) => {
+      const pts = resample(sideWireCfg(hdr, this.pp, side, 0, this.cuts), 160);
+      const mesh = new THREE.Mesh(sweepRect(pts, WIRE.ss.w, WIRE.ss.h, [0, 1, 0]), this.antMetal); mesh.renderOrder = 2; this.inc.add(mesh);
+      const edge = new THREE.Mesh(sweepRect(pts, WIRE.ss.w + EDGE_PAD, WIRE.ss.h + EDGE_PAD, [0, 1, 0]), this.antEdge ??= edgeMat()); edge.renderOrder = 1; this.inc.add(edge);
+      const ol = new THREE.Mesh(sweepRect(pts, WIRE.ss.w + OUT_PAD, WIRE.ss.h + OUT_PAD, [0, 1, 0]), this.antOutline ??= outlineMat()); ol.renderOrder = 8; this.inc.add(ol);
+      return { mesh, ol, edge, pts, idx: mesh.geometry.index.count, side };
+    });
+    this.wireU = 0;
     // cantilevers (TMA) + passive outlines + ligatures at the tie points
     this.cantN = 300;
     this.cantMat = [tma(), tma()];
     this.cant = [0, 1].map((i) => { const m = new THREE.Mesh(sweepRect(resample([[0, 0, 0], [1, 0, 0]], this.cantN), WIRE.tma.w, WIRE.tma.h, [0, 1, 0]), this.cantMat[i]); m.renderOrder = 2; sc.add(m); return m; });
+    this.cantEdgeMat = [edgeMat(), edgeMat()];
+    this.cantEdge = [0, 1].map((i) => { const m = new THREE.Mesh(sweepRect(resample([[0, 0, 0], [1, 0, 0]], this.cantN), WIRE.tma.w + EDGE_PAD, WIRE.tma.h + EDGE_PAD, [0, 1, 0]), this.cantEdgeMat[i]); m.renderOrder = 1; sc.add(m); return m; });
     this.cantOutline = [0, 1].map(() => { const m = new THREE.Mesh(sweepRect(resample([[0, 0, 0], [1, 0, 0]], this.cantN), WIRE.tma.w + OUT_PAD, WIRE.tma.h + OUT_PAD, [0, 1, 0]), outlineMat()); m.renderOrder = 8; sc.add(m); return m; });
     this.passiveMat = ghostMaterial('#cfeeff');
     this.cantGhost = [0, 1].map(() => { const m = new THREE.Mesh(sweepRect(resample([[0, 0, 0], [1, 0, 0]], this.cantN), WIRE.tma.w, WIRE.tma.h, [0, 1, 0]), this.passiveMat); m.renderOrder = 7; sc.add(m); return m; });
     // steel ligature: one loop around the anterior wire and the free end of the cantilever lying labially against it
     //   local frame: x = labial (radial out), y = occlusal, z = along the wire; centre between the two centre lines
-    const ligLoop = []; const la = END.lab / 2 + 0.32 + 0.13, lb = 0.24 + 0.14;
+    const ligLoop = []; const la = HOOK.lab / 2 + 0.32 + 0.13, lb = 0.24 + 0.14;
     for (let k = 0; k < 40; k++) { const a = (k / 40) * Math.PI * 2; ligLoop.push(new THREE.Vector3(la * Math.cos(a), lb * Math.sin(a), 0.06 * Math.sin(2 * a))); }
     const ligGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ligLoop, true), 64, 0.115, 8, true);
     this.ties = [0, 1].map(() => { const m = new THREE.Mesh(ligGeo, steel()); m.renderOrder = 3; sc.add(m); return m; });
 
-    // ---------------- clearance envelope for the cantilever arm
-    const meshes = Object.keys(raw).filter((n) => n[0] === 'L').map((n) => raw[n]);
-    const brk = [];
-    for (const n of Object.keys(M).filter((k) => k[0] === 'L')) {
-      const m = M[n]; brk.push(V.add(m.fa, V.mul(m.faN, n.endsWith('6') ? 3.0 : 2.45)));
-    }
-    for (const side of [1, -1]) for (const p of sideWire(hdr, side)) { const o = V.norm([p[0] - hdr.archCentre[0], 0, p[2] - hdr.archCentre[2]]); brk.push(V.add(p, V.mul(o, 0.36))); }
-    this.env = buildEnvelope(meshes, brk, hdr.archCentre);
+    // ---------------- clearance envelope (V5: height-aware) + bracket boxes for the cantilever arm
+    this.env = cantileverEnvelope(hdr, M, Object.fromEntries(Object.entries(raw).filter(([n]) => n[0] === 'L' || n === 'bone')));
+    this.brkRest = bracketBoxes(hdr);
 
     await Promise.all([document.fonts.load(`800 60px ${F}`), document.fonts.load(`700 40px ${F}`), document.fonts.load(`600 30px ${F}`),
       document.fonts.load(`600 30px ${F}`, 'АБВ'), document.fonts.load(`800 60px ${F}`, 'АБВ'), document.fonts.load(TOP.font)]);
     // free-arm length of the cantilever for A / B / C (for the re-adjusted activation: same F, F ∝ δ / L³)
-    this.armL = TIE_KEYS.map((k, i) => { const [l] = tieLocal(this.pp, i); return cantilever({ c: this.buc['3'].aux.c, m: this.buc['3'].aux.m }, l, this.env, { act: 1, delta0: DELTA_A }).Ltot; });
+    this.armL = TIE_KEYS.map((k, i) => { const [l] = tieLocal(this.pp, i);
+      return cantilever({ c: this.buc['3'].aux.c, m: this.buc['3'].aux.m }, l, this.env, { act: 1, delta0: DELTA_A, tieDir: tieDirLocal(this.pp, i)[0], brackets: this.brkRest, yLow: this.yLowAt(IDENT),
+        wirePts: resample(sideWireCfg(hdr, this.pp, 1, i, this.cuts), 160) }).Ltot; });
     for (const t of [0.5, 6, 10, 12.5, 15, 20, 25, 33, 40, 50, 55, 58]) this.renderTime(t);   // compile all programs once
+  }
+  /** V5: arm level along the buccal segments = level of the anterior extension (current incisor pose) − hook drop */
+  yLowAt(pose) { return apply(pose, this.hdr.wire.left[this.hdr.wire.iRun + 1])[1] - HOOK.drop; }
+  /** V5: bracket boxes in the current poses (incisor segment / buccal segments) for the arm height limits */
+  bracketsNow(pose, BS) {
+    return this.brkRest.map((b) => ({ ...b, p: b.inc ? apply(pose, b.p) : this.bucApply(b.fdi[0], BS, b.p) }));
+  }
+  /** V5: anterior sectional wire cut for configuration u (A / B / C, fractional in transitions) */
+  setWireCfg(u) {
+    if (Math.abs(u - this.wireU) < 1e-4) return;
+    this.wireU = u;
+    for (const h of this.antHalves) {
+      h.pts = resample(sideWireCfg(this.hdr, this.pp, h.side, u, this.cuts), 160);
+      sweepRect(h.pts, WIRE.ss.w, WIRE.ss.h, [0, 1, 0], h.mesh.geometry);
+      sweepRect(h.pts, WIRE.ss.w + EDGE_PAD, WIRE.ss.h + EDGE_PAD, [0, 1, 0], h.edge.geometry);
+      sweepRect(h.pts, WIRE.ss.w + OUT_PAD, WIRE.ss.h + OUT_PAD, [0, 1, 0], h.ol.geometry);
+    }
+    this.antSplitIdx = null;
   }
   // ------------------------------------------------------------------ state (pure functions of t)
   P(name) { return this.POSES[name]; }
@@ -447,9 +474,9 @@ export class Film {
       this.bucGhost[q].visible = false; B.wire.visible = false; this.bucMetal.opacity = 0; this.bucLig.visible = false;
     }
     this.upper.visible = false;
-    for (const m of [...this.cant, ...this.cantGhost, ...this.ties, ...this.cantOutline, this.buc['3'].outline, this.buc['4'].outline]) m.visible = false;
+    for (const m of [...this.cant, ...this.cantGhost, ...this.ties, ...this.cantOutline, ...this.cantEdge, this.buc['3'].outline, this.buc['4'].outline, this.buc['3'].edge, this.buc['4'].edge]) m.visible = false;
     this.incMetal.opacity = 1; this.antMetal.opacity = 1; this.antOutline.opacity = 0;
-    for (const h of this.antHalves) { h.mesh.visible = true; h.mesh.geometry.setDrawRange(0, h.idx); }
+    for (const h of this.antHalves) { h.mesh.visible = true; h.mesh.geometry.setDrawRange(0, h.idx); h.edge.visible = true; h.edge.geometry.setDrawRange(0, h.idx); }
     this.bone.visible = true;
     const bu = this.boneMat.uniforms;
     bu.uAlpha.value = 1; bu.uBase.value = 0.07; bu.uRimA.value = 0.42; bu.uX0.value = -10.5; bu.uX1.value = 10.5; bu.uY0.value = -18; bu.uSoft.value = 4;
@@ -462,6 +489,7 @@ export class Film {
       this.applyCamera(cam, ZONE_CAM, rect.w / rect.h);
       const pose = poseLerp(IDENT, this.P(z.pose), s);
       this.setIncPose(pose);
+      this.setWireCfg(z.u);
       this.ghostMat.uniforms.uAlpha.value = 1.1; this.ghostInc.visible = true;
       r.setViewport(rect.x, H - rect.y - rect.h, rect.w, rect.h); r.setScissor(rect.x, H - rect.y - rect.h, rect.w, rect.h);
       r.render(this.scene, cam);
@@ -540,13 +568,15 @@ export class Film {
     bu.uAlpha.value = 1; bu.uBase.value = lerp(0.3, 0.06, clear); bu.uRimA.value = lerp(0.45, 0.42, clear);
     bu.uX0.value = lerp(-40, -11, sag); bu.uX1.value = lerp(40, 11, sag); bu.uSoft.value = lerp(6, 4, sag); bu.uY0.value = -40 + 22 * sag;
     // anterior wire (gold accent): draw-on of the sectional part, then the stepped extensions
+    this.setWireCfg(this.tieU(t));
     const sw = t < 4 ? 1 : t < S.antWire[0] ? 0 : t < S.extension[0] ? 0.5 * ramp(t, ...S.antWire) : 0.5 + 0.5 * ramp(t, ...S.extension);
     for (const h of this.antHalves) {
       const segs = h.pts.length - 1, perSeg = h.idx / segs;
       const nA = this.antSplitIdx ??= this.splitIndex(h.pts);
       const n = sw <= 0.5 ? Math.round(nA * sw * 2) : Math.round(nA + (segs - nA) * (sw - 0.5) * 2);
       h.mesh.geometry.setDrawRange(0, Math.max(0, n) * perSeg); h.ol.geometry.setDrawRange(0, Math.max(0, n) * perSeg);
-      h.mesh.visible = n > 0; h.ol.visible = n > 0;
+      h.edge.geometry.setDrawRange(0, Math.max(0, n) * perSeg);
+      h.mesh.visible = n > 0; h.ol.visible = n > 0; h.edge.visible = n > 0;
     }
     this.incMetal.opacity = 1; this.antMetal.opacity = 1;
     // temporary contour highlight of the anterior sectional wire: draw-on, macro of the stepped extension, re-tie slides
@@ -557,6 +587,7 @@ export class Film {
       const w = q === '4' ? S.bucR : S.bucL;
       const bw = t < 4 ? 0 : ramp(t, ...w);
       const g = this.buc[q].wire.geometry; g.setDrawRange(0, Math.round(g.index.count / 6 * bw) * 6); this.buc[q].wire.visible = bw > 0.01;
+      const ge = this.buc[q].edge; ge.geometry.setDrawRange(0, Math.round(ge.geometry.index.count / 6 * bw) * 6); ge.visible = bw > 0.01 && sag < 0.99; this.bucEdge.opacity = 0.9 * (1 - sag);
       const o = this.buc[q].outline; o.geometry.setDrawRange(0, Math.round(o.geometry.index.count / 6 * bw) * 6);
       o.material.opacity = 0.6 * win(t, w[0], w[1] + 1.0, 0.2, 0.5) * (1 - sag); o.visible = bw > 0.01 && o.material.opacity > 0.004;
     }
@@ -589,16 +620,20 @@ export class Film {
     for (let i = 0; i < 2; i++) {
       const cs = this.cantState(t, i), mesh = this.cant[i];
       mesh.visible = cs.a > 0.004;
-      this.cantGhost[i].visible = false; this.ties[i].visible = false; this.cantOutline[i].visible = false;
+      this.cantGhost[i].visible = false; this.ties[i].visible = false; this.cantOutline[i].visible = false; this.cantEdge[i].visible = false;
       if (!mesh.visible) continue;
       const q = cs.q, aux = this.buc[q].aux;
       const tube = { c: this.bucApply(q, this.BS, aux.c), m: this.bucApplyDir(q, this.BS, aux.m) };
       const tie = ties[i];
       const tieDir = applyDir(pose, tieDirLocal(this.pp, u)[i]);
-      const res = cantilever(tube, tie, this.env, { act: cs.act, delta0, offset: cs.offset, side: cs.side, tieDir });
+      const brackets = this.bracketsNow(pose, this.BS), yLow = this.yLowAt(IDENT);
+      const dyTie = tie[1] - tieLocal(this.pp, u)[i][1], wirePts = this.antHalves[i].pts.map((p) => apply(pose, p));
+      const res = cantilever(tube, tie, this.env, { act: cs.act, delta0, offset: cs.offset, tieDir, brackets, yLow, dyTie, wirePts });
       const rp = smoothResample(res.pts, this.cantN);
       sweepRect(rp, WIRE.tma.w, WIRE.tma.h, [0, 1, 0], mesh.geometry);
       this.cantMat[i].opacity = cs.a;
+      sweepRect(rp, WIRE.tma.w + EDGE_PAD, WIRE.tma.h + EDGE_PAD, [0, 1, 0], this.cantEdge[i].geometry);
+      this.cantEdge[i].visible = true; this.cantEdgeMat[i].opacity = 0.9 * cs.a * cs.a;
       // temporary contour highlight: insertion → activation → tie, and while the tie point is changed
       const oa = cs.a * Math.max(0.6 * win(t, S.insert[0], S.tie + 0.9, 0.2, 0.5), 0.45 * win(t, S.untieB[0], S.tieB + 0.6, 0.25, 0.4), 0.45 * win(t, S.untieC[0], S.tieC + 0.6, 0.25, 0.4));
       const ol = this.cantOutline[i]; ol.visible = oa > 0.004;
@@ -606,22 +641,13 @@ export class Film {
       this.cantWorld[i] = res;
       // passive outline during the activation windows
       const ga = this.passiveGhostA(t) * smooth((cs.act - 0.12) / 0.25);
-      const pr = cantilever(tube, tie, this.env, { act: 0, delta0, side: cs.side, tieDir });
+      const pr = cantilever(tube, tie, this.env, { act: 0, delta0, tieDir, brackets, yLow, dyTie, wirePts });
       this.passiveEnd[i] = pr.pts[pr.iEnd];
       if (ga > 0.004) {
         sweepRect(smoothResample(pr.pts, this.cantN), WIRE.tma.w, WIRE.tma.h, [0, 1, 0], this.cantGhost[i].geometry);
         this.cantGhost[i].visible = true; this.passiveMat.uniforms.uAlpha.value = ga * 2.0;
       }
-      // ligature at the tie point
-      if (lig.a > 0.004) {
-        const L = this.ties[i]; L.visible = true;
-        const ae = res.pts[res.iEnd];
-        let ox = V.sub(ae, tie); ox[1] = 0; ox = V.norm(ox);                      // labial: from the wire to the arm
-        const oz = V.norm(V.cross(ox, [0, 1, 0])), oy = V.cross(oz, ox);
-        L.position.set(...V.lerp(tie, ae, 0.5));
-        L.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(...ox), new THREE.Vector3(...oy), new THREE.Vector3(...oz)));
-        L.scale.setScalar((1 + 0.6 * (1 - lig.pulse)) * (0.4 + 0.6 * lig.a)); L.material.transparent = true; L.material.opacity = cs.a * lig.a;
-      }
+      // V5: no ligature — the hook formed from the cantilever wire rests on the sectional wire (point contact)
     }
   }
   passiveGhostA(t) {
@@ -877,7 +903,7 @@ export class Film {
       this.callout(x, apply(pose, mid), 'ACTIVE SEGMENT', { dx: 40, dy: 260, alpha: win(t, S2.incGlow[0], WT.unite2 + 0.1, 0.25, 0.3), size: 24, sub: '32 · 31 · 41 · 42 only' });
       this.callout(x, M.L43.tip, 'CANINES 33 / 43', { dx: -30, dy: -230, alpha: win(t, 4.9, WT.unite2 + 0.6, 0.25, 0.3), size: 22, sub: 'not in the active segment' });
       this.callout(x, apply(pose, hdr.slots['32']), 'SECTIONAL WIRE', { dx: 50, dy: 250, color: '#ffffff', alpha: win(t, S2.antWire[0] + 0.2, S2.extension[0] + 0.05, 0.25, 0.3), size: 22, sub: 'SS .019 × .025 · rigid' });
-      this.callout(x, hdr.wire.left[hdr.wire.iTip - 3], 'STEPPED EXTENSION', { dx: 40, dy: 240, color: '#ffffff', alpha: win(t, S2.extension[0] + 0.2, S2.bucR[0] + 0.1, 0.25, 0.3), size: 22, sub: 'not engaged in the canine bracket' });
+      this.callout(x, apply(pose, this.antHalves[0].pts[150]), 'STEPPED EXTENSION', { dx: 40, dy: 240, color: '#ffffff', alpha: win(t, S2.extension[0] + 0.2, S2.bucR[0] + 0.1, 0.25, 0.3), size: 22, sub: 'not engaged in the canine bracket' });
       this.callout(x, hdr.slots['45'], 'RIGHT ANCHOR SEGMENT', { dx: 30, dy: 330, alpha: win(t, S2.bucR[0], S2.bucR[1] + 0.6, 0.2, 0.3), size: 22, sub: '43–47 · SS .019 × .025' });
       this.callout(x, hdr.slots['35'], 'LEFT ANCHOR SEGMENT', { dx: -30, dy: 330, alpha: win(t, S2.bucL[0], S2.bucL[1] + 0.6, 0.2, 0.3), size: 22, sub: '33–37 · SS .019 × .025' });
       const aT = win(t, S2.insert[0], S2.macro[0] + 0.1, 0.25, 0.3);
@@ -886,10 +912,10 @@ export class Film {
       // macro of the stepped extension (left)
       const aM = win(t, S2.macro[0] + 0.25, S2.activate[0] + 0.05, 0.25, 0.25);
       if (aM > 0.01) {
-        const wl = hdr.wire.left;
+        const wl = hdr.wire.left, cwp = this.antHalves[0].pts;
         this.callout(x, apply(pose, V.lerp(wl[hdr.wire.iLat], wl[hdr.wire.iRun], 0.5)), 'APICAL STEP', { dx: 70, dy: -170, color: '#ffffff', alpha: aM, size: 22, sub: 'out of the lateral bracket' });
-        this.callout(x, apply(pose, wl[Math.max(hdr.wire.iRun + 2, hdr.wire.iTip - 6)]), 'DISTAL RUN · TIE ZONE', { dx: 60, dy: 190, color: '#ffffff', alpha: aM, size: 22, sub: 'straight · gingival to the canine bracket' });
-        this.callout(x, apply(pose, wl[wl.length - 1]), 'UP-TURNED TIP', { dx: -30, dy: -260, color: '#ffffff', alpha: aM, size: 22, sub: 'short occlusal bend · keeps the ligature' });
+        this.callout(x, apply(pose, cwp[146]), 'COMPACT DISTAL RUN', { dx: 60, dy: 190, color: '#ffffff', alpha: aM, size: 22, sub: 'length set by the force point' });
+        this.callout(x, apply(pose, cwp[cwp.length - 1]), 'UP-TURNED TIP', { dx: -30, dy: -260, color: '#ffffff', alpha: aM, size: 22, sub: 'end of the sectional wire · not a hook' });
         this.step(x, 'STEPPED EXTENSION OF THE SECTIONAL WIRE', aM);
       }
       // activation and tie
@@ -908,7 +934,7 @@ export class Film {
       }
       const ef = win(t, S2.tie - 0.02, S2.tie + 0.6, 0.05, 0.5);
       for (const p of this.tiesNow) this.flash(x, this.proj(p), clamp01((t - S2.tie) / 0.6), ef, COL.blue);
-      this.step(x, 'TIED AT A · POINT CONTACT', win(t, S2.tie + 0.2, 13.0, 0.25, 0.3));
+      this.step(x, 'HOOKED AT A · POINT CONTACT', win(t, S2.tie + 0.2, 13.0, 0.25, 0.3));
       const aV = win(t, S2.vectors - 0.05, 13.05, 0.25, 0.15);
       if (aV > 0.01) {
         for (const [i, p] of this.tiesNow.entries()) {
@@ -931,18 +957,17 @@ export class Film {
         this.badge(x, q, 'A', { alpha: aB * (t < 16.3 ? 1 : 0), scale: 1 + 0.4 * (1 - smooth((t - S.badgeA) / 0.4)) });
         this.flash(x, this.proj(p), clamp01((t - S.badgeA) / 0.7), aB * (1 - clamp01((t - S.badgeA) / 0.7)), COL.blue);
       }
-      this.step(x, 'BOTH CANTILEVERS TIED AT A', win(t, S.badgeA + 0.2, S.closeOcc[0] + 0.2, 0.3, 0.3));
+      this.step(x, 'BOTH CANTILEVERS HOOKED AT A', win(t, S.badgeA + 0.2, S.closeOcc[0] + 0.2, 0.3, 0.3));
       // close-ups: occlusal (straight free end of the cantilever + ligature), vestibular (up-turned tip of the extension)
       const cw = this.cantWorld[0];
       if (cw) {
-        const tipEnd = cw.pts[cw.pts.length - 1];
         const aO = win(t, S.closeOcc[0] + 0.35, S.closeOcc[1] + 0.1, 0.25, 0.25);
-        this.callout(x, tipEnd, 'STRAIGHT FREE END', { dx: 30, dy: 300, color: '#ffffff', alpha: aO, size: 22, sub: 'cantilever: no bends, no hooks' });
-        this.callout(x, this.tiesNow[0], 'STEEL LIGATURE', { dx: -70, dy: 420, color: '#ffffff', alpha: aO, size: 22, sub: 'arm tied to the sectional wire · not a rigid joint' });
+        this.callout(x, cw.pts[cw.iEnd], 'HOOK OF THE CANTILEVER', { dx: 30, dy: 300, color: '#ffffff', alpha: aO, size: 22, sub: 'bent from the TMA wire · rests on the SS wire' });
+        this.callout(x, cw.pts[cw.tags.indexOf('hook') - 30], 'ARM GINGIVAL TO THE BRACKETS', { dx: -70, dy: 420, color: '#ffffff', alpha: aO, size: 22, sub: 'one point contact · no weld, no clamp' });
         const aV2 = win(t, S.closeVes[0] + 0.05, S.sagIn[0] + 0.5, 0.25, 0.3);
         const wl = hdr.wire.left;
-        this.callout(x, apply(pose, wl[wl.length - 1]), 'UP-TURNED TIP OF THE SECTIONAL WIRE', { dx: 40, dy: -330, color: '#ffffff', alpha: aV2, size: 22, sub: 'short occlusal bend · the tie cannot slip off' });
-        this.callout(x, cw.pts[Math.max(0, cw.iEnd - 30)], 'ARM BELOW THE OCCLUSAL PLANE', { dx: -60, dy: 400, color: COL.dim, alpha: aV2, size: 20, sub: 'vestibular · ligated at A' });
+        this.callout(x, apply(pose, this.antHalves[0].pts[159]), 'UP-TURNED TIP OF THE SECTIONAL WIRE', { dx: 40, dy: -330, color: '#ffffff', alpha: aV2, size: 22, sub: 'short occlusal bend · not the cantilever hook' });
+        this.callout(x, cw.pts[cw.tags.indexOf('hook') - 45], 'ARM GINGIVAL TO THE BRACKETS', { dx: -60, dy: 290, color: COL.dim, alpha: aV2, size: 20, sub: 'no contact with brackets or SS wire' });
       }
       if (t < S.sagIn[0]) return;
     }
@@ -1054,9 +1079,9 @@ export class Film {
     const seq = (untie, deact, slide, react, tieT, from, to) => {
       if (t < untie[0] - 0.1 || t > tieT + 0.8) return;
       const pa = win(t, untie[0] - 0.1, tieT + 0.8, 0.25, 0.35);
-      const steps = [['UNTIE', untie[0]], ['DEACTIVATE', deact[0]], [`SLIDE THE FREE END DISTALLY  ${from} → ${to}`, slide[0]], ['RE-ACTIVATE FOR THE SAME F', react[0]], [`RE-TIE AT ${to}`, tieT]];
+      const steps = [['UNHOOK', untie[0]], ['PASSIVE POSITION', deact[0]], [`ALTERNATIVE SET-UP  ${from} → ${to}`, slide[0]], ['RE-ACTIVATE FOR THE SAME F', react[0]], [`HOOK AT ${to}`, tieT]];
       x.save(); x.globalAlpha = pa * 0.62; x.fillStyle = '#02060d'; x.beginPath(); x.roundRect(40, 570, 470, 330, 18); x.fill(); x.restore();
-      this.text(x, 'CHANGING THE TIE POINT', 60, 600, { size: 24, weight: 800, color: '#ffffff', alpha: pa, align: 'left', spacing: 3 });
+      this.text(x, 'ALTERNATIVE CONFIGURATION', 60, 600, { size: 24, weight: 800, color: '#ffffff', alpha: pa, align: 'left', spacing: 3 });
       steps.forEach(([str, t0], i) => {
         const next = steps[i + 1] ? steps[i + 1][1] : tieT + 0.8;
         const on = t >= t0 - 0.05, cur = on && t < next;

@@ -6,6 +6,8 @@
 C — дальше дистально) и три результата: интрузия с вестибулярным наклоном, чистая интрузия (идеализированно) и интрузия
 с ретроклинацией. Показана реальная переподвязка: снять лигатуру → деактивировать → сместить свободный конец → реактивировать → подвязать.
 
+**Версия V5 (FINAL CANTILEVER GEOMETRY CORRECTION)** — см. [docs/V5_CHANGES.md](docs/V5_CHANGES.md): кантилевер из придесневой трубки 36/46 с апикальной ступенью, плечо ниже брекетов, крючок из самой проволоки на фронтальной дуге, длина продолжений под каждую конфигурацию, исправлена перевёрнутая система координат левых брекетов (трубка 36 была окклюзионнее основной), металл без пересвета, QA 404/404.
+
 **Версия V4** — см. [docs/V4_CHANGES.md](docs/V4_CHANGES.md): прямой цельный кантилевер без загибов, короткие загнутые вверх кончики на дополнительной (секционной) дуге резцов, новая озвучка, ЦС ≈ всего сегмента, сравнение трёх вариантов в конце.
 
 **Версия V3 (FINAL GEOMETRY CORRECTION)** — см. [docs/V3_GEOMETRY_CORRECTION.md](docs/V3_GEOMETRY_CORRECTION.md): исходная модель
@@ -20,13 +22,13 @@ C — дальше дистально) и три результата: интр�
 
 | | |
 |---|---|
-| Итоговое видео (V4) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V4_FINAL.mp4` |
-| Предыдущие версии | `export/…_V3_FINAL.mp4`, `export/…_FINAL.mp4` (не изменялись) |
+| Итоговое видео (V5) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V5_FINAL.mp4` |
+| Предыдущие версии | `export/…_V4_FINAL.mp4`, `export/…_V3_FINAL.mp4`, `export/…_FINAL.mp4` (не изменялись) |
 | Предыдущая версия (V2) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_FINAL.mp4` (не изменена) |
 | Научные источники и система сил | [SCIENTIFIC_REFERENCES.md](SCIENTIFIC_REFERENCES.md) |
 | Сценарий по таймкодам | [docs/SCRIPT.md](docs/SCRIPT.md) |
 | Озвучка, тайминги, SRT | [docs/VOICEOVER_RU.md](docs/VOICEOVER_RU.md), [docs/voiceover_ru.srt](docs/voiceover_ru.srt), [docs/subtitles_ru.srt](docs/subtitles_ru.srt) |
-| Проверка геометрии и механики | [docs/QA_REPORT.json](docs/QA_REPORT.json) (130 проверок), контрольные изображения `docs/qa/` (28 кадров, вкл. `V4_construction_A/B/C`) |
+| Проверка геометрии и механики | [docs/QA_REPORT.json](docs/QA_REPORT.json) (404 проверки), контрольные изображения V5 `docs/qa_v5/` (7 видов), ранее `docs/qa/` |
 | 3D-модели и лицензии | [docs/ASSETS.md](docs/ASSETS.md) |
 | Плеер | `index.html` (нужен веб-сервер) |
 

@@ -10,7 +10,7 @@ const film = new Film();
 film.subtitles = q.get('subs') !== '0';
 film.setLook((q.get('look') || 'B').toUpperCase());
 const $ = (id) => document.getElementById(id);
-const NAME = 'CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V4_FINAL';
+const NAME = 'CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V5_FINAL';
 const DUR = DURATION;
 
 $('stage').appendChild(film.out);

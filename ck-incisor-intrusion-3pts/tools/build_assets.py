@@ -293,11 +293,12 @@ def hdir(a, b):
     d = np.asarray(b) - np.asarray(a); d[1] = 0; return d / np.linalg.norm(d)
 RUN0 = 2.0            # straight run distal to the lateral slot before the step
 EXT_OFF = 1.45        # labial clearance of the extension from the enamel (centre line)
-Z_END = -4.8          # distal end of the extension (CR at z = 0) — V4: only ≈0.8 mm past tie C (no excess length)
+Z_END = -5.6          # V5: full-length blank of the extension; each configuration cuts it ≈1 mm past its own tie point
 Z_C = -4.0            # tie configuration C (distal, on the extension)
 TIP_R = 0.4           # V4: radius of the small occlusal up-bend at the distal tip of each extension
 TIP_RISE = 0.6       # V4: short straight rise after the quarter circle (total tip height ≈ 1.0 mm)
-BR_HALF = 1.6         # occluso-gingival half-height of the canine / premolar bracket body + tie wings (geom.js)
+BR_HALF = 1.67        # occluso-gingival half-height of the canine / premolar bracket incl. the wing lips (geom.js)
+HOOK_TOP = 0.88 + 0.25   # V5: cantilever hook crown (outer surface) above the wire centre + its lift while being hooked on
 def side_wire(sg):
     """one half of the rigid anterior SS sectional wire, midline → distal end:
     smooth arch-form curve through the central and lateral slots (levelled: one height) → short straight run →
@@ -309,14 +310,17 @@ def side_wire(sg):
     pts[-1] = np.array([sL[0], yS, sL[2]])
     tdir = hdir(arch_pt(thL - sg * 0.02, yS)[0], arch_pt(thL, yS)[0])
     A = pts[-1] + tdir * RUN0
-    ext_y = min(slot(q + '3')[1], slot(q + '4')[1]) - BR_HALF - 0.32 - 0.35   # extension clears the canine / premolar brackets
+    # extension clears the canine bracket, and a cantilever hook seated on it (B, C) clears the first-premolar bracket
+    ext_y = min(slot(q + '3')[1] - BR_HALF - 0.24 - 0.35, slot(q + '4')[1] - BR_HALF - HOOK_TOP - 0.25)
     B = A + np.array([0, ext_y - A[1], 0])
-    band = np.concatenate([T[q + k]['v'][np.abs(T[q + k]['v'][:, 1] - B[1]) < 0.6] for k in '234'])
+    band = np.concatenate([T[q + k]['v'][np.abs(T[q + k]['v'][:, 1] - B[1]) < 0.6] for k in '2345'])
     ang_ = lambda p: math.atan2(p[0] - ARCH_C[0], p[2] - ARCH_C[2])
     bandA = np.array([ang_(p) for p in band]); bandR = np.hypot(band[:, 0] - ARCH_C[0], band[:, 2] - ARCH_C[2])
     a0 = ang_(B); rB = math.hypot(B[0] - ARCH_C[0], B[2] - ARCH_C[2])
     A_ = np.linspace(a0, a0 + sg * 1.2, 241)
-    rr = np.array([(bandR[np.abs(bandA - a) < 0.035].max() if (np.abs(bandA - a) < 0.035).any() else 0) + EXT_OFF for a in A_])
+    rr = np.array([(bandR[np.abs(bandA - a) < 0.035].max() if (np.abs(bandA - a) < 0.035).any() else np.nan) + EXT_OFF for a in A_])
+    for i in range(len(rr)):                                       # V5: no vertices in a bin → keep the previous radius (no lingual kink)
+        if np.isnan(rr[i]): rr[i] = rr[i - 1] if i else rB
     rr = ndimage.maximum_filter1d(rr, 9); rr = ndimage.gaussian_filter1d(rr, 3) + 0.15
     w = np.clip((A_ - a0) * sg / 0.10, 0, 1); w = w * w * (3 - 2 * w)
     rr = rB * (1 - w) + np.maximum(rr, 0) * w
@@ -328,15 +332,15 @@ def side_wire(sg):
         p = np.array([ARCH_C[0] + r * math.sin(a), B[1], ARCH_C[2] + r * math.cos(a)])
         if k % 8 == 0: pts.append(p)
         if p[2] < Z_END: pts.append(p); break
-    # V4: the distal tip of the extension is turned up (occlusally) — a short, smooth bend of the extension itself that
-    # keeps the cantilever ligature from slipping off distally (cf. Machado-type designs). Main run stays straight.
-    e, f = pts[-1], pts[-2]
-    d = np.array([e[0] - f[0], 0.0, e[2] - f[2]]); d /= np.linalg.norm(d)
-    for k in range(1, 9):
-        a = (math.pi / 2) * k / 8
-        pts.append(e + d * TIP_R * math.sin(a) + np.array([0, TIP_R * (1 - math.cos(a)), 0]))
-    top = pts[-1]
-    pts.append(top + np.array([0, TIP_RISE, 0]))
+    # V5: distal to the CR level the extension runs STRAIGHT (a tangent over the premolar convexity) — no bend into
+    #     the 34/35 embrasure; the cantilever hook at C sits on a straight part of the wire
+    i0 = next(i for i in range(iB, len(pts)) if pts[i][2] < -0.5)
+    j = next((i for i in range(i0 + 1, len(pts)) if pts[i][2] < -3.0), len(pts) - 1)
+    d = pts[j] - pts[i0]; d[1] = 0; d /= np.linalg.norm(d)
+    p0 = pts[i0].copy(); pts = pts[:i0 + 1]
+    Lz = (p0[2] - Z_END) / -d[2]
+    for sk in np.linspace(0, Lz, 7)[1:]: pts.append(p0 + d * sk)
+    # V5: the distal end (length per configuration) and its short occlusal up-bend are cut / formed in src/appliance.js
     return pts, iB
 (wL, iBL), (wR, iBR) = side_wire(+1), side_wire(-1)
 MIR = np.array([-1.0, 1.0, 1.0])
@@ -496,7 +500,7 @@ hdr = {'units': 'mm', 'frame': 'arch frame: origin = CR of the 4-incisor segment
        'skull_to_arch': {'origin': O.tolist(), 'R_rows': R.tolist()}, 'archCentre': ARCH_C.tolist(),
        'source': 'Z-Anatomy (CC BY-SA 4.0), derived from BodyParts3D (c) DBCLS (CC BY-SA 2.1 JP); bone procedural from it',
        'extrusionStart': EXTR, 'intrusion': INTR, 'cRot': C_ROT, 'poses': POSES, 'qa': qa,
-       'wire': {'anterior': anterior, 'left': [p.tolist() for p in wL], 'right': [p.tolist() for p in wR], 'stepH': STEP_H, 'iLat': iBL - 2, 'iRun': iBL - 1, 'iTip': len(wL) - 10},
+       'wire': {'anterior': anterior, 'left': [p.tolist() for p in wL], 'right': [p.tolist() for p in wR], 'stepH': STEP_H, 'iLat': iBL - 2, 'iRun': iBL - 1},
        'points': {k: [p.tolist() for p in v] for k, v in POINTS.items()}, 'd': dk,
        'slots': {f: slot(f).tolist() for f in LOWER}, 'auxTube': {f: slot(f, TUBE_OFF).tolist() for f in ['36', '46']},
        'meshes': []}

@@ -906,7 +906,7 @@ export class Film {
         this.force3(x, V.add(p, [0, 1.2, 0]), [0, 1, 0], [1.6, 2.2, 2.8, 3.4, 2.4][j], { color: COL.red, alpha: aD, width: 3.5, head: 12 });
       });
       const aT = win(t, S.buccalTip[0] + 0.3, 53.1, 0.3, 0.3);
-      this.callout(x, this.bucApply('4', this.BS, M.L47.tip), 'POSSIBLE DISTAL TIPPING', { dx: 30, dy: -250, color: COL.red, alpha: aT, size: 20, sub: 'anchor teeth are not immobile' });
+      this.callout(x, this.bucApply('4', this.BS, M.L47.tip), 'POSSIBLE DISTAL TIPPING', { dx: 20, dy: -135, color: COL.red, alpha: aT, size: 20, sub: 'anchor teeth are not immobile' });
       this.step(x, 'RIGID SEGMENTS SHARE THE LOAD — NOT ELIMINATE IT', win(t, WT.anchor7 - 0.2, 53.0, 0.3, 0.3) * 0.95, COL.dim, 21);
       this.text(x, 'Anatomy: Z-Anatomy / BodyParts3D © DBCLS · CC BY-SA 4.0', W / 2, 1584, { size: 15, weight: 500, color: COL.dim, alpha: win(t, 46.6, 53.0, 0.5, 0.4) * 0.6, spacing: 1 });
     }

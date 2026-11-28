@@ -10,8 +10,10 @@
 // outputs: assets/audio/{music,voiceover,mix}.m4a and build/*.wav masters
 import fs from 'fs';
 import { execFileSync } from 'child_process';
-import { VOICE } from '../src/voice.js';
-import { DURATION, T, SAD_KEYS, RAM_KEYS } from '../src/timeline.js';
+import { T, SAD_KEYS, RAM_KEYS } from '../src/timeline.js';
+import { LANG, VOICE, DURATION_OUT, unwarp as U, EN_TEMPO_ACTIVE } from '../src/lang.js';
+const DURATION = DURATION_OUT;
+const SUF = LANG === 'en' ? '_en' : '';
 const SR = 48000, DUR = DURATION, N = SR * DUR;
 const L = new Float32Array(N), R = new Float32Array(N);
 let seed = 7; const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * 2 - 1;
@@ -26,9 +28,9 @@ const CH = [
   [56.6, [98.0, [1, 1.5, 2, 2.4, 3.0, 4.5]]],        // Gm9
   [63.4, [73.42, [1, 1.5, 2, 2.4, 3.0, 4.5]]],       // Dm9 — payoff
 ];
-const thin = (t) => 1 - 0.85 * sm((t - 31.25) / 0.3) * (1 - sm((t - (T.sum6 - 0.05)) / 0.15));   // near-silence before SAME SUM
+const thin = (t) => 1 - 0.85 * sm((t - U(31.25)) / 0.3) * (1 - sm((t - U(T.sum6 - 0.05)) / 0.15));   // near-silence before SAME SUM
 for (let ci = 0; ci < CH.length; ci++) {
-  const [t0, [root, iv]] = CH[ci], t1 = ci + 1 < CH.length ? CH[ci + 1][0] : DUR;
+  const t0 = U(CH[ci][0]), [root, iv] = CH[ci][1], t1 = ci + 1 < CH.length ? U(CH[ci + 1][0]) : DUR;
   const a0 = Math.max(0, t0 - 1.5), a1 = Math.min(DUR, t1 + 1.5);
   for (let i = Math.floor(a0 * SR); i < a1 * SR; i++) {
     const t = i / SR;
@@ -55,8 +57,8 @@ for (let i = 0; i < N; i++) {
 }
 // ---- muted pulse (scene 07 → 10), soft, filtered, no transients
 for (let n = 0; ; n++) {
-  const t0 = 39.0 + n * 0.3; if (t0 > 71.2) break;
-  const f = (n % 8 < 4) ? 174.6 : 196.0, g = 0.012 * sm((t0 - 39) / 3) * (1 - sm((t0 - 69.5) / 1.7));
+  const t0 = U(39.0) + n * 0.3; if (t0 > U(71.2)) break;
+  const f = (n % 8 < 4) ? 174.6 : 196.0, g = 0.012 * sm((t0 - U(39)) / 3) * (1 - sm((t0 - U(69.5)) / 1.7));
   for (let i = Math.floor(t0 * SR); i < Math.min(N, (t0 + 0.26) * SR); i++) {
     const u = i / SR - t0, e = Math.min(1, u / 0.02) * Math.exp(-u * 10);
     const s = Math.sin(2 * Math.PI * f * u) * e * g; L[i] += s * 0.9; R[i] += s;
@@ -64,20 +66,29 @@ for (let n = 0; ; n++) {
 }
 // ---- 2. accents
 function tick(t0, f, gain, pan = 0) {
+  t0 = U(t0);
   for (let i = Math.floor(t0 * SR); i < Math.min(N, (t0 + 0.5) * SR); i++) {
     const u = i / SR - t0, e = Math.exp(-u * 12) * Math.min(1, u * 600);
     const s = (Math.sin(2 * Math.PI * f * u) + 0.25 * Math.sin(4 * Math.PI * f * u)) * e * gain; L[i] += s * (1 - pan); R[i] += s * (1 + pan);
   }
 }
+function toneOut(t0, f, gain) {   // output-clock tick (used for impact bells)
+  for (let i = Math.floor(t0 * SR); i < Math.min(N, (t0 + 0.5) * SR); i++) {
+    const u = i / SR - t0, e = Math.exp(-u * 12) * Math.min(1, u * 600);
+    const s = (Math.sin(2 * Math.PI * f * u) + 0.25 * Math.sin(4 * Math.PI * f * u)) * e * gain; L[i] += s; R[i] += s;
+  }
+}
 function sweep(t0, d, f0, f1, gain) {
+  t0 = U(t0);
   let ph = 0;
   for (let i = Math.floor(t0 * SR); i < Math.min(N, (t0 + d) * SR); i++) {
     const u = (i / SR - t0) / d, f = f0 * Math.pow(f1 / f0, u); ph += 2 * Math.PI * f / SR;
     const e = Math.sin(Math.PI * u) ** 2 * gain, s = Math.sin(ph) * e; L[i] += s * (1 - u * 0.5); R[i] += s * (0.5 + u * 0.5);
   }
 }
-function chime(t0, f, gain) { [1, 2.01, 3.03].forEach((m, k) => tick(t0 + k * 0.004, f * m, gain / (k + 1.5))); }
+function chime(t0, f, gain) { [1, 2.01, 3.03].forEach((m, k) => tick(t0 + k * 0.004, f * m, gain / (k + 1.5))); }   // anim time (tick converts)
 function whoosh(t0, d, gain) {
+  t0 = U(t0);
   let y1 = 0, y2 = 0;
   for (let i = Math.floor(t0 * SR); i < Math.min(N, (t0 + d) * SR); i++) {
     const u = (i / SR - t0) / d, e = Math.sin(Math.PI * u) ** 2, c = 0.004 + 0.05 * u;
@@ -85,6 +96,7 @@ function whoosh(t0, d, gain) {
   }
 }
 function riser(t0, t1, gain) {
+  t0 = U(t0); t1 = U(t1);
   let ph = 0, y = 0;
   for (let i = Math.floor(t0 * SR); i < Math.min(N, t1 * SR); i++) {
     const u = (i / SR - t0) / (t1 - t0), f = 120 * Math.pow(6, u); ph += 2 * Math.PI * f / SR;
@@ -93,12 +105,14 @@ function riser(t0, t1, gain) {
   }
 }
 function impact(t0, gain) {      // soft low impact (sine drop) + bell
+  t0 = U(t0);
   for (let i = Math.floor(t0 * SR); i < Math.min(N, (t0 + 2.2) * SR); i++) {
     const u = i / SR - t0, f = 70 * Math.exp(-u * 1.5) + 34, e = Math.exp(-u * 2.2) * Math.min(1, u * 300);
     const s = Math.sin(2 * Math.PI * f * u) * e * gain; L[i] += s; R[i] += s;
   }
-  chime(t0 + 0.02, 587.3, gain * 0.5);
+  ICH.push([t0 + 0.02, gain]);
 }
+const ICH = [];
 // scene transitions
 [[4.6, 1.2, 0.35], [30.95, 0.9, 0.3], [38.75, 1.0, 0.3], [56.35, 1.0, 0.32], [63.15, 1.0, 0.32], [71.4, 1.1, 0.3], [76.8, 1.3, 0.35]].forEach((w) => whoosh(...w));
 // 01 hook
@@ -129,12 +143,13 @@ impact(T.rel, 0.09);
 [0, 0.45, 0.9].forEach((d) => tick(T.trg + d, 1174.7, 0.035));
 tick(77.65, 440, 0.06); tick(77.67, 659.25, 0.045); tick(78.25, 880, 0.04);
 // outro: soft D-major-add9 swell under the logo (fades to the end)
-for (let i = Math.floor(77.2 * SR); i < N; i++) {
-  const t = i / SR, g = sm((t - 77.2) / 0.8) * (1 - sm((t - 78.6) / 1.4)) * 0.05;
+for (let i = Math.floor(U(77.2) * SR); i < N; i++) {
+  const t = i / SR, g = sm((t - U(77.2)) / 0.8) * (1 - sm((t - U(78.6)) / 1.4)) * 0.05;
   let s = 0; [146.83, 220, 293.66, 369.99, 440].forEach((f, k) => { s += Math.sin(2 * Math.PI * f * t + k) * (k ? 0.6 : 1); });
   L[i] += s * g; R[i] += s * g * 0.96;
 }
 chime(77.65, 587.33, 0.08); chime(78.25, 880, 0.06);
+for (const [t0, g] of ICH) [1, 2.01, 3.03].forEach((m, k) => toneOut(t0 + k * 0.004, 587.3 * m, g * 0.5 / (k + 1.5)));
 // ---- write masters
 function wav(path, Lc, Rc) {
   const n = Lc.length, buf = Buffer.alloc(44 + n * 4);
@@ -145,21 +160,21 @@ function wav(path, Lc, Rc) {
   fs.writeFileSync(path, buf);
 }
 fs.mkdirSync('build', { recursive: true }); fs.mkdirSync('assets/audio', { recursive: true });
-wav('build/music.wav', L, R);
+wav(`build/music${SUF}.wav`, L, R);
 const ff = (args) => execFileSync('ffmpeg', ['-y', '-v', 'error', ...args]);
 const ext = process.argv[2];
-if (ext) ff(['-i', ext, '-af', `apad,atrim=0:${DUR}`, '-ar', '48000', '-ac', '2', 'build/voiceover.wav']);
+if (ext) ff(['-i', ext, '-af', `apad,atrim=0:${DUR}`, '-ar', '48000', '-ac', '2', `build/voiceover${SUF}.wav`]);
 else {
   const ins = VOICE.flatMap((v) => ['-i', v.file]);
-  const ch = VOICE.map((v, i) => `[${i}:a]aresample=48000,aformat=channel_layouts=stereo,adelay=${Math.round(v.start * 1000)}|${Math.round(v.start * 1000)}[v${i}]`).join(';');
-  ff([...ins, '-filter_complex', `${ch};${VOICE.map((_, i) => `[v${i}]`).join('')}amix=inputs=${VOICE.length}:normalize=0,apad,atrim=0:${DUR}[vo]`, '-map', '[vo]', 'build/voiceover.wav']);
+  const ch = VOICE.map((v, i) => `[${i}:a]aresample=48000,aformat=channel_layouts=stereo${EN_TEMPO_ACTIVE !== 1 ? `,atempo=${EN_TEMPO_ACTIVE}` : ''},adelay=${Math.round(v.start * 1000)}|${Math.round(v.start * 1000)}[v${i}]`).join(';');
+  ff([...ins, '-filter_complex', `${ch};${VOICE.map((_, i) => `[v${i}]`).join('')}amix=inputs=${VOICE.length}:normalize=0,apad,atrim=0:${DUR}[vo]`, '-map', '[vo]', `build/voiceover${SUF}.wav`]);
 }
-ff(['-i', 'build/voiceover.wav', '-i', 'build/music.wav', '-filter_complex',
+ff(['-i', `build/voiceover${SUF}.wav`, '-i', `build/music${SUF}.wav`, '-filter_complex',
   '[0:a]apad=pad_dur=4,loudnorm=I=-15:TP=-2:LRA=9,asplit=2[vo][sc];[1:a]apad=pad_dur=4,loudnorm=I=-25:TP=-5:LRA=12[bed];' +
   '[bed][sc]sidechaincompress=threshold=0.035:ratio=5:attack=20:release=380[duck];' +
   `[vo][duck]amix=inputs=2:normalize=0:duration=longest,apad=pad_dur=4,loudnorm=I=-15:TP=-1.5:LRA=11,apad,atrim=0:${DUR}[out]`,
-  '-map', '[out]', '-ar', '48000', 'build/mix.wav']);
-ff(['-i', 'build/music.wav', '-af', `apad=pad_dur=4,loudnorm=I=-25:TP=-5,atrim=0:${DUR}`, '-c:a', 'aac', '-b:a', '192k', 'assets/audio/music.m4a']);
-ff(['-i', 'build/voiceover.wav', '-c:a', 'aac', '-b:a', '192k', 'assets/audio/voiceover.m4a']);
-ff(['-i', 'build/mix.wav', '-c:a', 'aac', '-b:a', '192k', 'assets/audio/mix.m4a']);
-console.log('assets/audio/{music,voiceover,mix}.m4a');
+  '-map', '[out]', '-ar', '48000', `build/mix${SUF}.wav`]);
+ff(['-i', `build/music${SUF}.wav`, '-af', `apad=pad_dur=4,loudnorm=I=-25:TP=-5,atrim=0:${DUR}`, '-c:a', 'aac', '-b:a', '192k', `assets/audio/music${SUF}.m4a`]);
+ff(['-i', `build/voiceover${SUF}.wav`, '-c:a', 'aac', '-b:a', '192k', `assets/audio/voiceover${SUF}.m4a`]);
+ff(['-i', `build/mix${SUF}.wav`, '-c:a', 'aac', '-b:a', '192k', `assets/audio/mix${SUF}.m4a`]);
+console.log(`assets/audio/{music,voiceover,mix}${SUF}.m4a  (${DUR} s)`);

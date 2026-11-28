@@ -3,8 +3,9 @@
 //  so playback, scrubbing and export render identical frames. Visual events are
 //  anchored to the spoken words (src/words.js) of the actual narration.
 // ============================================================================
-import { VOICE } from './voice.js';
+import { VOICE as VOICE_RU } from './voice.js';
 import { WORDS } from './words.js';
+import { LANG, VOICE as VOICE_OUT, WORDS_ACTIVE, warp } from './lang.js';
 import { STATES } from './states.js';
 
 export const DURATION = 80;
@@ -21,11 +22,17 @@ export const ramp = (t, a, b, ease = easeInOut) => ease((t - a) / (b - a));
 export const win = (t, a, b, fi = 0.4, fo = 0.4) => Math.min(smooth((t - a) / fi), 1 - smooth((t - (b - fo)) / fo));
 
 const norm = (s) => s.toLowerCase().replace(/[.,?!—«»]/g, '');
-/** absolute start time of the n-th word in narration line `line` (1-based) beginning with `stem` */
-export function W(line, stem, nth = 0) {
-  const ws = WORDS[line - 1].filter((x) => norm(x[0]).startsWith(stem));
+function wordAt(words, voice, line, stem, nth) {
+  const ws = words[line - 1].filter((x) => norm(x[0]).startsWith(stem));
   if (!ws[nth]) throw new Error(`word ${stem} not in line ${line}`);
-  return +(VOICE[line - 1].start + ws[nth][1]).toFixed(3);
+  return voice[line - 1].start + ws[nth][1];
+}
+/** absolute start (animation clock) of the n-th word in narration line `line` (1-based) beginning with `stem` (Russian) */
+export function W(line, stem, nth = 0) { return +wordAt(WORDS, VOICE_RU, line, stem, nth).toFixed(3); }
+/** anchor in the active language: RU word on the animation clock, or the EN word onset mapped onto it */
+function A(line, ru, en, ruNth = 0, enNth = 0) {
+  if (LANG !== 'en') return W(line, ru, ruNth);
+  return +warp(wordAt(WORDS_ACTIVE, VOICE_OUT, line, en, enNth)).toFixed(3);
 }
 
 export const SCENES = [
@@ -44,17 +51,17 @@ export const SCENES = [
 
 // ---------------------------------------------------------------- key word times
 export const T = {
-  same: W(1, 'одинаковая'), length: W(1, 'длина'), why: W(1, 'почему'), diff: W(1, 'разные'), prof: W(1, 'профили'),
-  bjork: W(2, 'бьёрка'), jarabak: W(2, 'джарабака'), sizes: W(2, 'размеры'), geom: W(2, 'геометрию'),
-  saddle: W(3, 'седловидный'), base3: W(3, 'основания'), affects: W(3, 'влияет'), pos3: W(3, 'положение'),
-  art: W(4, 'артикулярный'), ramus4: W(4, 'ветви'), post4: W(4, 'заднего'),
-  gon: W(5, 'гониальный'), ramus5: W(5, 'ветви'), body5: W(5, 'тела'), split: W(5, 'разделение'), detail: W(5, 'детальнее'),
-  catch: W(6, 'подвох'), even: W(6, 'даже'), sum6: W(6, 'сумма'), hide: W(6, 'скрывать'), diff6: W(6, 'разную'),
-  base7: W(7, 'основания'), ramus7: W(7, 'высоту'), body7: W(7, 'длину', 1), comp7: W(7, 'компоненты'),
-  post8: W(8, 'задней'), ant8: W(8, 'передней'), help8: W(8, 'помогает'), vert8: W(8, 'вертикальные'), morph8: W(8, 'морфологии'),
-  low9: W(9, 'низкий'), vert9: W(9, 'вертикального'), high9: W(9, 'высокий'), hor9: W(9, 'горизонтального'),
-  analyse: W(10, 'анализируйте'), numbers: W(10, 'цифры'), rel: W(10, 'взаимосвязь'), morph10: W(10, 'морфологию'),
-  which: W(11, 'какой'), trg: W(11, 'тэ-эр-гэ'), use: W(11, 'используете'),
+  same: A(1, 'одинаковая', 'same'), length: A(1, 'длина', 'length'), why: A(1, 'почему', 'why'), diff: A(1, 'разные', 'different'), prof: A(1, 'профили', 'profiles'),
+  bjork: A(2, 'бьёрка', 'björk'), jarabak: A(2, 'джарабака', 'björk'), sizes: A(2, 'размеры', 'size'), geom: A(2, 'геометрию', 'geometry'),
+  saddle: A(3, 'седловидный', 'saddle'), base3: A(3, 'основания', 'base'), affects: A(3, 'влияет', 'influences'), pos3: A(3, 'положение', 'position'),
+  art: A(4, 'артикулярный', 'articular'), ramus4: A(4, 'ветви', 'ramus'), post4: A(4, 'заднего', 'posterior'),
+  gon: A(5, 'гониальный', 'gonial'), ramus5: A(5, 'ветви', 'ramus'), body5: A(5, 'тела', 'body'), split: A(5, 'разделение', 'splitting'), detail: A(5, 'детальнее', 'detail'),
+  catch: A(6, 'подвох', 'catch'), even: A(6, 'даже', 'even'), sum6: A(6, 'сумма', 'sum'), hide: A(6, 'скрывать', 'hide'), diff6: A(6, 'разную', 'different'),
+  base7: A(7, 'основания', 'base'), ramus7: A(7, 'высоту', 'ramus'), body7: A(7, 'длину', 'body', 1, 0), comp7: A(7, 'компоненты', 'components'),
+  post8: A(8, 'задней', 'posterior'), ant8: A(8, 'передней', 'anterior'), help8: A(8, 'помогает', 'helps'), vert8: A(8, 'вертикальные', 'vertical'), morph8: A(8, 'морфологии', 'morphology'),
+  low9: A(9, 'низкий', 'low'), vert9: A(9, 'вертикального', 'vertical'), high9: A(9, 'высокий', 'high'), hor9: A(9, 'горизонтального', 'horizontal'),
+  analyse: A(10, 'анализируйте', 'analyze'), numbers: A(10, 'цифры', 'numbers'), rel: A(10, 'взаимосвязь', 'relate'), morph10: A(10, 'морфологию', 'morphology'),
+  which: A(11, 'какой', 'which'), trg: A(11, 'тэ-эр-гэ', 'cephalometric'), use: A(11, 'используете', 'use'),
 };
 
 // ---------------------------------------------------------------- layouts (world mm, scaled specimen)
@@ -78,7 +85,9 @@ const mixCam = (A, B, u) => ({ k: Math.exp(lerp(Math.log(A.k), Math.log(B.k), u)
 
 // saddle demo / ramus demo morph keys
 export const SAD_KEYS = [[12.3, ST.REF], [13.1, ST.SAD_LO], [14.3, ST.SAD_LO], [15.2, ST.SAD_HI], [16.25, ST.SAD_HI], [16.95, ST.REF]];
-export const RAM_KEYS = [[44.0, ST.REF], [44.8, ST.RAM_S], [45.6, ST.RAM_S], [46.5, ST.RAM_L], [47.3, ST.RAM_L], [48.0, ST.REF]];
+// ramus comparison starts after the Go–Me measurement has appeared (language-independent)
+const RAM0 = Math.max(44.0, T.body7 + 0.7), RAMK = Math.min(4.0, 48.25 - RAM0) / 4.0;
+export const RAM_KEYS = [[0, ST.REF], [0.8, ST.RAM_S], [1.6, ST.RAM_S], [2.5, ST.RAM_L], [3.3, ST.RAM_L], [4.0, ST.REF]].map(([d, P]) => [RAM0 + d * RAMK, P]);
 
 /** 3D layer opacity (fade through the identical brand background at the hard cuts) */
 export function layerAlpha(t) {
@@ -116,7 +125,7 @@ export function stateAt(t) {
     cam = mixCam({ k: SK.k, cz: SK.cz, cy: SK.cy }, S1, u);
     const f8 = ramp(t, 48.4, 49.4);
     cam.k *= 1 - 0.04 * f8; cam.cy += 2 * f8;
-    const P = t > 43.9 && t < 48.1 ? stateKeys(t, RAM_KEYS) : ST.REF;
+    const P = t > RAM_KEYS[0][0] - 0.05 && t < RAM_KEYS[5][0] + 0.05 ? stateKeys(t, RAM_KEYS) : ST.REF;
     skulls.push({ P, z: 0, y: lerp(SK.dyA, 0, u), role: 'single' });
     if (t < 40.0) skulls.push({ P: ST.COMP, z: 0, y: lerp(SK.dyB, -420, u), role: 'B' });
   } else if (t < 63.45) {                                            // 09 three skeletal patterns

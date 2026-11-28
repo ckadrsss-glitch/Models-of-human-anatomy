@@ -14,6 +14,7 @@ V2 — доработка ролика `ck-jarabak-analysis` (V1 сохранё�
 | Наука: определения, модель, выбор референсов, расхождения, источники | [docs/SCIENCE.md](docs/SCIENCE.md) |
 | Численная проверка (53 проверки) | [docs/QA_REPORT.json](docs/QA_REPORT.json) — `node tools/qa.mjs` |
 | Бренд | [docs/BRAND.md](docs/BRAND.md) |
+| **English version** | `export/CK_BIOMECHANICS_BJORK_JARABAK_V2_EN_MASTER.mp4`, `…_EN_INSTAGRAM.mp4` (91.7 s) · [docs/SCRIPT_EN.md](docs/SCRIPT_EN.md) · `index.html?lang=en` |
 
 ## Что изменилось по сравнению с V1
 
@@ -28,6 +29,19 @@ V2 — доработка ролика `ck-jarabak-analysis` (V1 сохранё�
 * Пословная синхронизация типографики с голосом; постоянный цветовой код; активное измерение яркое, остальные приглушены.
 * Фон графитово-синий светлее V1, верхний титр CK BIOMECHANICS, финальный логотип CK в тонком круге + BIOMECHANICS.
 * Музыка «cinematic scientific ambient» + акценты, ducking под голос.
+
+## English version
+
+Тот же ролик с английской озвучкой (ElevenLabs «Ryan — American Documentary Narrator», темп ×1.05) и без русских
+пояснений на экране. Английская речь длиннее русской, поэтому `src/lang.js` равномерно растягивает каждую сцену под
+английскую реплику (91.7 с) и переносит все привязки к словам (ключевые слова, точки, измерения, звуковые акценты)
+на английские слова. Геометрия, числа и QA — те же.
+
+```bash
+FILM_LANG=en node tools/build_audio.mjs
+FILM_LANG=en node tools/render.cjs build/frames_en 4
+bash tools/encode.sh build/frames_en assets/audio/mix_en.m4a CK_BIOMECHANICS_BJORK_JARABAK_V2_EN
+```
 
 ## Запуск
 

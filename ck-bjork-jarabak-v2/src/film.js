@@ -10,8 +10,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { loadSkullGeometry, createSkull } from './skull.js';
 import { ceph, dist } from './morph.js';
 import { BRAND, backgroundCanvas, drawOutro, drawTopLabel } from './brand.js';
-import { stateAt, T, ST, L, OUTRO_T0, DURATION, FPS, clamp01, smooth, easeOut, win, ramp, lerp } from './timeline.js';
-import { VOICE } from './voice.js';
+import { stateAt, T, ST, L, RAM_KEYS, OUTRO_T0, DURATION, FPS, clamp01, smooth, easeOut, win, ramp, lerp } from './timeline.js';
+import { LANG, VOICE, DURATION_OUT, warp } from './lang.js';
 import { drawKeywords } from './kinetic.js';
 
 const W = BRAND.width, H = BRAND.height;
@@ -26,7 +26,7 @@ const ri = (x) => String(Math.round(x));
 
 export class Film {
   constructor() {
-    this.duration = DURATION; this.fps = FPS;
+    this.duration = DURATION_OUT; this.fps = FPS;
     this.out = document.createElement('canvas'); this.out.width = W; this.out.height = H;
     this.ctx = this.out.getContext('2d');
     this.subtitles = false;
@@ -71,8 +71,10 @@ export class Film {
 
   renderFrame(i) { return this.renderTime(i / FPS); }
 
-  renderTime(t) {
-    t = Math.min(Math.max(t, 0), DURATION - 1e-6);
+  renderTime(tOut) {
+    tOut = Math.min(Math.max(tOut, 0), DURATION_OUT - 1e-6);
+    this.tOut = tOut;
+    const t = Math.min(warp(tOut), DURATION - 1e-6);     // animation clock (identity for RU)
     const st = this.state = stateAt(t);
     const { k, cz, cy } = st.cam;
     const cam = this.camera;
@@ -90,7 +92,7 @@ export class Film {
     x.drawImage(this.renderer.domElement, 0, 0);
     x.globalAlpha = 1;
     this.drawOverlay(x, t, st);
-    if (this.subtitles) this.drawSubtitle(x, t);
+    if (this.subtitles) this.drawSubtitle(x);
     drawTopLabel(x, 1);
     if (t >= OUTRO_T0) drawOutro(x, t - OUTRO_T0);
     return this.out;
@@ -314,9 +316,9 @@ export class Film {
       this.text(x, `${r1(c.articular)}°`, q[0], q[1], { size: 34, weight: 700, color: COL.articular, alpha: s4 });
       const a1 = win(t, T.ramus4, 22.9, 0.4, 0.4) * fade, a2 = win(t, T.post4, 22.9, 0.4, 0.4) * fade;
       this.text(x, 'RAMUS  Ar–Go', 540, 1462, { size: 32, weight: 700, color: COL.ramus, alpha: a1 });
-      this.text(x, 'ветвь нижней челюсти', 540, 1502, { size: 25, weight: 500, color: COL.dim, alpha: a1 });
+      if (LANG !== 'en') this.text(x, 'ветвь нижней челюсти', 540, 1502, { size: 25, weight: 500, color: COL.dim, alpha: a1 });
       this.text(x, 'POSTERIOR CRANIAL BASE  S–Ar', 540, 1552, { size: 32, weight: 700, color: COL.base, alpha: a2 });
-      this.text(x, 'заднее основание черепа', 540, 1592, { size: 25, weight: 500, color: COL.dim, alpha: a2 });
+      if (LANG !== 'en') this.text(x, 'заднее основание черепа', 540, 1592, { size: 25, weight: 500, color: COL.dim, alpha: a2 });
     }
     // ---- 05 gonial angle and its split by Go–N
     const s5 = win(t, 23.3, 31.1, 0.5, 0.35) * fade;
@@ -403,7 +405,7 @@ export class Film {
         this.text(x, `ref ${ref}`, 1010, y, { size: 23, weight: 500, color: COL.dim, alpha: g * 0.9, align: 'right' });
       });
       // ramus comparison: short vs long ramus as morphological variants
-      const rd = win(t, 44.0, 48.1, 0.4, 0.4) * in7;
+      const rd = win(t, RAM_KEYS[0][0], RAM_KEYS[5][0] + 0.1, 0.4, 0.4) * in7;
       if (rd > 0) {
         this.polyline(x, this.outline(d, c0), { color: '#ffffff', width: 2, alpha: rd * 0.55, dash: [7, 7] });
         this.polyline(x, this.outline(d, c), { color: COL.ramus, width: 2.5, alpha: rd * 0.85 });
@@ -517,7 +519,7 @@ export class Film {
     if (q > 0) {
       this.text(x, 'WHICH CEPH ANALYSIS', 540, 640, { size: 56, weight: 700, alpha: smooth((t - T.which + 0.1) / 0.4) * q });
       this.text(x, 'DO YOU USE MOST?', 540, 712, { size: 56, weight: 700, alpha: smooth((t - T.which - 0.15) / 0.4) * q });
-      this.text(x, 'Какой анализ ТРГ вы используете чаще всего?', 540, 780, { size: 28, weight: 500, color: COL.dim, alpha: smooth((t - T.which - 0.3) / 0.4) * q });
+      if (LANG !== 'en') this.text(x, 'Какой анализ ТРГ вы используете чаще всего?', 540, 780, { size: 28, weight: 500, color: COL.dim, alpha: smooth((t - T.which - 0.3) / 0.4) * q });
       ['JARABAK?', 'STEINER?', 'McNAMARA?'].forEach((s, i) => {
         const ga = smooth((t - (T.trg + i * 0.45)) / 0.35) * q, rise = (1 - easeOut((t - (T.trg + i * 0.45)) / 0.5)) * 24;
         const y = 900 + i * 112 + rise, w = 420, h = 84;
@@ -533,7 +535,8 @@ export class Film {
   }
 
   // ---------------------------------------------------------------- optional Russian subtitles (off in the exports)
-  drawSubtitle(x, t) {
+  drawSubtitle(x) {
+    const t = this.tOut;
     for (const v of VOICE) {
       if (t < v.start || t > v.start + v.dur + 0.2) continue;
       const a = Math.min(smooth((t - v.start) / 0.2), smooth((v.start + v.dur + 0.2 - t) / 0.2));

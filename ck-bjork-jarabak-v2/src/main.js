@@ -1,15 +1,15 @@
 // Player: Play / Pause / Restart, scrubbing, sound, audio import, WebM recording (MediaRecorder,
 // with sound), frame-accurate MP4 export (WebCodecs H.264 + AAC + mp4-muxer), headless render API.
 import { Film } from './film.js';
-import { SCENES, DURATION, FPS } from './timeline.js';
-import { VOICE } from './voice.js';
+import { SCENES, FPS } from './timeline.js';
+import { LANG, DURATION_OUT as DURATION, unwarp } from './lang.js';
 
 const q = new URLSearchParams(location.search);
 const RENDER = q.has('render');
 const film = new Film();
 film.subtitles = q.has('subs');
 const $ = (id) => document.getElementById(id);
-const NAME = 'CK_BIOMECHANICS_BJORK_JARABAK_V2';
+const NAME = 'CK_BIOMECHANICS_BJORK_JARABAK_V2' + (LANG === 'en' ? '_EN' : '');
 
 $('stage').appendChild(film.out);
 if (RENDER) document.body.classList.add('render');
@@ -22,6 +22,7 @@ $('loading')?.remove();
 if (!RENDER) {
   let playing = false, t = +(q.get('t') || 0), last = 0, recording = null;
   const audio = $('audio');
+  if (LANG === 'en') { audio.src = 'assets/audio/mix_en.m4a'; document.documentElement.lang = 'en'; }
   const scrub = $('scrub'), time = $('time');
   // subtitle durations from the actual clips
 
@@ -52,7 +53,7 @@ if (!RENDER) {
     if (e.code === 'ArrowRight') { t = Math.min(DURATION - 1e-3, t + (e.shiftKey ? 1 : 1 / FPS)); draw(); syncAudio(true); }
     if (e.code === 'ArrowLeft') { t = Math.max(0, t - (e.shiftKey ? 1 : 1 / FPS)); draw(); syncAudio(true); }
   });
-  SCENES.forEach((s) => { const b = document.createElement('button'); b.textContent = `${s.id} ${s.name}`; b.onclick = () => { t = s.t0; draw(); syncAudio(true); }; $('scenes').appendChild(b); });
+  SCENES.forEach((s) => { const b = document.createElement('button'); b.textContent = `${s.id} ${s.name}`; b.onclick = () => { t = unwarp(s.t0); draw(); syncAudio(true); }; $('scenes').appendChild(b); });
   $('sound').onclick = () => { audio.muted = !audio.muted; $('sound').textContent = audio.muted ? '🔇 Звук выкл.' : '🔊 Звук вкл.'; syncAudio(true); };
   $('subs').onclick = () => { film.subtitles = !film.subtitles; $('subs').textContent = film.subtitles ? '💬 Субтитры вкл.' : '💬 Субтитры выкл.'; draw(); };
   $('audioFile').onchange = (e) => {

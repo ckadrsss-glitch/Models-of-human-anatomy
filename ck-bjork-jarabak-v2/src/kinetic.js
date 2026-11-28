@@ -6,6 +6,7 @@
 //  Places: 'top' (y 288, under the brand line), 'bottom' (y 1566), or explicit y.
 // ============================================================================
 import { T, smooth, easeOut, clamp01 } from './timeline.js';
+import { LANG } from './lang.js';
 
 export const KEYWORDS = [
   // 01 hook
@@ -62,7 +63,7 @@ export function drawKeywords(film, x, t) {
       const size = Math.round(k.size * s.scale);
       film.text(x, k.text, 540, y, { size, weight: k.size >= 40 ? 700 : 600, color: COLOR[k.color || 'white'], alpha: s.alpha, spacing: (k.spacing ?? 2) + s.tracking, maxW: 960 });
     }
-    if (k.ru) {
+    if (k.ru && LANG !== 'en') {
       const r = envelope(t, k.ruAt, k.until);
       if (r && r.alpha > 0.003) film.text(x, k.ru, 540, (k.y ?? PLACE_Y[k.place]) + 40 + r.rise * 0.6, { size: 25, weight: 500, color: '#c9d4e6', alpha: r.alpha * 0.92, maxW: 960 });
     }

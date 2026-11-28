@@ -1,0 +1,43 @@
+1
+00:00:00,250 --> 00:00:05,326
+Same mandibular length. So why are these facial profiles so different?
+
+2
+00:00:05,776 --> 00:00:13,586
+The Björk–Jarabak analysis evaluates not only the size of the jaws, but the geometry of the facial skeleton.
+
+3
+00:00:13,986 --> 00:00:21,148
+The saddle angle describes the configuration of the cranial base, which influences the position of the mandible.
+
+4
+00:00:21,598 --> 00:00:27,969
+The articular angle reflects the orientation of the ramus relative to the posterior cranial base.
+
+5
+00:00:28,419 --> 00:00:37,695
+The gonial angle describes the relationship between the ramus and the mandibular body. Splitting it shows their orientation in more detail.
+
+6
+00:00:38,671 --> 00:00:44,719
+But here's the catch. Even the same sum of angles can hide completely different anatomy.
+
+7
+00:00:46,571 --> 00:00:57,314
+Next, we assess cranial base length, ramus height and mandibular body length. This shows which components determine the position of the mandible.
+
+8
+00:00:57,880 --> 00:01:06,090
+The ratio of posterior to anterior facial height helps assess vertical proportions and the character of the skeletal morphology.
+
+9
+00:01:07,190 --> 00:01:13,285
+A low ratio is typical of a vertical pattern. A high ratio, of a horizontal one.
+
+10
+00:01:14,421 --> 00:01:22,859
+So don't analyze isolated numbers — analyze how they relate. That is what reveals the patient's skeletal morphology.
+
+11
+00:01:23,485 --> 00:01:27,495
+Which cephalometric analysis do you use most often?

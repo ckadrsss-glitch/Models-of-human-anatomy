@@ -204,7 +204,7 @@ export class Film {
   // ------------------------------------------------------------------ overlay
   drawOverlay(x, t, st) {
     const fade = st.alpha;
-    if (t < 6.2) this.scene01(x, t, st);
+    if (t < 6.2 && st.skulls.some((s) => s.role === 'B')) this.scene01(x, t, st);
     if (t >= 4.9 && t < 31.3) this.scenesSingle(x, t, st, fade);
     if (t >= 31.2 && t < 39.1) this.scene06(x, t, st, fade);
     if (t >= 39.0 && t < 56.7) this.scenes0708(x, t, st, fade);

@@ -35,7 +35,7 @@
 ## Звук
 
 * `assets/audio/voiceover.m4a` — дорожка голоса (80 с), `assets/audio/music.m4a` — музыкальная подложка с акцентами,
-  `assets/audio/mix.m4a` — финальный микс (−15.7 LUFS, true peak −1.6 dBTP), подложка приглушается под голосом.
+  `assets/audio/mix.m4a` — финальный микс (−15.9 LUFS, true peak −1.5 dBTP), подложка приглушается под голосом.
 * Музыка — процедурная («cinematic scientific ambient»): пэды Dm9 → B♭maj7 → Dm9 → Fmaj9 → Gm9 → Dm9, саб, воздух,
   мягкая пульсация в сценах 07–10; без вокала и ударных. Акценты: тики точек, свипы линий и дуг, колокольчики чисел,
   райзер к SAME SUM и мягкие низкие удары на SAME SUM и DIFFERENT ANATOMY.

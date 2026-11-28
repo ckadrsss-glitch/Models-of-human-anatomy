@@ -128,6 +128,13 @@ sweep(T.post8, 0.6, 400, 800, 0.012); sweep(T.ant8, 0.6, 450, 900, 0.012); chime
 impact(T.rel, 0.09);
 [0, 0.45, 0.9].forEach((d) => tick(T.trg + d, 1174.7, 0.035));
 tick(77.65, 440, 0.06); tick(77.67, 659.25, 0.045); tick(78.25, 880, 0.04);
+// outro: soft D-major-add9 swell under the logo (fades to the end)
+for (let i = Math.floor(77.2 * SR); i < N; i++) {
+  const t = i / SR, g = sm((t - 77.2) / 0.8) * (1 - sm((t - 78.6) / 1.4)) * 0.05;
+  let s = 0; [146.83, 220, 293.66, 369.99, 440].forEach((f, k) => { s += Math.sin(2 * Math.PI * f * t + k) * (k ? 0.6 : 1); });
+  L[i] += s * g; R[i] += s * g * 0.96;
+}
+chime(77.65, 587.33, 0.08); chime(78.25, 880, 0.06);
 // ---- write masters
 function wav(path, Lc, Rc) {
   const n = Lc.length, buf = Buffer.alloc(44 + n * 4);
@@ -148,11 +155,11 @@ else {
   ff([...ins, '-filter_complex', `${ch};${VOICE.map((_, i) => `[v${i}]`).join('')}amix=inputs=${VOICE.length}:normalize=0,apad,atrim=0:${DUR}[vo]`, '-map', '[vo]', 'build/voiceover.wav']);
 }
 ff(['-i', 'build/voiceover.wav', '-i', 'build/music.wav', '-filter_complex',
-  '[0:a]loudnorm=I=-15:TP=-2:LRA=9,asplit=2[vo][sc];[1:a]loudnorm=I=-25:TP=-5:LRA=12[bed];' +
+  '[0:a]apad=pad_dur=4,loudnorm=I=-15:TP=-2:LRA=9,asplit=2[vo][sc];[1:a]apad=pad_dur=4,loudnorm=I=-25:TP=-5:LRA=12[bed];' +
   '[bed][sc]sidechaincompress=threshold=0.035:ratio=5:attack=20:release=380[duck];' +
-  `[vo][duck]amix=inputs=2:normalize=0:duration=longest,loudnorm=I=-15:TP=-1.5:LRA=11,apad,atrim=0:${DUR}[out]`,
+  `[vo][duck]amix=inputs=2:normalize=0:duration=longest,apad=pad_dur=4,loudnorm=I=-15:TP=-1.5:LRA=11,apad,atrim=0:${DUR}[out]`,
   '-map', '[out]', '-ar', '48000', 'build/mix.wav']);
-ff(['-i', 'build/music.wav', '-af', 'loudnorm=I=-25:TP=-5', '-c:a', 'aac', '-b:a', '192k', 'assets/audio/music.m4a']);
+ff(['-i', 'build/music.wav', '-af', `apad=pad_dur=4,loudnorm=I=-25:TP=-5,atrim=0:${DUR}`, '-c:a', 'aac', '-b:a', '192k', 'assets/audio/music.m4a']);
 ff(['-i', 'build/voiceover.wav', '-c:a', 'aac', '-b:a', '192k', 'assets/audio/voiceover.m4a']);
 ff(['-i', 'build/mix.wav', '-c:a', 'aac', '-b:a', '192k', 'assets/audio/mix.m4a']);
 console.log('assets/audio/{music,voiceover,mix}.m4a');

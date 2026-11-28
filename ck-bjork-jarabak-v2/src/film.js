@@ -337,7 +337,7 @@ export class Film {
         this.text(x, 'LOWER GONIAL ANGLE', 70, 1528, { size: 30, weight: 700, color: COL.lower, alpha: rowL, align: 'left' });
         this.text(x, `N–Go–Me   ${r1(c.lowerGonial)}°   · ref 70–75°`, 70, 1566, { size: 27, weight: 600, alpha: rowL, align: 'left' });
         const eq = s5 * smooth((t - (T.detail + 0.9)) / 0.5);
-        this.text(x, `${r1(c.upperGonial)}° + ${r1(c.lowerGonial)}° = ${r1(c.gonial)}°`, 700, 1446, { size: 30, weight: 700, color: '#ffffff', alpha: eq, align: 'left' });
+        this.text(x, `${r1(c.upperGonial)}° + ${r1(c.lowerGonial)}° = ${r1(c.gonial)}°`, 540, 1614, { size: 30, weight: 700, color: '#ffffff', alpha: eq });
       }
     }
   }

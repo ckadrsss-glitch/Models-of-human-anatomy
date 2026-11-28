@@ -204,12 +204,14 @@ export class Film {
   // ------------------------------------------------------------------ overlay
   drawOverlay(x, t, st) {
     const fade = st.alpha;
-    if (t < 6.2 && st.skulls.some((s) => s.role === 'B')) this.scene01(x, t, st);
-    if (t >= 4.9 && t < 31.3) this.scenesSingle(x, t, st, fade);
-    if (t >= 31.2 && t < 39.1) this.scene06(x, t, st, fade);
-    if (t >= 39.0 && t < 56.7) this.scenes0708(x, t, st, fade);
-    if (t >= 56.6 && t < 63.5) this.scene09(x, t, st, fade);
-    if (t >= 63.4) this.scene1011(x, t, st, fade);
+    const has = (r) => st.skulls.some((s) => s.role === r);
+    const trio = st.skulls.length && st.skulls.every((s) => s.role.startsWith('trio'));
+    if (t < 6.2 && has('B') && (has('A') || has('single'))) this.scene01(x, t, st);
+    if (t >= 4.9 && t < 31.3 && has('single')) this.scenesSingle(x, t, st, fade);
+    if (t >= 31.2 && t < 39.1 && has('A') && has('B') && !has('single')) this.scene06(x, t, st, fade);
+    if (t >= 39.0 && t < 56.7 && has('single')) this.scenes0708(x, t, st, fade);
+    if (t >= 56.6 && t < 63.5 && trio) this.scene09(x, t, st, fade);
+    if (t >= 63.4 && has('A') && has('B')) this.scene1011(x, t, st, fade);
     drawKeywords(this, x, t);
   }
 

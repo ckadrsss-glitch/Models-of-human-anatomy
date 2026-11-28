@@ -12,6 +12,7 @@
 // ============================================================================
 import { VOICE } from './voice.js';
 import { wordTime } from './words.js';
+import { LANG } from './lang.js';
 export { VOICE };
 
 export const DURATION = 60;
@@ -76,7 +77,13 @@ export const ramp = (t, a, b, ease = easeInOut) => ease((t - a) / (b - a));
 export const win = (t, a, b, fi = 0.5, fo = 0.5) => Math.min(smooth((t - a) / fi), 1 - smooth((t - (b - fo)) / fo));
 
 // ---------------------------------------------------------------- word-synchronised events (absolute s)
-const wa = (line, stem, nth = 0) => toAnim(wordTime(line, stem, nth)[0]);   // word onset in animation time
+const EN_STEM = { 'интрузировать': 'intrude', 'наклон': 'inclination', 'линия': 'line', 'где': 'where', 'центра': 'center', 'сила': 'force',
+  'впереди': 'front', 'него': 'it', 'возникает': ['incisors', 'arises'], 'тенденция': 'tend', 'вестибулярному': 'labially', 'через': 'through',
+  'центр': 'center', 'получаем': 'get', 'преимущественно': 'predominantly', 'корпусную': 'bodily', 'что': 'what', 'сместить': 'shift',
+  'позади': 'behind', 'противоположный': 'opposite', 'лингвальному': 'lingual', 'один': 'one', 'три': 'three', 'биомеханических': 'biomechanical',
+  'контролировать': 'control', 'величину': 'magnitude', 'точку': 'point', 'направление': 'direction' };
+const enStem = (line, stem) => { const e = EN_STEM[stem]; return Array.isArray(e) ? (line === 2 ? e[0] : e[1]) : e; };
+const wa = (line, stem, nth = 0) => toAnim(wordTime(line, LANG === 'en' ? enStem(line, stem) : stem, nth)[0]);   // word onset in animation time
 export const W = {
   // 01 hook / 02 appliance build: the V3 animation beats are kept as they are (animation time)
   tilt1: 0.905, fwd1: 1.462, down1: 3.261,

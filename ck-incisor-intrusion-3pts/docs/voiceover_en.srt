@@ -1,0 +1,31 @@
+1
+00:00:00,150 --> 00:00:03,865
+Do you know how to intrude the lower incisors without changing their inclination?
+
+2
+00:00:04,400 --> 00:00:08,905
+It all depends on where the line of action of the force passes relative to the center of resistance.
+
+3
+00:00:15,300 --> 00:00:18,969
+If the force passes in front of it, the incisors tend to tip labially.
+
+4
+00:00:25,900 --> 00:00:31,008
+If the line of action passes through the center of resistance, we get predominantly bodily intrusion.
+
+5
+00:00:33,100 --> 00:00:37,001
+But what happens if we shift the line of action behind the center of resistance?
+
+6
+00:00:37,750 --> 00:00:41,419
+An opposite moment arises, promoting lingual tipping of the crowns.
+
+7
+00:00:46,000 --> 00:00:50,272
+One cantilever. Three lines of action. Three different biomechanical effects.
+
+8
+00:00:51,550 --> 00:00:57,494
+That's why it's important to control not only the magnitude of the force, but also its point of application and direction.

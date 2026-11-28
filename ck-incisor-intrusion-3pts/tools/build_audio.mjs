@@ -11,6 +11,8 @@
 import fs from 'fs';
 import { execFileSync } from 'child_process';
 import { VOICE } from '../src/voice.js';
+import { LANG } from '../src/lang.js';
+const SFX_ = LANG === 'en' ? '_en' : '';
 import { DURATION, OUTRO_T0 as OUTRO_A, S as S_A, W as W_A, toOut } from '../src/timeline.js';
 // V4: the animation is authored in animation time and played through WARP — every sound event is placed in OUTPUT time
 const mapT = (v) => (Array.isArray(v) ? v.map(mapT) : typeof v === 'number' ? toOut(v) : v);
@@ -211,5 +213,5 @@ ff(['-i', 'build/voiceover.wav', '-i', 'build/music.wav', '-i', 'build/sfx.wav',
   '[bed][sc]sidechaincompress=threshold=0.025:ratio=6:attack=12:release=380[duck];' +
   `[vo][duck]amix=inputs=2:normalize=0:duration=longest,loudnorm=I=-15:TP=-1.5:LRA=11,apad,atrim=0:${DURATION}[out]`,
   '-map', '[out]', '-ar', '48000', 'build/mix.wav']);
-for (const n of ['music', 'sfx', 'voiceover', 'mix']) ff(['-i', `build/${n}.wav`, '-c:a', 'aac', '-b:a', '160k', `assets/audio/${n}.m4a`]);
+for (const n of ['music', 'sfx', 'voiceover', 'mix']) ff(['-i', `build/${n}.wav`, '-c:a', 'aac', '-b:a', '160k', `assets/audio/${n}${SFX_}.m4a`]);
 console.log('assets/audio/{music,sfx,voiceover,mix}.m4a');

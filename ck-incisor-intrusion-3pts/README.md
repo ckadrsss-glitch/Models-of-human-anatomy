@@ -23,6 +23,7 @@ C — дальше дистально) и три результата: интр�
 | | |
 |---|---|
 | Итоговое видео (V5) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V5_FINAL.mp4` |
+| English version (V5 EN) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_V5_FINAL_EN.mp4` — [docs/VOICEOVER_EN.md](docs/VOICEOVER_EN.md) |
 | Предыдущие версии | `export/…_V4_FINAL.mp4`, `export/…_V3_FINAL.mp4`, `export/…_FINAL.mp4` (не изменялись) |
 | Предыдущая версия (V2) | `export/CK_BIOMECHANICS_Incisor_Intrusion_Three_Points_FINAL.mp4` (не изменена) |
 | Научные источники и система сил | [SCIENTIFIC_REFERENCES.md](SCIENTIFIC_REFERENCES.md) |

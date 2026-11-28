@@ -1,7 +1,7 @@
 // DOUBLE CANTILEVER edit — soundtrack of CK_BIOMECHANICS_Molar_Uprighting_Double_Cantilever_FINAL (63.3 s).
 // Same procedural music and sound design as tools/build_audio.mjs; everything before 40.5 s is identical,
 // the scene-06 music is time-stretched over the longer new scene, events after it are shifted by EDIT.d,
-// the miniscrew sounds are replaced by the second-cantilever sounds. Output: assets/audio/*_dc.m4a
+// the miniscrew sounds are replaced by the second-cantilever sounds. Output: assets/audio/*_dc.m4a (EN=1: *_dc_en.m4a)
 // Soundtrack builder (licence-free, procedural, synchronised to src/timeline.js):
 //  1. music bed — minimal cinematic / technological: soft pad (Dm9 → B♭maj7 → Gm9 → A7sus → Dm(add9)),
 //     muted pulse (100 BPM) entering with the design scene, sub on downbeats, a riser into
@@ -16,7 +16,9 @@ import fs from 'fs';
 import { execFileSync } from 'child_process';
 import { DURATION as DUR0, OUTRO_T0 as OUT0, S, W as W0 } from '../src/timeline.js';
 import { VOICE_DC, DURATION_DC, EDIT, DS, W6 } from '../src/dc.js';
-const VOICE = VOICE_DC, D = EDIT.d, DURATION = DURATION_DC, OUTRO_T0 = OUT0 + D;
+import { VOICE_EN, W6_EN } from '../src/voice_en.js';
+const EN = !!process.env.EN, SUF = EN ? '_dc_en' : '_dc';                  // EN=1 → English narration (assets/audio/*_dc_en.m4a)
+const VOICE = EN ? VOICE_EN : VOICE_DC, D = EDIT.d, DURATION = DURATION_DC, OUTRO_T0 = OUT0 + D;
 // old-timeline word events after scene 06 move by D
 const W = { ...W0, question: W0.question + D };
 // musical time: identical before 40.5 s, scene 06 stretched over the new scene, then shifted
@@ -197,7 +199,7 @@ for (let i = Math.floor((56.0 + D) * SR); i < Math.floor((OUTRO_T0 + 0.6) * SR);
   const t = i / SR, u = (t - 56.0 - D) / (OUTRO_T0 + 0.6 - 56.0 - D), e = Math.sin(Math.PI * u) * 0.018;
   add(XL, XR, i, (Math.sin(2 * Math.PI * 146.83 * t) + 0.5 * Math.sin(2 * Math.PI * 220 * t) + 0.3 * Math.sin(2 * Math.PI * 293.66 * t)) * e);
 }
-KEYWORDS.filter((k) => k.at < 40 || k.at > 51).map((k) => (k.at > 51 ? k.at + D : k.at)).concat([W6.second, DS.v2[0], W6.compensate, W6.control])
+KEYWORDS.filter((k) => k.at < 40 || k.at > 51).map((k) => (k.at > 51 ? k.at + D : k.at)).concat(EN ? [W6_EN.cantilever, DS.v2[0], W6_EN.compensate, W6_EN.control] : [W6.second, DS.v2[0], W6.compensate, W6.control])
   .forEach((t) => tone(Math.max(0.02, t - 0.04), 1975.5, 0.25, 0.006, 16));   // very soft tick under each keyword
 // outro (logo): chime on the circle, second on BIOMECHANICS
 tone(OUTRO_T0 + 0.55, 440, 2.4, 0.05, 1.6); tone(OUTRO_T0 + 0.57, 659.25, 2.4, 0.04, 1.6); tone(OUTRO_T0 + 1.15, 880, 1.8, 0.035, 1.8);
@@ -212,17 +214,17 @@ function wav(path, Lc, Rc) {
   fs.writeFileSync(path, buf);
 }
 fs.mkdirSync('build', { recursive: true }); fs.mkdirSync('assets/audio', { recursive: true });
-wav('build/music_dc.wav', ML, MR); wav('build/sfx_dc.wav', XL, XR);
+wav(`build/music${SUF}.wav`, ML, MR); wav(`build/sfx${SUF}.wav`, XL, XR);
 const ff = (args) => execFileSync('ffmpeg', ['-y', '-v', 'error', ...args]);
 const ins = VOICE.flatMap((v) => ['-i', v.file]);
 const chains = VOICE.map((v, i) => `[${i}:a]aresample=48000,aformat=channel_layouts=stereo,adelay=${Math.round(v.start * 1000)}|${Math.round(v.start * 1000)}[v${i}]`).join(';');
-ff([...ins, '-filter_complex', `${chains};${VOICE.map((_, i) => `[v${i}]`).join('')}amix=inputs=${VOICE.length}:normalize=0,apad,atrim=0:${DURATION}[vo]`, '-map', '[vo]', 'build/voiceover_dc.wav']);
-ff(['-i', 'build/voiceover_dc.wav', '-i', 'build/music_dc.wav', '-i', 'build/sfx_dc.wav', '-filter_complex',
+ff([...ins, '-filter_complex', `${chains};${VOICE.map((_, i) => `[v${i}]`).join('')}amix=inputs=${VOICE.length}:normalize=0,apad,atrim=0:${DURATION}[vo]`, '-map', '[vo]', `build/voiceover${SUF}.wav`]);
+ff(['-i', `build/voiceover${SUF}.wav`, '-i', `build/music${SUF}.wav`, '-i', `build/sfx${SUF}.wav`, '-filter_complex',
   `[0:a]loudnorm=I=-15:TP=-2:LRA=9,apad,atrim=0:${DURATION},asplit=2[vo][sc];` +
   '[1:a]loudnorm=I=-27:TP=-8:LRA=11[mu];[2:a]loudnorm=I=-24:TP=-5:LRA=14[fx];' +
   `[mu][fx]amix=inputs=2:normalize=0,apad,atrim=0:${DURATION}[bed];` +
   '[bed][sc]sidechaincompress=threshold=0.025:ratio=6:attack=12:release=380[duck];' +
   `[vo][duck]amix=inputs=2:normalize=0:duration=longest,loudnorm=I=-15:TP=-1.5:LRA=11,apad,atrim=0:${DURATION}[out]`,
-  '-map', '[out]', '-ar', '48000', 'build/mix_dc.wav']);
-for (const n of ['music', 'sfx', 'voiceover', 'mix']) ff(['-i', `build/${n}_dc.wav`, '-c:a', 'aac', '-b:a', '160k', `assets/audio/${n}_dc.m4a`]);
-console.log('assets/audio/{music,sfx,voiceover,mix}_dc.m4a');
+  '-map', '[out]', '-ar', '48000', `build/mix${SUF}.wav`]);
+for (const n of ['music', 'sfx', 'voiceover', 'mix']) ff(['-i', `build/${n}${SUF}.wav`, '-c:a', 'aac', '-b:a', '160k', `assets/audio/${n}${SUF}.m4a`]);
+console.log(`assets/audio/{music,sfx,voiceover,mix}${SUF}.m4a`);

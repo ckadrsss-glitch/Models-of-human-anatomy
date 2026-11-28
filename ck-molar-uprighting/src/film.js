@@ -14,8 +14,9 @@ import { SCENE } from './scene.js';
 import { KEYWORDS, keywordState, kickerState, focusLevel } from './kinetic.js';
 import { solveDesign, centreLine } from './wire.js';
 import { bracketGeometry, tubeGeometry, sweepRect, resample, screwGeometry, roundedBox } from './geom.js';
-import { EDIT, DURATION_DC, DS, W6, SUBS_DC, DELTA2, dcGeometry, forceSystemDC } from './dc.js';
+import { EDIT, DURATION_DC, DS, W6 as W6R, SUBS_DC, DELTA2, dcGeometry, forceSystemDC } from './dc.js';
 import { solve3, centreLine3, toLocal3, toWorld3 } from './wire3.js';
+import { SUBS_EN, W6_EN } from './voice_en.js';
 import { CAMERA } from './timeline.js';
 
 const W = BRAND.width, H = BRAND.height;
@@ -680,7 +681,7 @@ export class Film {
     }
     // 6: resulting moments — kept after the vertical compensation
     const aM = win(t, DS.moments[0], end, 0.4, 0.5);
-    const pulse = 1 + 0.35 * win(t, W6.moment - 0.1, W6.moment + 0.9, 0.2, 0.5);
+    const Wm = (this.lang === 'en' ? W6_EN : W6R).moment, pulse = 1 + 0.35 * win(t, Wm - 0.1, Wm + 0.9, 0.2, 0.5);
     if (aM > 0.01) {
       this.moment3(x, crNow, 8, 205, 335, { alpha: aM, progress: easeOut((t - DS.moments[0]) / 0.6), width: (8 + 2 * (pulse - 1) * 3) });
       const lp = this.proj(V.add(crNow, [3, -10.5, 0]));
@@ -712,9 +713,10 @@ export class Film {
   }
 
   drawKeywordsDC(x, t) {
+    const W6 = this.lang === 'en' ? W6_EN : W6R;
     const KWS = [
       { text: 'DOUBLE CANTILEVER', at: W6.second, hold: 1.7, color: 'green', dir: [1, 0], size: 76, kicker: 'ANOTHER WAY', kickerAt: W6.other },
-      { text: 'INTRUSIVE FORCE', at: DS.v2[0], hold: 1.0, color: 'green', dir: [0, 1], size: 76, kicker: 'CANTILEVER 2 → CANTILEVER 1 → 47', kickerAt: DS.v2[0] },
+      { text: 'INTRUSIVE FORCE', at: DS.v2[0], hold: this.lang === 'en' ? Math.max(0.15, W6.compensate - DS.v2[0] - 0.45) : 1.0, color: 'green', dir: [0, 1], size: 76, kicker: 'CANTILEVER 2 → CANTILEVER 1 → 47', kickerAt: DS.v2[0] },
       { text: 'FORCE BALANCE', at: W6.compensate, hold: 2.4, color: 'white', dir: [0, -1], size: 84 },
       { text: 'CONTROLLED UPRIGHTING', at: W6.control, hold: 2.1, color: 'green', dir: [-1, 0], size: 64 },
     ];
@@ -1066,7 +1068,7 @@ export class Film {
   }
 
   drawSubtitle(x, t) {
-    const cue = (this.dc ? SUBS_DC : SUBS).find((c) => t >= c[0] && t < c[1]);
+    const cue = (this.lang === 'en' ? SUBS_EN : this.dc ? SUBS_DC : SUBS).find((c) => t >= c[0] && t < c[1]);
     if (!cue || t >= OUTRO_T0 + (this.dc ? EDIT.d : 0)) return;
     const a = Math.min(smooth((t - cue[0]) / 0.15), smooth((cue[1] - t) / 0.15));
     x.save(); x.font = `600 40px ${F}`;

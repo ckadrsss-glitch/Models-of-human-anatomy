@@ -9,6 +9,7 @@
 |---|---|
 | Итоговое видео | `export/CK_BIOMECHANICS_Molar_Uprighting_FINAL.mp4` |
 | Версия DOUBLE CANTILEVER | `export/CK_BIOMECHANICS_Molar_Uprighting_Double_Cantilever_FINAL.mp4` (63,3 с) — сцена 06 с двумя кантилеверами вместо мини-винта, см. [docs/DOUBLE_CANTILEVER_EDIT.md](docs/DOUBLE_CANTILEVER_EDIT.md); плеер `index.html?dc=1` |
+| English version | `export/CK_BIOMECHANICS_Molar_Uprighting_Double_Cantilever_EN.mp4` — same film with English narration and subtitles, see [docs/ENGLISH_VERSION.md](docs/ENGLISH_VERSION.md); player `index.html?dc=1&lang=en` |
 | Научные источники и система сил | [SCIENTIFIC_REFERENCES.md](SCIENTIFIC_REFERENCES.md) |
 | Текст озвучки и синхронизация | [docs/VOICEOVER_RU.md](docs/VOICEOVER_RU.md), SRT: [docs/voiceover_ru.srt](docs/voiceover_ru.srt), [docs/subtitles_ru.srt](docs/subtitles_ru.srt) |
 | Сценарий по таймкодам | [docs/SCRIPT.md](docs/SCRIPT.md) |

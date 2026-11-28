@@ -8,13 +8,14 @@ import { DURATION_DC } from './dc.js';
 const q = new URLSearchParams(location.search);
 const RENDER = q.has('render');
 const film = new Film();
-film.dc = q.has('dc');                 // DOUBLE CANTILEVER edit (src/dc.js); without ?dc the original film
+film.dc = q.has('dc');
+film.lang = q.get('lang') === 'en' ? 'en' : 'ru';          // English narration/subtitles (src/voice_en.js)                 // DOUBLE CANTILEVER edit (src/dc.js); without ?dc the original film
 film.subtitles = q.get('subs') !== '0';
 film.setLook((q.get('look') || 'B').toUpperCase());
 const $ = (id) => document.getElementById(id);
-const NAME = film.dc ? 'CK_BIOMECHANICS_Molar_Uprighting_Double_Cantilever_FINAL' : 'CK_BIOMECHANICS_Molar_Uprighting_FINAL';
+const NAME = film.dc ? (film.lang === 'en' ? 'CK_BIOMECHANICS_Molar_Uprighting_Double_Cantilever_EN' : 'CK_BIOMECHANICS_Molar_Uprighting_Double_Cantilever_FINAL') : 'CK_BIOMECHANICS_Molar_Uprighting_FINAL';
 const DUR = film.dc ? DURATION_DC : DURATION;
-if (film.dc) document.getElementById('audio')?.setAttribute('src', 'assets/audio/mix_dc.m4a');
+if (film.dc) document.getElementById('audio')?.setAttribute('src', film.lang === 'en' ? 'assets/audio/mix_dc_en.m4a' : 'assets/audio/mix_dc.m4a');
 
 $('stage').appendChild(film.out);
 if (RENDER) document.body.classList.add('render');

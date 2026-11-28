@@ -1,0 +1,408 @@
+{
+ "vertices": 79682,
+ "triangles": 159215,
+ "units": "mm",
+ "up": "+Y",
+ "front": "+Z",
+ "source": "Z-Anatomy (CC BY-SA 4.0), derived from BodyParts3D (c) DBCLS (CC BY-SA 2.1 JP)",
+ "bbox": [
+  [
+   -74.39018249511719,
+   -104.5787353515625,
+   -101.82342529296875
+  ],
+  [
+   74.28561401367188,
+   104.5787353515625,
+   101.82342529296875
+  ]
+ ],
+ "objects": [
+  [
+   "Frontal bone",
+   0,
+   0,
+   3902
+  ],
+  [
+   "Occipital bone",
+   0,
+   3902,
+   3757
+  ],
+  [
+   "Sphenoid bone",
+   0,
+   7659,
+   3650
+  ],
+  [
+   "Ethmoid bone",
+   0,
+   11309,
+   5082
+  ],
+  [
+   "Vomer",
+   0,
+   16391,
+   514
+  ],
+  [
+   "Parietal bone.l",
+   0,
+   16905,
+   3443
+  ],
+  [
+   "Parietal bone.r",
+   0,
+   20348,
+   3386
+  ],
+  [
+   "Temporal bone.l",
+   0,
+   23734,
+   7051
+  ],
+  [
+   "Temporal bone.r",
+   0,
+   30785,
+   7051
+  ],
+  [
+   "Zygomatic bone.l",
+   0,
+   37836,
+   666
+  ],
+  [
+   "Zygomatic bone.r",
+   0,
+   38502,
+   666
+  ],
+  [
+   "Nasal bone.l",
+   0,
+   39168,
+   148
+  ],
+  [
+   "Nasal bone.r",
+   0,
+   39316,
+   148
+  ],
+  [
+   "Lacrimal bone.l",
+   0,
+   39464,
+   296
+  ],
+  [
+   "Lacrimal bone.r",
+   0,
+   39760,
+   296
+  ],
+  [
+   "Palatine bone.l",
+   0,
+   40056,
+   732
+  ],
+  [
+   "Palatine bone.r",
+   0,
+   40788,
+   732
+  ],
+  [
+   "Inferior nasal concha bone.l",
+   0,
+   41520,
+   238
+  ],
+  [
+   "Inferior nasal concha bone.r",
+   0,
+   41758,
+   238
+  ],
+  [
+   "Maxilla.l",
+   0,
+   41996,
+   2399
+  ],
+  [
+   "Maxilla.r",
+   0,
+   44395,
+   2399
+  ],
+  [
+   "Mandible",
+   1,
+   46794,
+   9388
+  ],
+  [
+   "Upper medial incisor.l",
+   2,
+   56182,
+   686
+  ],
+  [
+   "Upper lateral incisor.l",
+   2,
+   56868,
+   729
+  ],
+  [
+   "Upper canine.l",
+   2,
+   57597,
+   737
+  ],
+  [
+   "Upper first premolar.l",
+   2,
+   58334,
+   844
+  ],
+  [
+   "Upper second premolar.l",
+   2,
+   59178,
+   779
+  ],
+  [
+   "Upper first molar tooth.l",
+   2,
+   59957,
+   1090
+  ],
+  [
+   "Upper second molar tooth.l",
+   2,
+   61047,
+   924
+  ],
+  [
+   "Upper medial incisor.r",
+   2,
+   61971,
+   686
+  ],
+  [
+   "Upper lateral incisor.r",
+   2,
+   62657,
+   729
+  ],
+  [
+   "Upper canine.r",
+   2,
+   63386,
+   737
+  ],
+  [
+   "Upper first premolar.r",
+   2,
+   64123,
+   844
+  ],
+  [
+   "Upper second premolar.r",
+   2,
+   64967,
+   779
+  ],
+  [
+   "Upper first molar tooth.r",
+   2,
+   65746,
+   1090
+  ],
+  [
+   "Upper second molar tooth.r",
+   2,
+   66836,
+   924
+  ],
+  [
+   "Lower medial incisor.l",
+   3,
+   67760,
+   494
+  ],
+  [
+   "Lower lateral incisor.l",
+   3,
+   68254,
+   522
+  ],
+  [
+   "Lower canine.l",
+   3,
+   68776,
+   640
+  ],
+  [
+   "Lower first premolar.l",
+   3,
+   69416,
+   613
+  ],
+  [
+   "Lower second premolar.l",
+   3,
+   70029,
+   592
+  ],
+  [
+   "Lower first molar tooth.l",
+   3,
+   70621,
+   2260
+  ],
+  [
+   "Lower second molar tooth.l",
+   3,
+   72881,
+   840
+  ],
+  [
+   "Lower medial incisor.r",
+   3,
+   73721,
+   494
+  ],
+  [
+   "Lower lateral incisor.r",
+   3,
+   74215,
+   522
+  ],
+  [
+   "Lower canine.r",
+   3,
+   74737,
+   640
+  ],
+  [
+   "Lower first premolar.r",
+   3,
+   75377,
+   613
+  ],
+  [
+   "Lower second premolar.r",
+   3,
+   75990,
+   592
+  ],
+  [
+   "Lower first molar tooth.r",
+   3,
+   76582,
+   2260
+  ],
+  [
+   "Lower second molar tooth.r",
+   3,
+   78842,
+   840
+  ]
+ ],
+ "chunks": [
+  {
+   "name": "position",
+   "offset": 0,
+   "bytes": 956184,
+   "dtype": "float32",
+   "shape": [
+    79682,
+    3
+   ]
+  },
+  {
+   "name": "normal",
+   "offset": 956184,
+   "bytes": 239046,
+   "dtype": "int8",
+   "shape": [
+    79682,
+    3
+   ]
+  },
+  {
+   "name": "ao",
+   "offset": 1195232,
+   "bytes": 79682,
+   "dtype": "uint8",
+   "shape": [
+    79682
+   ]
+  },
+  {
+   "name": "part",
+   "offset": 1274916,
+   "bytes": 79682,
+   "dtype": "uint8",
+   "shape": [
+    79682
+   ]
+  },
+  {
+   "name": "suture",
+   "offset": 1354600,
+   "bytes": 79682,
+   "dtype": "uint8",
+   "shape": [
+    79682
+   ]
+  },
+  {
+   "name": "enamel",
+   "offset": 1434284,
+   "bytes": 79682,
+   "dtype": "uint8",
+   "shape": [
+    79682
+   ]
+  },
+  {
+   "name": "rigid",
+   "offset": 1513968,
+   "bytes": 79682,
+   "dtype": "uint8",
+   "shape": [
+    79682
+   ]
+  },
+  {
+   "name": "anchor",
+   "offset": 1593652,
+   "bytes": 956184,
+   "dtype": "float32",
+   "shape": [
+    79682,
+    3
+   ]
+  },
+  {
+   "name": "index",
+   "offset": 2549836,
+   "bytes": 1910580,
+   "dtype": "uint32",
+   "shape": [
+    477645
+   ]
+  }
+ ]
+}

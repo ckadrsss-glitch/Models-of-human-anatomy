@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Björk–Jarabak Analysis V2 — CK BIOMECHANICS</title>
+<link rel="icon" href="data:,">
+<script type="importmap">{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }</script>
+<style>
+  @font-face { font-family: Montserrat; src: url(assets/fonts/montserrat-latin.woff2) format('woff2'); font-weight: 100 900; font-display: block; }
+  @font-face { font-family: Montserrat; src: url(assets/fonts/montserrat-cyrillic-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: block; unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: Inter; src: url(assets/fonts/inter-latin-500-normal.woff2) format('woff2'); font-weight: 500; font-display: block; }
+  :root { --bg: #090f1a; --panel: #142238; --line: #1d3361; --accent: #2de2d0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: #fff; font-family: Montserrat, system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+  #stage { height: min(calc(100vh - 170px), calc((100vw - 32px) * 16 / 9)); aspect-ratio: 9 / 16; max-width: 100%; position: relative; }
+  #stage canvas { width: 100%; height: 100%; display: block; border-radius: 10px; box-shadow: 0 0 0 1px #13213d; }
+  #loading { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; letter-spacing: 3px; color: #8fa3c7; }
+  .ui { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; max-width: 980px; }
+  button, label.btn { background: var(--panel); color: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font: 600 13px Montserrat, sans-serif; cursor: pointer; touch-action: manipulation; }
+  button:hover, label.btn:hover { border-color: var(--accent); }
+  label.btn input { display: none; }
+  #scrub { width: min(560px, 92vw); accent-color: var(--accent); height: 28px; }
+  #time { font: 500 13px ui-monospace, monospace; color: #a9b8d6; min-width: 120px; text-align: center; }
+  #status { font-size: 12px; color: #8fa3c7; min-height: 16px; text-align: center; }
+  #scenes button { font-weight: 500; font-size: 12px; padding: 5px 9px; }
+  @media (max-width: 600px) { #stage { height: auto; width: 100%; } button, label.btn { padding: 9px 10px; font-size: 12px; } #scenes { display: none; } }
+  body.render { padding: 0; } body.render #stage { height: 1920px; width: 1080px; } body.render #stage canvas { border-radius: 0; box-shadow: none; } body.render .ui, body.render #status { display: none; }
+</style>
+</head>
+<body>
+  <div id="stage"><div id="loading">ЗАГРУЗКА 3D-АНАТОМИИ…</div></div>
+  <div class="ui">
+    <button id="play">▶ Play</button>
+    <button id="restart">↺ Restart</button>
+    <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Таймлайн">
+    <span id="time">00:00.0 / 01:20.0</span>
+  </div>
+  <div class="ui">
+    <button id="sound">🔇 Звук выкл.</button>
+    <button id="subs">💬 Субтитры выкл.</button>
+    <label class="btn">♪ Импорт аудио<input id="audioFile" type="file" accept="audio/*"></label>
+    <button id="rec">● Запись WebM</button>
+    <button id="mp4">⬇ Экспорт MP4 (покадрово)</button>
+  </div>
+  <div class="ui" id="scenes"></div>
+  <div id="status"></div>
+  <audio id="audio" src="assets/audio/mix.m4a" preload="auto" muted></audio>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

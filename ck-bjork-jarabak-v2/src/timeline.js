@@ -1,0 +1,132 @@
+// ============================================================================
+//  Björk–Jarabak V2 — 80-second timeline. Every value is a pure function of time t,
+//  so playback, scrubbing and export render identical frames. Visual events are
+//  anchored to the spoken words (src/words.js) of the actual narration.
+// ============================================================================
+import { VOICE } from './voice.js';
+import { WORDS } from './words.js';
+import { STATES } from './states.js';
+
+export const DURATION = 80;
+export const FPS = 30;
+export const OUTRO_T0 = DURATION - 3;
+
+export const clamp01 = (x) => Math.min(1, Math.max(0, x));
+export const smooth = (x) => { const t = clamp01(x); return t * t * (3 - 2 * t); };
+export const easeOut = (x) => { const t = clamp01(x); return 1 - Math.pow(1 - t, 3); };
+export const easeInOut = (x) => { const t = clamp01(x); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+export const lerp = (a, b, t) => a + (b - a) * t;
+export const ramp = (t, a, b, ease = easeInOut) => ease((t - a) / (b - a));
+/** fade in over [a, a+fi], hold, fade out over [b-fo, b] */
+export const win = (t, a, b, fi = 0.4, fo = 0.4) => Math.min(smooth((t - a) / fi), 1 - smooth((t - (b - fo)) / fo));
+
+const norm = (s) => s.toLowerCase().replace(/[.,?!—«»]/g, '');
+/** absolute start time of the n-th word in narration line `line` (1-based) beginning with `stem` */
+export function W(line, stem, nth = 0) {
+  const ws = WORDS[line - 1].filter((x) => norm(x[0]).startsWith(stem));
+  if (!ws[nth]) throw new Error(`word ${stem} not in line ${line}`);
+  return +(VOICE[line - 1].start + ws[nth][1]).toFixed(3);
+}
+
+export const SCENES = [
+  { id: '01', name: 'Hook', t0: 0, t1: 4.9 },
+  { id: '02', name: 'Polygon', t0: 4.9, t1: 10.9 },
+  { id: '03', name: 'Saddle', t0: 10.9, t1: 17.0 },
+  { id: '04', name: 'Articular', t0: 17.0, t1: 23.0 },
+  { id: '05', name: 'Gonial', t0: 23.0, t1: 31.2 },
+  { id: '06', name: 'Rehook', t0: 31.2, t1: 39.0 },
+  { id: '07', name: 'Linear', t0: 39.0, t1: 48.4 },
+  { id: '08', name: 'Jarabak ratio', t0: 48.4, t1: 56.6 },
+  { id: '09', name: 'Patterns', t0: 56.6, t1: 63.4 },
+  { id: '10', name: 'Payoff', t0: 63.4, t1: 71.6 },
+  { id: '11', name: 'Question + outro', t0: 71.6, t1: 80 },
+];
+
+// ---------------------------------------------------------------- key word times
+export const T = {
+  same: W(1, 'одинаковая'), length: W(1, 'длина'), why: W(1, 'почему'), diff: W(1, 'разные'), prof: W(1, 'профили'),
+  bjork: W(2, 'бьёрка'), jarabak: W(2, 'джарабака'), sizes: W(2, 'размеры'), geom: W(2, 'геометрию'),
+  saddle: W(3, 'седловидный'), base3: W(3, 'основания'), affects: W(3, 'влияет'), pos3: W(3, 'положение'),
+  art: W(4, 'артикулярный'), ramus4: W(4, 'ветви'), post4: W(4, 'заднего'),
+  gon: W(5, 'гониальный'), ramus5: W(5, 'ветви'), body5: W(5, 'тела'), split: W(5, 'разделение'), detail: W(5, 'детальнее'),
+  catch: W(6, 'подвох'), even: W(6, 'даже'), sum6: W(6, 'сумма'), hide: W(6, 'скрывать'), diff6: W(6, 'разную'),
+  base7: W(7, 'основания'), ramus7: W(7, 'высоту'), body7: W(7, 'длину', 1), comp7: W(7, 'компоненты'),
+  post8: W(8, 'задней'), ant8: W(8, 'передней'), help8: W(8, 'помогает'), vert8: W(8, 'вертикальные'), morph8: W(8, 'морфологии'),
+  low9: W(9, 'низкий'), vert9: W(9, 'вертикального'), high9: W(9, 'высокий'), hor9: W(9, 'горизонтального'),
+  analyse: W(10, 'анализируйте'), numbers: W(10, 'цифры'), rel: W(10, 'взаимосвязь'), morph10: W(10, 'морфологию'),
+  which: W(11, 'какой'), trg: W(11, 'тэ-эр-гэ'), use: W(11, 'используете'),
+};
+
+// ---------------------------------------------------------------- layouts (world mm, scaled specimen)
+export const L = {
+  single: { k: 4.1, cz: 15, cy: -12 },
+  stack: { k: 2.35, cz: 10, cy: 0, dyA: 151.2, dyB: -104.1 },
+  trio: { k: 1.5, cz: 0, cy: -98, colX: [190, 540, 890] },
+};
+const trioZ = (c) => (L.trio.colX[c] - 540) / L.trio.k;
+
+export const lerpP = (A, B, u) => Object.fromEntries(Object.keys(A).map((k) => [k, lerp(A[k], B[k], u)]));
+export const ST = STATES;
+
+/** piecewise state keys: [[t, STATE], ...] with eased transitions */
+function stateKeys(t, ks) {
+  if (t <= ks[0][0]) return ks[0][1];
+  for (let i = 1; i < ks.length; i++) if (t <= ks[i][0]) return lerpP(ks[i - 1][1], ks[i][1], easeInOut((t - ks[i - 1][0]) / (ks[i][0] - ks[i - 1][0])));
+  return ks[ks.length - 1][1];
+}
+const mixCam = (A, B, u) => ({ k: Math.exp(lerp(Math.log(A.k), Math.log(B.k), u)), cz: lerp(A.cz, B.cz, u), cy: lerp(A.cy, B.cy, u) });
+
+// saddle demo / ramus demo morph keys
+export const SAD_KEYS = [[12.3, ST.REF], [13.1, ST.SAD_LO], [14.3, ST.SAD_LO], [15.2, ST.SAD_HI], [16.25, ST.SAD_HI], [16.95, ST.REF]];
+export const RAM_KEYS = [[44.0, ST.REF], [44.8, ST.RAM_S], [45.6, ST.RAM_S], [46.5, ST.RAM_L], [47.3, ST.RAM_L], [48.0, ST.REF]];
+
+/** 3D layer opacity (fade through the identical brand background at the hard cuts) */
+export function layerAlpha(t) {
+  const dip = (a) => Math.min(1, smooth(Math.abs(t - a) / 0.32));
+  let a = Math.min(dip(31.25), dip(56.65), dip(63.45));
+  if (t > 71.6) a *= lerp(1, 0.28, ramp(t, 71.6, 72.4));
+  return a;
+}
+
+export function stateAt(t) {
+  const skulls = [];
+  let cam;
+  const S1 = L.single, SK = L.stack;
+  if (t < 4.9) {                                                     // 01 hook — two skulls, same Go–Me
+    const push = ramp(t, 0, 4.9, smooth);
+    cam = { k: lerp(2.3, 2.38, push), cz: SK.cz, cy: SK.cy };
+    skulls.push({ P: ST.HYPO, z: 0, y: SK.dyA, role: 'A' }, { P: ST.HYPER, z: 0, y: SK.dyB, role: 'B' });
+  } else if (t < 31.25) {                                            // 02–05 single reference skull
+    const u = ramp(t, 4.9, 6.1);
+    const base = mixCam({ k: 2.38, cz: SK.cz, cy: SK.cy }, S1, u);
+    // gentle framing per scene: cranial base → ramus → gonial region
+    const f3 = ramp(t, 10.9, 11.8) * (1 - ramp(t, 16.6, 17.4));
+    const f4 = ramp(t, 17.0, 17.8) * (1 - ramp(t, 22.6, 23.4));
+    const f5 = ramp(t, 23.0, 23.8) * (1 - ramp(t, 30.4, 31.2));
+    cam = { k: base.k * (1 + 0.04 * (f3 + f4 + f5)), cz: base.cz + 5 * f3 - 2 * f4 + 4 * f5, cy: base.cy };
+    let P = t < 6.1 ? lerpP(ST.HYPO, ST.REF, u) : ST.REF;
+    if (t > 12 && t < 17.2) P = stateKeys(t, SAD_KEYS);
+    skulls.push({ P, z: 0, y: lerp(SK.dyA, 0, u), role: 'single' });
+    if (t < 6.1) skulls.push({ P: ST.HYPER, z: 0, y: lerp(SK.dyB, -420, u), role: 'B' });
+  } else if (t < 39.0) {                                             // 06 rehook — same sum, different anatomy
+    cam = { k: SK.k, cz: SK.cz, cy: SK.cy };
+    skulls.push({ P: ST.REF, z: 0, y: SK.dyA, role: 'A' }, { P: ST.COMP, z: 0, y: SK.dyB, role: 'B' });
+  } else if (t < 56.65) {                                            // 07–08 single reference skull
+    const u = ramp(t, 39.0, 40.0);
+    cam = mixCam({ k: SK.k, cz: SK.cz, cy: SK.cy }, S1, u);
+    const f8 = ramp(t, 48.4, 49.4);
+    cam.k *= 1 - 0.04 * f8; cam.cy += 2 * f8;
+    const P = t > 43.9 && t < 48.1 ? stateKeys(t, RAM_KEYS) : ST.REF;
+    skulls.push({ P, z: 0, y: lerp(SK.dyA, 0, u), role: 'single' });
+    if (t < 40.0) skulls.push({ P: ST.COMP, z: 0, y: lerp(SK.dyB, -420, u), role: 'B' });
+  } else if (t < 63.45) {                                            // 09 three skeletal patterns
+    cam = { k: L.trio.k, cz: L.trio.cz, cy: L.trio.cy };
+    const rise = (t0) => (1 - easeOut((t - t0) / 0.8)) * -260;      // slide up into the cell
+    const order = [[ST.HYPER, T.low9 - 0.1], [ST.REF, T.vert9 + 0.25], [ST.HYPO, T.high9 - 0.1]];
+    order.forEach(([P, t0], c) => { if (t > t0 - 0.05) skulls.push({ P, z: trioZ(c), y: rise(t0), role: 'trio' + c, appear: smooth((t - t0) / 0.5) }); });
+  } else {                                                           // 10 payoff + 11 question
+    cam = { k: SK.k, cz: SK.cz, cy: SK.cy };
+    skulls.push({ P: ST.HYPO, z: 0, y: SK.dyA, role: 'A' }, { P: ST.HYPER, z: 0, y: SK.dyB, role: 'B' });
+  }
+  return { t, cam, skulls, alpha: layerAlpha(t) };
+}

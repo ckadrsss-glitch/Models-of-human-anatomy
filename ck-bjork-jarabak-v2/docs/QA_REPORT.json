@@ -1,0 +1,454 @@
+{
+ "scale": {
+  "factor": 1.07867,
+  "sourceSN": 65.82
+ },
+ "models": {
+  "REF": {
+   "SN": 71,
+   "SAr": 33.5,
+   "ArGo": 47.55,
+   "GoMe": 71,
+   "SGo": 76.99,
+   "NMe": 120.67,
+   "ratio": 63.8,
+   "saddle": 123,
+   "articular": 143,
+   "gonial": 130,
+   "sum": 396,
+   "upperGonial": 52.69,
+   "lowerGonial": 77.31,
+   "pogAP": 50.5
+  },
+  "HYPER": {
+   "SN": 71,
+   "SAr": 33.6,
+   "ArGo": 41.45,
+   "GoMe": 71,
+   "SGo": 71.64,
+   "NMe": 127.93,
+   "ratio": 56,
+   "saddle": 123.09,
+   "articular": 145.11,
+   "gonial": 138.91,
+   "sum": 407.12,
+   "upperGonial": 53.48,
+   "lowerGonial": 85.44,
+   "pogAP": 42.15
+  },
+  "HYPO": {
+   "SN": 71,
+   "SAr": 33.4,
+   "ArGo": 50.53,
+   "GoMe": 71,
+   "SGo": 79.54,
+   "NMe": 116.97,
+   "ratio": 68,
+   "saddle": 122.91,
+   "articular": 141.98,
+   "gonial": 125.78,
+   "sum": 390.66,
+   "upperGonial": 52.32,
+   "lowerGonial": 73.46,
+   "pogAP": 54.57
+  },
+  "SAD_LO": {
+   "SN": 71,
+   "SAr": 33.5,
+   "ArGo": 47.55,
+   "GoMe": 71,
+   "SGo": 76.99,
+   "NMe": 114.6,
+   "ratio": 67.18,
+   "saddle": 118,
+   "articular": 143,
+   "gonial": 130,
+   "sum": 391,
+   "upperGonial": 55.01,
+   "lowerGonial": 74.99,
+   "pogAP": 59.6
+  },
+  "SAD_HI": {
+   "SN": 71,
+   "SAr": 33.5,
+   "ArGo": 47.55,
+   "GoMe": 71,
+   "SGo": 76.99,
+   "NMe": 126.63,
+   "ratio": 60.8,
+   "saddle": 128,
+   "articular": 143,
+   "gonial": 130,
+   "sum": 401,
+   "upperGonial": 50.35,
+   "lowerGonial": 79.65,
+   "pogAP": 41.64
+  },
+  "COMP": {
+   "SN": 71,
+   "SAr": 32.55,
+   "ArGo": 49.14,
+   "GoMe": 70.99,
+   "SGo": 75.21,
+   "NMe": 119.08,
+   "ratio": 63.16,
+   "saddle": 133,
+   "articular": 133,
+   "gonial": 130.04,
+   "sum": 396.04,
+   "upperGonial": 54.95,
+   "lowerGonial": 75.09,
+   "pogAP": 46.63
+  },
+  "RAM_S": {
+   "SN": 71,
+   "SAr": 33.21,
+   "ArGo": 41.55,
+   "GoMe": 70.81,
+   "SGo": 70.64,
+   "NMe": 114.15,
+   "ratio": 61.88,
+   "saddle": 122.74,
+   "articular": 141.52,
+   "gonial": 131.64,
+   "sum": 395.91,
+   "upperGonial": 56.49,
+   "lowerGonial": 75.15,
+   "pogAP": 51.53
+  },
+  "RAM_L": {
+   "SN": 71,
+   "SAr": 33.65,
+   "ArGo": 53.55,
+   "GoMe": 71.17,
+   "SGo": 83.23,
+   "NMe": 127.06,
+   "ratio": 65.51,
+   "saddle": 123.14,
+   "articular": 144.31,
+   "gonial": 128.63,
+   "sum": 396.08,
+   "upperGonial": 49.36,
+   "lowerGonial": 79.27,
+   "pogAP": 49.49
+  }
+ },
+ "checks": [
+  {
+   "name": "REF S–N = 71.0 mm",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "REF saddle = 123.0°",
+   "pass": true,
+   "detail": 122.99999071308376
+  },
+  {
+   "name": "REF articular = 143.0°",
+   "pass": true,
+   "detail": 142.99999489489915
+  },
+  {
+   "name": "REF gonial = 130.0°",
+   "pass": true,
+   "detail": 129.99998464391774
+  },
+  {
+   "name": "REF Björk sum = 396.0°",
+   "pass": true,
+   "detail": 395.99997025190066
+  },
+  {
+   "name": "REF Go–Me = 71.0 mm",
+   "pass": true,
+   "detail": 70.99999491855024
+  },
+  {
+   "name": "REF S–Ar within 32 ± 3 mm",
+   "pass": true,
+   "detail": 33.50000756718191
+  },
+  {
+   "name": "REF Ar–Go within 44 ± 5 mm",
+   "pass": true,
+   "detail": 47.54637742910402
+  },
+  {
+   "name": "REF Jarabak ratio = 63.8 % (within 62–65 %)",
+   "pass": true,
+   "detail": 63.79997416219456
+  },
+  {
+   "name": "REF upper gonial within 52–55°",
+   "pass": true,
+   "detail": 52.68654547632982
+  },
+  {
+   "name": "REF lower gonial reported (ref 70–75°; may lie outside — see SCIENCE.md)",
+   "pass": true,
+   "detail": 77.3134391675879
+  },
+  {
+   "name": "REF: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    52.68654547632982,
+    77.3134391675879,
+    129.99998464391774
+   ]
+  },
+  {
+   "name": "REF: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 395.99997025190066
+  },
+  {
+   "name": "REF: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "HYPER: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    53.47852066693514,
+    85.43530969367484,
+    138.91383036060998
+   ]
+  },
+  {
+   "name": "HYPER: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 407.1153530099356
+  },
+  {
+   "name": "HYPER: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "HYPO: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    52.31801512239532,
+    73.45911234271642,
+    125.77712746511177
+   ]
+  },
+  {
+   "name": "HYPO: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 390.66438428128566
+  },
+  {
+   "name": "HYPO: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "SAD_LO: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    55.01090085186269,
+    74.98908379205503,
+    129.9999846439177
+   ]
+  },
+  {
+   "name": "SAD_LO: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 390.99998025190064
+  },
+  {
+   "name": "SAD_LO: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "SAD_HI: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    50.35004712208833,
+    79.64993752182937,
+    129.9999846439177
+   ]
+  },
+  {
+   "name": "SAD_HI: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 400.99998025190064
+  },
+  {
+   "name": "SAD_HI: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "COMP: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    54.94806146432726,
+    75.0937739955661,
+    130.04183545989335
+   ]
+  },
+  {
+   "name": "COMP: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 396.04184251314564
+  },
+  {
+   "name": "COMP: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "RAM_S: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    56.49398467301701,
+    75.150848850459,
+    131.644833523476
+   ]
+  },
+  {
+   "name": "RAM_S: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 395.9083588618848
+  },
+  {
+   "name": "RAM_S: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "RAM_L: upper + lower gonial = gonial",
+   "pass": true,
+   "detail": [
+    49.362979372434545,
+    79.26531196755668,
+    128.62829133999122
+   ]
+  },
+  {
+   "name": "RAM_L: Björk sum = 360° + angle(S–N, Go–Me)",
+   "pass": true,
+   "detail": 396.0790093039323
+  },
+  {
+   "name": "RAM_L: S–N = 71.0 mm (same cranial base in every model)",
+   "pass": true,
+   "detail": 71
+  },
+  {
+   "name": "HYPO: Go–Me = 71.0 mm",
+   "pass": true,
+   "detail": 70.999960372347
+  },
+  {
+   "name": "HYPER: Go–Me = 71.0 mm",
+   "pass": true,
+   "detail": 71.00008575597782
+  },
+  {
+   "name": "HYPER ratio = 56 %",
+   "pass": true,
+   "detail": 55.99999671969989
+  },
+  {
+   "name": "HYPO ratio = 68 %",
+   "pass": true,
+   "detail": 68.00000160412664
+  },
+  {
+   "name": "NORMO (= REF) ratio rounds to 64 %",
+   "pass": true,
+   "detail": 63.79997416219456
+  },
+  {
+   "name": "HYPER sum > 396° + 6°, HYPO sum < 396°",
+   "pass": true,
+   "detail": [
+    407.1153530099356,
+    390.66438428128566
+   ]
+  },
+  {
+   "name": "hook: chin projection differs (HYPO more anterior)",
+   "pass": true,
+   "detail": 12.404393625692904
+  },
+  {
+   "name": "SAD_LO: articular unchanged",
+   "pass": true,
+   "detail": 142.99999489489912
+  },
+  {
+   "name": "SAD_LO: gonial unchanged",
+   "pass": true,
+   "detail": 129.9999846439177
+  },
+  {
+   "name": "SAD_LO: Go–Me unchanged (71 ± 0.6 mm)",
+   "pass": true,
+   "detail": 70.99999491855021
+  },
+  {
+   "name": "SAD_HI: articular unchanged",
+   "pass": true,
+   "detail": 142.99999489489912
+  },
+  {
+   "name": "SAD_HI: gonial unchanged",
+   "pass": true,
+   "detail": 129.9999846439177
+  },
+  {
+   "name": "SAD_HI: Go–Me unchanged (71 ± 0.6 mm)",
+   "pass": true,
+   "detail": 70.99999491855021
+  },
+  {
+   "name": "SAD_LO saddle = 118°, SAD_HI = 128°",
+   "pass": true,
+   "detail": [
+    118.00000071308375,
+    128.00000071308375
+   ]
+  },
+  {
+   "name": "Model A on screen: 123 + 143 + 130 = 396",
+   "pass": true,
+   "detail": [
+    123,
+    143,
+    130
+   ]
+  },
+  {
+   "name": "Model B on screen: 133 + 133 + 130 = 396",
+   "pass": true,
+   "detail": [
+    133,
+    133,
+    130
+   ]
+  },
+  {
+   "name": "Model B exact sum within 0.1° of 396",
+   "pass": true,
+   "detail": 396.04184251314564
+  },
+  {
+   "name": "ramus variants: ±6 mm Ar–Go around REF",
+   "pass": true,
+   "detail": [
+    41.54638116113846,
+    53.54637647920117
+   ]
+  }
+ ],
+ "passed": 53,
+ "total": 53
+}
